@@ -20,7 +20,7 @@
 ### 형식
 
 ```
-<type>(<scope>): <제목>
+<type> : <제목>
 
 <본문 - 선택. 무엇을, 왜 바꿨는지>
 ```
@@ -39,8 +39,8 @@
 
 ### 규칙
 
-1. `scope`에는 변경 대상(도메인 또는 계층)을 쓴다. 예: `event`, `common`, `build`
-2. 제목은 50자 이내로, 무엇을 했는지 구체적으로 쓴다. 끝에 마침표를 붙이지 않는다.
+1. `type`과 `제목`은 ` : `(콜론 앞뒤로 공백 한 칸)로 구분한다.
+2. 제목은 50자 이내로, 변경 대상과 무엇을 했는지 구체적으로 쓴다. 끝에 마침표를 붙이지 않는다.
 3. 제목만 보고 변경 대상과 내용을 알 수 있어야 하고, 실제 코드 변경과 일치해야 한다.
 4. 한 커밋에는 독립적으로 설명할 수 있는 작업 하나만 담는다.
 5. 같은 작업을 인위적으로 쪼개거나, 의미 없는 변경(공백, 빈 커밋)만으로 커밋하지 않는다.
@@ -49,11 +49,11 @@
 ### 예시
 
 ```
-feat(event): 행사 등록 POST API와 요청·응답 DTO 구현
-fix(event): 존재하지 않는 행사 조회 시 500 대신 404 반환
-test(event): 행사 서비스 조회 실패 예외 테스트 추가
-refactor(common): 컨트롤러별 중복 응답 생성을 ApiResponse로 통일
-chore(build): H2 의존성과 JPA 감사 설정 추가
+feat : 회차 생성 POST API와 요청·응답 DTO 구현
+fix : 존재하지 않는 회차 조회 시 500 대신 404 반환
+test : 입학 전형 자격 검사 예외 테스트 추가
+refactor : 컨트롤러별 중복 응답 생성을 ApiResponse로 통일
+chore : H2 의존성과 JPA 감사 설정 추가
 ```
 
 ### 나쁜 예시
@@ -61,8 +61,9 @@ chore(build): H2 의존성과 JPA 감사 설정 추가
 ```
 update
 수정
-feat: 작업 중
-fix: 오타 수정 (한 파일의 공백만 변경)
+feat : 작업 중
+fix : 오타 수정 (한 파일의 공백만 변경)
+feat(event): 행사 등록 API 구현 (scope 괄호는 쓰지 않는다)
 ```
 
 ## 3. 커밋 횟수 (평가 기준)
@@ -73,11 +74,13 @@ fix: 오타 수정 (한 파일의 공백만 변경)
 
 ## 4. Pull Request
 
-1. 제목은 커밋 메시지와 같은 형식으로 쓴다. 예: `feat(event): 행사 CRUD API 구현`
+1. 제목은 커밋 메시지와 같은 `type : 제목` 형식으로 쓴다. 예: `feat : 회차 CRUD API 구현`
 2. PR 템플릿(`.github/pull_request_template.md`)의 항목을 채운다.
 3. 합치기 전에 `./gradlew build`가 성공해야 한다.
-4. 팀원 1명 이상의 확인을 받고 합친다.
-5. 합칠 때는 `Squash and merge`가 아니라 `Rebase and merge` 또는 `Merge commit`을 써서 개인 커밋 이력이 남게 한다.
+4. **승인(Approve)이 1개 이상 없으면 절대 머지하지 않는다.** 본인이 올린 PR은 본인이 승인할 수 없고, 다른 팀원이 승인해야 한다.
+5. 승인 후 리뷰에서 요청한 변경이 남아 있으면(Request changes) 머지하지 않는다.
+6. 이 규칙은 GitHub 브랜치 보호 규칙(`main`의 Require a pull request before merging → Require approvals 1)으로 강제한다.
+7. 합칠 때는 `Squash and merge`가 아니라 `Rebase and merge` 또는 `Merge commit`을 써서 개인 커밋 이력이 남게 한다.
 
 ## 5. 코드 네이밍 (접미사 통일)
 
@@ -89,10 +92,10 @@ fix: 오타 수정 (한 파일의 공백만 변경)
 | 리포지토리 | `~Repository` | `EventRepository` |
 | 엔티티 | 접미사 없음 | `Event` |
 | 요청 DTO | `~Request` | `EventCreateRequest` |
-| 응답 DTO | `~Response` | `EventResponse` |
+| 응답 DTO | `~View`, `~Result`, `~Mutation` (기획서 DTO 이름을 따른다) | `PlayerView`, `MutationResult` |
 | 테스트 | `~Test` | `EventServiceTest` |
 
-- 패키지는 `com.silvally.<도메인>.<controller|service|repository|entity|dto>`로 나눈다.
+- 패키지는 `com.silvally.<controller|service|repository|entity|dto>`로 계층별로 나눈다. DTO는 `dto/request`, `dto/response`로 다시 나눈다.
 - 공통 클래스(`ApiResponse`, `ErrorResponse`, `BaseEntity`, `GlobalExceptionHandler`)는 `com.silvally.common`에 두고 재사용한다.
 - 요청·응답에는 DTO만 쓰고 엔티티를 외부에 노출하지 않는다.
 
