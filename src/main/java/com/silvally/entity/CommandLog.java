@@ -84,6 +84,23 @@ public class CommandLog extends BaseEntity {
     public String getEvidenceJson() { return evidenceJson; }
     public Integer getBeforeSchoolDay() { return beforeSchoolDay; }
 
+    public static CommandLog of(Player player, UUID commandId, String kind, String subjectCode,
+                                String requestHash, int httpStatus, String responseJson, String afterStatsJson) {
+        CommandLog log = new CommandLog();
+        log.playerId = player.getId();
+        log.commandId = commandId;
+        log.year = player.getYear();
+        log.turn = player.getTurn();
+        log.beforeSchoolDay = player.getBeforeSchoolDay();
+        log.kind = kind;
+        log.subjectCode = subjectCode;
+        log.requestHash = requestHash;
+        log.httpStatus = httpStatus;
+        log.responseJson = responseJson;
+        log.afterStatsJson = afterStatsJson;
+        return log;
+    }
+
     public Long getId() {
         return id;
     }
@@ -94,5 +111,17 @@ public class CommandLog extends BaseEntity {
 
     public UUID getCommandId() {
         return commandId;
+    }
+
+    public String getKind() {
+        return kind;
+    }
+
+    public String getRequestHash() {
+        return requestHash;
+    }
+
+    public String getResponseJson() {
+        return responseJson;
     }
 }
