@@ -1,5 +1,7 @@
 package com.silvally.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.silvally.common.ApiResponse;
 import com.silvally.dto.request.ApplyJobRequest;
 import com.silvally.dto.request.JobStepRequest;
@@ -20,6 +22,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "채용")
 @RestController
 @RequestMapping("/api/v1/players/{playerId}/applications")
 public class ApplicationController {
@@ -29,11 +32,13 @@ public class ApplicationController {
         this.careerService = careerService;
     }
 
+    @Operation(summary = "지원 목록 조회")
     @GetMapping
     public ApiResponse<List<ApplicationView>> list(@PathVariable UUID playerId) {
         return ApiResponse.ok(careerService.getApplications(playerId));
     }
 
+    @Operation(summary = "기업 지원")
     @PostMapping
     public ResponseEntity<ApiResponse<ApplicationMutation>> apply(
             @PathVariable UUID playerId,
@@ -46,6 +51,7 @@ public class ApplicationController {
                 .body(ApiResponse.ok(result));
     }
 
+    @Operation(summary = "채용 단계 진행 (CODING, INTERVIEW, RESULT)")
     @PostMapping("/{applicationId}/steps")
     public ApiResponse<ApplicationMutation> step(
             @PathVariable UUID playerId,

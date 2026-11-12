@@ -1,5 +1,7 @@
 package com.silvally.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.silvally.common.ApiResponse;
 import com.silvally.common.exception.BusinessException;
 import com.silvally.common.exception.ErrorCode;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 import java.util.UUID;
 
+@Tag(name = "회차")
 @RestController
 @RequestMapping("/api/v1/players")
 public class PlayerController {
@@ -36,6 +39,7 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
+    @Operation(summary = "회차 생성")
     @PostMapping
     public ResponseEntity<ApiResponse<PlayerView>> create(
             @RequestHeader("Idempotency-Key") String idempotencyKey,
@@ -45,11 +49,13 @@ public class PlayerController {
                 .body(ApiResponse.ok(view));
     }
 
+    @Operation(summary = "회차 조회")
     @GetMapping("/{playerId}")
     public ApiResponse<PlayerView> get(@PathVariable UUID playerId) {
         return ApiResponse.ok(playerService.get(playerId));
     }
 
+    @Operation(summary = "회차 이름 변경")
     @PutMapping("/{playerId}")
     public ApiResponse<PlayerView> rename(
             @PathVariable UUID playerId,
@@ -59,6 +65,7 @@ public class PlayerController {
         return ApiResponse.ok(playerService.rename(playerId, expectedVersion, idempotencyKey, request));
     }
 
+    @Operation(summary = "회차 삭제")
     @DeleteMapping("/{playerId}")
     public ApiResponse<DeleteResult> delete(
             @PathVariable UUID playerId,
@@ -66,11 +73,13 @@ public class PlayerController {
         return ApiResponse.ok(playerService.delete(playerId, expectedVersion));
     }
 
+    @Operation(summary = "진행 현황 조회")
     @GetMapping("/{playerId}/progress")
     public ApiResponse<ProgressView> progress(@PathVariable UUID playerId) {
         return ApiResponse.ok(playerService.getProgress(playerId));
     }
 
+    @Operation(summary = "이력 조회")
     @GetMapping("/{playerId}/history")
     public ApiResponse<HistoryPage> history(
             @PathVariable UUID playerId,

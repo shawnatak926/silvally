@@ -1,5 +1,7 @@
 package com.silvally.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.silvally.common.ApiResponse;
 import com.silvally.common.exception.BusinessException;
 import com.silvally.common.exception.ErrorCode;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "카탈로그")
 @RestController
 @RequestMapping("/api/v1/catalog")
 public class CatalogController {
@@ -24,6 +27,7 @@ public class CatalogController {
         this.activityService = activityService;
     }
 
+    @Operation(summary = "카탈로그 조회")
     @GetMapping("/{kind}")
     public ApiResponse<List<CatalogEntry>> catalog(@PathVariable String kind, @RequestParam UUID playerId) {
         CatalogKind catalogKind = CatalogKind.fromPath(kind)
