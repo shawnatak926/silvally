@@ -1,5 +1,7 @@
 package com.silvally.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.silvally.common.ApiResponse;
 import com.silvally.dto.request.PerformActionRequest;
 import com.silvally.dto.response.AvailableAction;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "행동·턴")
 @RestController
 @RequestMapping("/api/v1/players/{playerId}")
 public class ActionController {
@@ -29,11 +32,13 @@ public class ActionController {
         this.playerService = playerService;
     }
 
+    @Operation(summary = "가용 행동 목록 조회")
     @GetMapping("/actions")
     public ApiResponse<List<AvailableAction>> actions(@PathVariable UUID playerId) {
         return ApiResponse.ok(activityService.getActions(playerId));
     }
 
+    @Operation(summary = "행동 실행")
     @PostMapping("/actions")
     public ApiResponse<MutationResult> perform(
             @PathVariable UUID playerId,
@@ -43,6 +48,7 @@ public class ActionController {
         return ApiResponse.ok(activityService.performAction(playerId, expectedVersion, idempotencyKey, request));
     }
 
+    @Operation(summary = "턴 종료")
     @PostMapping("/turns/advance")
     public ApiResponse<MutationResult> advanceTurn(
             @PathVariable UUID playerId,

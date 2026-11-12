@@ -1,5 +1,7 @@
 package com.silvally.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.silvally.common.ApiResponse;
 import com.silvally.dto.request.SelectCareerPreferenceRequest;
 import com.silvally.dto.response.CareerPreferenceMutation;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+@Tag(name = "희망 직무")
 @RestController
 @RequestMapping("/api/v1/players/{playerId}/career-preference")
 public class CareerPreferenceController {
@@ -25,11 +28,13 @@ public class CareerPreferenceController {
         this.careerPreferenceService = careerPreferenceService;
     }
 
+    @Operation(summary = "희망 직무 추천 조회")
     @GetMapping
     public ApiResponse<CareerPreferenceView> get(@PathVariable UUID playerId) {
         return ApiResponse.ok(careerPreferenceService.getPreference(playerId));
     }
 
+    @Operation(summary = "희망 직무 확정·변경")
     @PutMapping
     public ApiResponse<CareerPreferenceMutation> select(
             @PathVariable UUID playerId,

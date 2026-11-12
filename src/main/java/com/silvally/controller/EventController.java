@@ -1,5 +1,7 @@
 package com.silvally.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.silvally.common.ApiResponse;
 import com.silvally.dto.request.ChooseEventRequest;
 import com.silvally.dto.response.EventView;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "이벤트")
 @RestController
 @RequestMapping("/api/v1/players/{playerId}/events")
 public class EventController {
@@ -26,16 +29,19 @@ public class EventController {
         this.activityService = activityService;
     }
 
+    @Operation(summary = "이벤트 목록 조회")
     @GetMapping
     public ApiResponse<List<EventView>> events(@PathVariable UUID playerId) {
         return ApiResponse.ok(activityService.getEvents(playerId));
     }
 
+    @Operation(summary = "이벤트 상세 조회")
     @GetMapping("/{eventCode}")
     public ApiResponse<EventView> event(@PathVariable UUID playerId, @PathVariable String eventCode) {
         return ApiResponse.ok(activityService.getEvent(playerId, eventCode));
     }
 
+    @Operation(summary = "이벤트 선택지 선택")
     @PostMapping("/{eventCode}/choices")
     public ApiResponse<MutationResult> choose(
             @PathVariable UUID playerId,

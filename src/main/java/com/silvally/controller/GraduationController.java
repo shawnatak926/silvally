@@ -1,5 +1,7 @@
 package com.silvally.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.silvally.common.ApiResponse;
 import com.silvally.dto.request.FinalizeGraduationRequest;
 import com.silvally.dto.response.EndingMutation;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+@Tag(name = "졸업·엔딩")
 @RestController
 @RequestMapping("/api/v1/players/{playerId}")
 public class GraduationController {
@@ -26,6 +29,7 @@ public class GraduationController {
         this.careerService = careerService;
     }
 
+    @Operation(summary = "졸업 확정")
     @PostMapping("/graduation")
     public ApiResponse<EndingMutation> graduate(
             @PathVariable UUID playerId,
@@ -35,6 +39,7 @@ public class GraduationController {
         return ApiResponse.ok(careerService.graduate(playerId, expectedVersion, idempotencyKey, request));
     }
 
+    @Operation(summary = "엔딩 조회")
     @GetMapping("/ending")
     public ApiResponse<EndingView> ending(@PathVariable UUID playerId) {
         return ApiResponse.ok(careerService.getEnding(playerId));
