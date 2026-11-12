@@ -43,6 +43,18 @@ public class Stats {
     public java.util.Map<String, Integer> values() {
         return java.util.Map.of("P", p, "F", f, "B", b, "I", i, "A", a, "C", c, "H", h, "S", s);
     }
+    public void apply(java.util.Map<String, Integer> delta) {
+        p = clamp(p + delta.getOrDefault("P", 0));
+        f = clamp(f + delta.getOrDefault("F", 0));
+        b = clamp(b + delta.getOrDefault("B", 0));
+        i = clamp(i + delta.getOrDefault("I", 0));
+        a = clamp(a + delta.getOrDefault("A", 0));
+        c = clamp(c + delta.getOrDefault("C", 0));
+        h = clamp(h + delta.getOrDefault("H", 0));
+        s = clamp(s + delta.getOrDefault("S", 0));
+    }
+    private int clamp(int value) { return Math.max(0, Math.min(100, value)); }
+
     public int getP() { return p; }
     public int getF() { return f; }
     public int getB() { return b; }

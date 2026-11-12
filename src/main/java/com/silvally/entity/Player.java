@@ -142,6 +142,10 @@ public class Player extends BaseEntity {
         beforeSchoolDay = passed ? 1 : null;
         if (!passed) endingCode = "ADMISSION_FAILED";
     }
+    public void nextBeforeSchoolDay() {
+        beforeSchoolDay++;
+        if (beforeSchoolDay > 5) { phase = Phase.CAREER_PICK; beforeSchoolDay = null; }
+    }
     public String getAdmissionEvent() { return admissionEvent; }
     public String getAdmissionTrack() { return admissionTrack; }
     public String getRulesVersion() { return rulesVersion; }

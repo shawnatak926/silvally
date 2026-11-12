@@ -21,25 +21,28 @@ public class EventFlowServiceImpl implements EventFlowService {
     private final EventChoiceRepository choices;
     private final ActivityRecordRepository records;
     private final EventCommandRepository commands;
+    private final BeforeSchoolEventService beforeSchool;
     private final AdmissionPolicy policy;
     private final JsonMapper json = JsonMapper.builder().build();
 
     public EventFlowServiceImpl(PlayerRepository players, EventDefRepository events,
             EventChoiceRepository choices, ActivityRecordRepository records,
-            EventCommandRepository commands, AdmissionPolicy policy) {
+            EventCommandRepository commands, AdmissionPolicy policy, BeforeSchoolEventService beforeSchool) {
         this.players = players; this.events = events; this.choices = choices;
-        this.records = records; this.commands = commands; this.policy = policy;
+        this.records = records; this.commands = commands; this.policy = policy; this.beforeSchool = beforeSchool;
     }
     private Player player(UUID id) {
         return players.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
     }
     public List<EventView> list(UUID id) {
         Player p = player(id);
+        if (p.getPhase() == Phase.BEFORE_SCHOOL) return List.of(beforeSchool.view(p, beforeSchool.currentEvent(p)));
         if (p.getPhase() != Phase.ADMISSION_1 && p.getPhase() != Phase.ADMISSION_2) return List.of();
         return List.of(view(p, p.getAdmissionEvent()));
     }
     public EventView detail(UUID id, String event) { return view(player(id), event); }
     private EventView view(Player p, String code) {
+        if (code.startsWith("BS")) return beforeSchool.view(p, code);
         EventDef def = events.findById(new EventDef.Id(p.getRulesVersion(), code))
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
         boolean current = (p.getPhase() == Phase.ADMISSION_1 || p.getPhase() == Phase.ADMISSION_2)
@@ -64,6 +67,17 @@ public class EventFlowServiceImpl implements EventFlowService {
             return json.readValue(previous.get().getResponseJson(), MutationResult.class);
         }
         if (p.getVersion() != version) throw new BusinessException(ErrorCode.VERSION_CONFLICT);
+        if (event.startsWith("BS")) {
+            var result = beforeSchool.apply(p, event, request);
+            p.markCommand(UUID.randomUUID());
+            players.flush();
+            var response = new MutationResult(p.view(), result.actionCode(), result.spentAp(),
+                    result.statDelta(), result.resultCode(), result.details());
+            commands.save(new EventCommand(id, key, fingerprint, json.writeValueAsString(response)));
+            return response;
+        }
+        if (!request.isSelectionValid() || request.choiceCodes() != null)
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR);
         if (p.getPhase() != Phase.ADMISSION_1 && p.getPhase() != Phase.ADMISSION_2)
             throw new BusinessException(ErrorCode.WRONG_PHASE);
         if (!event.equals(p.getAdmissionEvent())) throw new BusinessException(ErrorCode.WRONG_STEP);

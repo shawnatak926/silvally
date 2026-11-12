@@ -65,6 +65,25 @@ public class CommandLog extends BaseEntity {
     protected CommandLog() {
     }
 
+    public static CommandLog activity(Player player, String event, String choice, String evidence) {
+        CommandLog log = new CommandLog();
+        log.playerId = player.getId();
+        log.commandId = UUID.randomUUID();
+        log.year = player.getYear();
+        log.turn = player.getTurn();
+        log.beforeSchoolDay = player.getBeforeSchoolDay();
+        log.kind = "EVENT";
+        log.subjectCode = event;
+        log.choiceCode = choice;
+        log.evidenceJson = evidence;
+        log.requestHash = log.commandId.toString();
+        log.httpStatus = 200;
+        return log;
+    }
+    public String getChoiceCode() { return choiceCode; }
+    public String getEvidenceJson() { return evidenceJson; }
+    public Integer getBeforeSchoolDay() { return beforeSchoolDay; }
+
     public Long getId() {
         return id;
     }
