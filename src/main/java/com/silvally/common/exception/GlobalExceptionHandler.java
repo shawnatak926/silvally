@@ -4,6 +4,8 @@ import com.silvally.common.ApiResponse;
 import com.silvally.common.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -25,7 +27,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException e) {
         ErrorCode code = e.getErrorCode();
-        return build(code, ErrorResponse.of(code, e.getMessage()));
+        return build(code, ErrorResponse.of(code, e.getMessage(), e.getDetails()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -48,6 +50,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<ApiResponse<Void>> handleOptimisticLock(ObjectOptimisticLockingFailureException e) {
         return build(ErrorCode.VERSION_CONFLICT, ErrorResponse.of(ErrorCode.VERSION_CONFLICT));
+    }
+
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePessimisticLock(PessimisticLockingFailureException e) {
+        return build(ErrorCode.VERSION_CONFLICT, ErrorResponse.of(ErrorCode.VERSION_CONFLICT));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(DataIntegrityViolationException e) {
+        log.warn("Data integrity violation", e);
+        return build(ErrorCode.IDEMPOTENCY_CONFLICT, ErrorResponse.of(ErrorCode.IDEMPOTENCY_CONFLICT));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

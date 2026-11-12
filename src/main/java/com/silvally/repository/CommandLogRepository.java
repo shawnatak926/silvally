@@ -14,4 +14,6 @@ public interface CommandLogRepository extends JpaRepository<CommandLog, Long> {
     List<CommandLog> findByPlayerIdAndSubjectCodeOrderByIdAsc(UUID playerId, String subjectCode);
 
     Optional<CommandLog> findByPlayerIdAndCommandId(UUID playerId, UUID commandId);
+
+    void deleteByPlayerId(UUID playerId);
 }

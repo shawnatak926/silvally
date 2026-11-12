@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface PlayerProjectRepository extends JpaRepository<PlayerProject, UUID> {
 
     List<PlayerProject> findByPlayerId(UUID playerId);
+
+    void deleteByPlayerId(UUID playerId);
 }

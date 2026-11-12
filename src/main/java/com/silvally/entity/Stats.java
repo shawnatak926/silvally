@@ -3,6 +3,9 @@ package com.silvally.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @Embeddable
 public class Stats {
     @Column(name = "stat_p", nullable = false)
@@ -54,6 +57,19 @@ public class Stats {
         s = clamp(s + delta.getOrDefault("S", 0));
     }
     private int clamp(int value) { return Math.max(0, Math.min(100, value)); }
+
+    public Map<String, Integer> toMap() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("P", p);
+        map.put("F", f);
+        map.put("B", b);
+        map.put("I", i);
+        map.put("A", a);
+        map.put("C", c);
+        map.put("H", h);
+        map.put("S", s);
+        return map;
+    }
 
     public int getP() { return p; }
     public int getF() { return f; }

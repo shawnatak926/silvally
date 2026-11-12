@@ -165,6 +165,21 @@ public class Player extends BaseEntity {
     protected Player() {
     }
 
+    /**
+     * API 회차 생성. admission()과 같은 초기 상태에 멱등 처리용 생성 키·요청 해시를 더한다.
+     */
+    public static Player create(String name, String applicationProfile,
+                                String createKey, String createRequestHash) {
+        Player player = admission(name, applicationProfile);
+        player.createKey = createKey;
+        player.createRequestHash = createRequestHash;
+        return player;
+    }
+
+    public void rename(String name) {
+        this.name = name;
+    }
+
     public UUID getId() {
         return id;
     }
@@ -175,5 +190,13 @@ public class Player extends BaseEntity {
 
     public long getVersion() {
         return version;
+    }
+
+    public String getCreateRequestHash() {
+        return createRequestHash;
+    }
+
+    public String getCreateResponseJson() {
+        return createResponseJson;
     }
 }

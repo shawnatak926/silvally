@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface CourseEnrollmentRepository extends JpaRepository<CourseEnrollment, UUID> {
 
     List<CourseEnrollment> findByPlayerId(UUID playerId);
+
+    void deleteByPlayerId(UUID playerId);
 }

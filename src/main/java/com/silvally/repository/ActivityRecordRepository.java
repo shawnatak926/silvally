@@ -5,4 +5,6 @@ import java.util.*;
 public interface ActivityRecordRepository extends JpaRepository<ActivityRecord, Long> {
     List<ActivityRecord> findByPlayerIdAndEventCodeOrderByIdAsc(UUID playerId, String eventCode);
     List<ActivityRecord> findByPlayerIdOrderByIdAsc(UUID playerId);
+
+    void deleteByPlayerId(UUID playerId);
 }

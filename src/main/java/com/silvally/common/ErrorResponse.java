@@ -16,4 +16,8 @@ public record ErrorResponse(String code, String message, Map<String, Object> det
     public static ErrorResponse of(ErrorCode errorCode, Map<String, Object> details) {
         return new ErrorResponse(errorCode.getCode(), errorCode.getMessage(), details);
     }
+
+    public static ErrorResponse of(ErrorCode errorCode, String message, Map<String, Object> details) {
+        return new ErrorResponse(errorCode.getCode(), message, details);
+    }
 }
