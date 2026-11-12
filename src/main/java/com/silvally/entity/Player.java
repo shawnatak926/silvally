@@ -89,6 +89,61 @@ public class Player extends BaseEntity {
 
     private UUID lastCommandId;
 
+    // 회차 생성 담당도 동일한 초기 상태를 사용할 수 있는 팩터리입니다.
+    public static Player admission(String name, String profile) {
+        Player player = new Player();
+        player.name = name;
+        player.applicationProfile = profile == null ? "OPEN" : profile;
+        player.rulesVersion = "v1.2";
+        player.phase = Phase.ADMISSION_1;
+        player.stats = Stats.initial();
+        player.seed = UUID.randomUUID().toString();
+        return player;
+    }
+
+    private Boolean meisterEligible;
+    private Boolean localEligible;
+    private Boolean socialEligible;
+    private String admissionEvent = "AD01";
+    private double scratchScore;
+    private double pythonScore;
+    private double basicScore;
+
+    @jakarta.persistence.PrePersist
+    public void initializeEligibility() {
+        if (meisterEligible != null) return;
+        var random = new java.util.SplittableRandom(seed.hashCode());
+        meisterEligible = random.nextDouble() < .70;
+        localEligible = random.nextDouble() < .20;
+        socialEligible = random.nextDouble() < .50;
+    }
+
+    public boolean eligible(String track) {
+        initializeEligibility();
+        return switch (track) {
+            case "GENERAL" -> true;
+            case "MEISTER" -> meisterEligible;
+            case "LOCAL" -> localEligible;
+            case "SOCIAL" -> socialEligible;
+            default -> false;
+        };
+    }
+    public void selectAdmissionTrack(String track) { admissionTrack = track; admissionEvent = "AD02"; }
+    public void passDocuments() { phase = Phase.ADMISSION_2; admissionEvent = "AD03"; }
+    public void prepare(String event, double score) {
+        if (event.equals("AD03")) { scratchScore = score; admissionEvent = "AD04"; }
+        else { pythonScore = score; basicScore = (stats.getP() + stats.getA()) / 2.0; admissionEvent = "AD05"; }
+    }
+    public double finalScore(double interview) {
+        return scratchScore * .25 + pythonScore * .30 + basicScore * .20 + interview * .25;
+    }
+    public void finishAdmission(boolean passed) {
+        phase = passed ? Phase.BEFORE_SCHOOL : Phase.ENDED;
+        beforeSchoolDay = passed ? 1 : null;
+        if (!passed) endingCode = "ADMISSION_FAILED";
+    }
+    public String getAdmissionEvent() { return admissionEvent; }
+    public String getAdmissionTrack() { return admissionTrack; }
     public String getRulesVersion() { return rulesVersion; }
     public Phase getPhase() { return phase; }
     public Integer getBeforeSchoolDay() { return beforeSchoolDay; }

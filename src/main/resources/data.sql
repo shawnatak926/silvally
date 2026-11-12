@@ -1,1 +1,20 @@
-SELECT 1;
+-- 게임 규칙 v1.2. 전형 선택 및 제출 프리셋 (실제 학교 선발 기준과 무관).
+INSERT INTO event_def (rules_version,event_code,phase,school_year,min_turn,max_turn,required,order_no,title,situation) VALUES ('v1.2','AD01','ADMISSION_1',0,0,0,true,0,'입학 전형 선택','준비한 결과를 제출합니다.');
+INSERT INTO event_def (rules_version,event_code,phase,school_year,min_turn,max_turn,required,order_no,title,situation) VALUES ('v1.2','AD02','ADMISSION_1',0,0,0,true,1,'1차 서류 제출','준비한 결과를 제출합니다.');
+INSERT INTO event_def (rules_version,event_code,phase,school_year,min_turn,max_turn,required,order_no,title,situation) VALUES ('v1.2','AD03','ADMISSION_2',0,0,0,true,2,'스크래치 전형','준비한 결과를 제출합니다.');
+INSERT INTO event_def (rules_version,event_code,phase,school_year,min_turn,max_turn,required,order_no,title,situation) VALUES ('v1.2','AD04','ADMISSION_2',0,0,0,true,3,'파이썬 전형과 기초능력','준비한 결과를 제출합니다.');
+INSERT INTO event_def (rules_version,event_code,phase,school_year,min_turn,max_turn,required,order_no,title,situation) VALUES ('v1.2','AD05','ADMISSION_2',0,0,0,true,4,'학교 면접','준비한 결과를 제출합니다.');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD01','GENERAL','일반전형',0,false,'{}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD01','MEISTER','마이스터인재',0,false,'{}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD01','LOCAL','지역우선',0,false,'{}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD01','SOCIAL','사회통합',0,false,'{}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD02','BALANCED','균형 잡힌 서류',0,false,'{"essay": 80, "grades": 80, "record": 80}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD02','ACADEMIC','학업 중심 서류',0,false,'{"essay": 100, "grades": 100, "record": 0}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD02','ACTIVITY','활동 중심 서류',0,false,'{"essay": 50, "grades": 50, "record": 100}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD02','BASIC','기본 서류',0,false,'{"essay": 35, "grades": 35, "record": 35}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD03','PREPARED','준비한 결과 제출',0,false,'{"score": 95}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD03','BASIC','기초 결과 제출',0,false,'{"score": 40}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD04','PREPARED','준비한 결과 제출',0,false,'{"score": 95}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD04','BASIC','기초 결과 제출',0,false,'{"score": 40}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD05','PREPARED','준비한 결과 제출',0,false,'{"score": 95}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','AD05','BASIC','기초 결과 제출',0,false,'{"score": 40}');

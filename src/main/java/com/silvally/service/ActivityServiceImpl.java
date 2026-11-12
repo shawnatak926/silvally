@@ -21,17 +21,19 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class ActivityServiceImpl implements ActivityService {
 
+    private final EventFlowService admissionEvents;
     private final PlayerRepository playerRepository;
     private final EventDefRepository eventDefRepository;
     private final EventChoiceRepository eventChoiceRepository;
     private final CatalogDefRepository catalogDefRepository;
     private final CommandExecutor commandExecutor;
 
-    public ActivityServiceImpl(PlayerRepository playerRepository,
+    public ActivityServiceImpl(EventFlowService admissionEvents, PlayerRepository playerRepository,
                                EventDefRepository eventDefRepository,
                                EventChoiceRepository eventChoiceRepository,
                                CatalogDefRepository catalogDefRepository,
                                CommandExecutor commandExecutor) {
+        this.admissionEvents = admissionEvents;
         this.playerRepository = playerRepository;
         this.eventDefRepository = eventDefRepository;
         this.eventChoiceRepository = eventChoiceRepository;
@@ -46,19 +48,19 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public List<EventView> getEvents(UUID playerId) {
-        throw new UnsupportedOperationException("TODO: 이벤트 목록");
+        return admissionEvents.list(playerId);
     }
 
     @Override
     public EventView getEvent(UUID playerId, String eventCode) {
-        throw new UnsupportedOperationException("TODO: 이벤트 상세");
+        return admissionEvents.detail(playerId, eventCode);
     }
 
     @Override
     @Transactional
     public MutationResult chooseEvent(UUID playerId, String eventCode, long expectedVersion,
                                       String idempotencyKey, ChooseEventRequest request) {
-        throw new UnsupportedOperationException("TODO: 이벤트 선택");
+        return admissionEvents.choose(playerId, eventCode, expectedVersion, idempotencyKey, request);
     }
 
     @Override

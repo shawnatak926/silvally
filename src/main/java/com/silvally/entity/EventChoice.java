@@ -38,6 +38,8 @@ public class EventChoice {
     protected EventChoice() {
     }
 
+    public String getEffectJson() { return effectJson; }
+
     public Id getId() {
         return id;
     }
