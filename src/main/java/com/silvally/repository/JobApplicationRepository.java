@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface JobApplicationRepository extends JpaRepository<JobApplication, UUID> {
     List<JobApplication> findByPlayerIdOrderByCompanyCodeAsc(UUID playerId);
+
+    void deleteByPlayerId(UUID playerId);
 }

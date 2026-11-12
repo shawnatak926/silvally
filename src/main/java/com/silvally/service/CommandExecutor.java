@@ -61,11 +61,7 @@ public class CommandExecutor {
             return replay.get();
         }
 
-        if (player.getVersion() != expectedVersion) {
-            throw new BusinessException(ErrorCode.VERSION_CONFLICT, Map.of(
-                    "expectedVersion", expectedVersion,
-                    "currentVersion", player.getVersion()));
-        }
+        verifyVersion(player, expectedVersion);
 
         mutation.accept(player);
         // 커맨드마다 lastCommandId가 달라 엔티티가 항상 변경되므로 @Version이 정확히 1 증가한다.
@@ -76,6 +72,14 @@ public class CommandExecutor {
         commandLogRepository.save(CommandLog.of(player, commandId, spec.kind(), spec.subjectCode(),
                 requestHash, 200, toJson(response), toJson(player.getStats().toMap())));
         return response;
+    }
+
+    public static void verifyVersion(Player player, long expectedVersion) {
+        if (player.getVersion() != expectedVersion) {
+            throw new BusinessException(ErrorCode.VERSION_CONFLICT, Map.of(
+                    "expectedVersion", expectedVersion,
+                    "currentVersion", player.getVersion()));
+        }
     }
 
     public static UUID parseIdempotencyKey(String idempotencyKey) {
