@@ -89,6 +89,20 @@ public class Player extends BaseEntity {
 
     private UUID lastCommandId;
 
+    public String getRulesVersion() { return rulesVersion; }
+    public Phase getPhase() { return phase; }
+    public Integer getBeforeSchoolDay() { return beforeSchoolDay; }
+    public String getSeed() { return seed; }
+    public Stats getStats() { return stats; }
+    public int getYear() { return year; }
+    public int getTurn() { return turn; }
+    public void markCommand(UUID commandId) { lastCommandId = commandId; }
+    public com.silvally.dto.response.PlayerView view() {
+        return new com.silvally.dto.response.PlayerView(id, name, rulesVersion, phase.name(), year, turn,
+            ap, version, stats.values(), applicationProfile, admissionTrack, beforeSchoolDay,
+            initialCareerCode, currentCareerCode, major, track, resumeLevel);
+    }
+
     protected Player() {
     }
 

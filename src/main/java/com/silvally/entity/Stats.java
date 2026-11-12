@@ -40,6 +40,9 @@ public class Stats {
         return new Stats(20, 8, 8, 8, 24, 20, 72, 18);
     }
 
+    public java.util.Map<String, Integer> values() {
+        return java.util.Map.of("P", p, "F", f, "B", b, "I", i, "A", a, "C", c, "H", h, "S", s);
+    }
     public int getP() { return p; }
     public int getF() { return f; }
     public int getB() { return b; }
