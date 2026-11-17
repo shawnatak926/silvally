@@ -44,6 +44,7 @@ public class PlayerServiceImpl implements PlayerService {
     private final ActivityRecordRepository activityRecordRepository;
     private final EventCommandRepository eventCommandRepository;
     private final CommandExecutor commandExecutor;
+    private final SchoolTurnService schoolTurnService;
     private final ObjectMapper objectMapper;
     private final TransactionTemplate transactionTemplate;
 
@@ -55,6 +56,7 @@ public class PlayerServiceImpl implements PlayerService {
                              ActivityRecordRepository activityRecordRepository,
                              EventCommandRepository eventCommandRepository,
                              CommandExecutor commandExecutor,
+                             SchoolTurnService schoolTurnService,
                              ObjectMapper objectMapper,
                              PlatformTransactionManager transactionManager) {
         this.playerRepository = playerRepository;
@@ -65,6 +67,7 @@ public class PlayerServiceImpl implements PlayerService {
         this.activityRecordRepository = activityRecordRepository;
         this.eventCommandRepository = eventCommandRepository;
         this.commandExecutor = commandExecutor;
+        this.schoolTurnService = schoolTurnService;
         this.objectMapper = objectMapper;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
@@ -137,7 +140,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional
     public MutationResult advanceTurn(UUID playerId, long expectedVersion, String idempotencyKey) {
-        throw new UnsupportedOperationException("TODO: 턴 종료");
+        return schoolTurnService.advanceTurn(playerId, expectedVersion, idempotencyKey);
     }
 
     private Optional<PlayerView> replayCreate(String createKey, String requestHash) {

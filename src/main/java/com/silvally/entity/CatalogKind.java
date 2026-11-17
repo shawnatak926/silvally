@@ -11,7 +11,9 @@ public enum CatalogKind {
     COMPANY("companies"),
     ENDING("endings"),
     ADMISSION_TRACK("admission-tracks"),
-    CAREER_ROLE("career-roles");
+    CAREER_ROLE("career-roles"),
+    MAJOR("majors"),
+    TRACK("tracks");
 
     private final String path;
 

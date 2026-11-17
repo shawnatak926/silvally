@@ -10,5 +10,7 @@ public interface CourseEnrollmentRepository extends JpaRepository<CourseEnrollme
 
     List<CourseEnrollment> findByPlayerId(UUID playerId);
 
+    List<CourseEnrollment> findByPlayerIdAndCourseCode(UUID playerId, String courseCode);
+
     void deleteByPlayerId(UUID playerId);
 }

@@ -58,3 +58,21 @@ INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,hea
 INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','BS05','GAME','게임 개발 상담',0,false,'{"stats": {"P": 3, "I": 1}, "tags": ["game"]}');
 INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','BS05','SECURITY','네트워크와 보안 상담',0,false,'{"stats": {"B": 2, "A": 2}, "tags": ["network", "security"]}');
 INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','BS05','UX','UI/UX 상담',0,false,'{"stats": {"F": 2, "C": 2}, "tags": ["design"]}');
+
+-- 학년 전환 필수 선택: 2학년 진급 시 전공, 3학년 진급 시 트랙. focus는 턴 종료 시 +1 성장하는 능력치.
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','MAJOR','SOFTWARE','소프트웨어개발과','{"focus": ["P", "B"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','MAJOR','EMBEDDED','임베디드소프트웨어과','{"focus": ["P", "I"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','MAJOR','SECURITY','정보보안과','{"focus": ["B", "A"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','TRACK','WEB','웹 서비스 트랙','{"focus": ["F", "B"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','TRACK','MOBILE','모바일 앱 트랙','{"focus": ["P", "F"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','TRACK','AI','AI 트랙','{"focus": ["I", "A"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','TRACK','GAME','게임 트랙','{"focus": ["P", "I"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','TRACK','NETWORK','네트워크·보안 트랙','{"focus": ["B", "A"]}');
+
+-- 방과후 자격증 과정 (실제 자격증 시험 기준과 무관). 출석 2회 후 응시, 점수 = exam 능력치 평균×1.2+20±5.
+-- validYears 0은 만료 없음, 1 이상이면 취득 학년 + validYears 학년이 끝나면 만료.
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COURSE','INFO_CRAFTSMAN','정보처리 방과후','{"certificate": "정보처리기능사", "minYear": 1, "requires": {"P": 25}, "exam": ["P", "A"], "passScore": 60, "validYears": 0}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COURSE','WEB_DESIGN','웹디자인 방과후','{"certificate": "웹디자인개발기능사", "minYear": 1, "requires": {"F": 15}, "exam": ["F", "P"], "passScore": 60, "validYears": 0}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COURSE','ENGLISH_SPEAKING','영어 말하기 방과후','{"certificate": "영어 말하기 평가", "minYear": 1, "requires": {"C": 20}, "exam": ["C", "A"], "passScore": 55, "validYears": 1}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COURSE','LINUX_MASTER','리눅스 방과후','{"certificate": "리눅스마스터 2급", "minYear": 2, "requires": {"B": 25}, "exam": ["B", "A"], "passScore": 65, "validYears": 0}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COURSE','NETWORK_ADMIN','네트워크 방과후','{"certificate": "네트워크관리사 2급", "minYear": 2, "requires": {"B": 20, "A": 30}, "exam": ["B", "A"], "passScore": 65, "validYears": 0}');

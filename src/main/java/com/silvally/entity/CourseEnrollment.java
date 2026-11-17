@@ -45,6 +45,41 @@ public class CourseEnrollment {
     protected CourseEnrollment() {
     }
 
+    public static CourseEnrollment enroll(UUID playerId, String courseCode, int year) {
+        CourseEnrollment enrollment = new CourseEnrollment();
+        enrollment.playerId = playerId;
+        enrollment.courseCode = courseCode;
+        enrollment.enrolledYear = year;
+        enrollment.status = CourseStatus.ENROLLED;
+        return enrollment;
+    }
+
+    public int attendanceCount() {
+        return (attendTurn1 == null ? 0 : 1) + (attendTurn2 == null ? 0 : 1);
+    }
+
+    public boolean attendedAt(int turn) {
+        return Integer.valueOf(turn).equals(attendTurn1) || Integer.valueOf(turn).equals(attendTurn2);
+    }
+
+    public void attend(int turn) {
+        if (attendTurn1 == null) {
+            attendTurn1 = turn;
+        } else {
+            attendTurn2 = turn;
+        }
+    }
+
+    public void recordExam(BigDecimal score, boolean passed, int turn) {
+        examScore = score;
+        status = passed ? CourseStatus.PASSED : CourseStatus.FAILED;
+        earnedAtTurn = passed ? turn : null;
+    }
+
+    public void expire() {
+        status = CourseStatus.EXPIRED;
+    }
+
     public UUID getId() {
         return id;
     }
@@ -59,5 +94,17 @@ public class CourseEnrollment {
 
     public CourseStatus getStatus() {
         return status;
+    }
+
+    public int getEnrolledYear() {
+        return enrolledYear;
+    }
+
+    public BigDecimal getExamScore() {
+        return examScore;
+    }
+
+    public Integer getEarnedAtTurn() {
+        return earnedAtTurn;
     }
 }
