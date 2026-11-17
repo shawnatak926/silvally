@@ -11,6 +11,7 @@ public enum ErrorCode {
     LOCKED(HttpStatus.CONFLICT, "현재 조건에서는 선택할 수 없습니다."),
     WRONG_PHASE(HttpStatus.CONFLICT, "현재 단계에서는 요청할 수 없습니다."),
     WRONG_STEP(HttpStatus.CONFLICT, "현재 전형 단계에서는 요청할 수 없습니다."),
+    CHOICE_REQUIRED(HttpStatus.CONFLICT, "학년 전환에 필요한 선택을 먼저 완료해야 합니다."),
     VERSION_CONFLICT(HttpStatus.CONFLICT, "회차가 이미 변경되었습니다. 최신 상태를 다시 조회하세요."),
     IDEMPOTENCY_CONFLICT(HttpStatus.CONFLICT, "같은 요청 키로 다른 내용의 요청이 들어왔습니다."),
     FINAL_PATH_REQUIRED(HttpStatus.CONFLICT, "오퍼가 있어 최종 진로를 직접 선택해야 합니다."),

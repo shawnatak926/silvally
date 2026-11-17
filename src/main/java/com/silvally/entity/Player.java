@@ -89,6 +89,8 @@ public class Player extends BaseEntity {
 
     private UUID lastCommandId;
 
+    private String pendingChoice;
+
     // 회차 생성 담당도 동일한 초기 상태를 사용할 수 있는 팩터리입니다.
     public static Player admission(String name, String profile) {
         Player player = new Player();
@@ -180,6 +182,22 @@ public class Player extends BaseEntity {
         year++;
         turn = 1;
         ap = apPerTurn;
+    }
+
+    public String getPendingChoice() { return pendingChoice; }
+
+    public void requireChoice(String choiceType) {
+        pendingChoice = choiceType;
+    }
+
+    public void chooseMajor(String major) {
+        this.major = major;
+        pendingChoice = null;
+    }
+
+    public void chooseTrack(String track) {
+        this.track = track;
+        pendingChoice = null;
     }
 
     public void readyToGraduate() {
