@@ -5,6 +5,7 @@ import com.silvally.common.exception.ErrorCode;
 import com.silvally.dto.response.YearTransitionView;
 import com.silvally.entity.CatalogDef;
 import com.silvally.entity.CatalogKind;
+import com.silvally.entity.Phase;
 import com.silvally.entity.Player;
 import com.silvally.repository.CatalogDefRepository;
 import org.springframework.stereotype.Component;
@@ -65,6 +66,12 @@ public class SchoolRules {
             case 3 -> Optional.of(CatalogKind.TRACK);
             default -> Optional.empty();
         };
+    }
+
+    public void requireSchool(Player player) {
+        if (player.getPhase() != Phase.SCHOOL) {
+            throw new BusinessException(ErrorCode.WRONG_PHASE, "재학 중에만 요청할 수 있습니다.");
+        }
     }
 
     public void requireNoPendingChoice(Player player) {

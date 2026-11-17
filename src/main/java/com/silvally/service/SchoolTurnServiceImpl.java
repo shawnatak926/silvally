@@ -6,13 +6,13 @@ import com.silvally.dto.request.YearTransitionRequest;
 import com.silvally.dto.response.MutationResult;
 import com.silvally.dto.response.YearTransitionView;
 import com.silvally.entity.CatalogKind;
-import com.silvally.entity.Phase;
 import com.silvally.entity.Player;
 import com.silvally.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,12 +23,14 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private final PlayerRepository playerRepository;
     private final CommandExecutor commandExecutor;
     private final SchoolRules rules;
+    private final CertificateService certificateService;
 
     public SchoolTurnServiceImpl(PlayerRepository playerRepository, CommandExecutor commandExecutor,
-                                 SchoolRules rules) {
+                                 SchoolRules rules, CertificateService certificateService) {
         this.playerRepository = playerRepository;
         this.commandExecutor = commandExecutor;
         this.rules = rules;
+        this.certificateService = certificateService;
     }
 
     @Override
@@ -61,7 +63,7 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     }
 
     private void choose(Player player, String code) {
-        requireSchool(player);
+        rules.requireSchool(player);
         if (player.getPendingChoice() == null) {
             throw new BusinessException(ErrorCode.WRONG_STEP, "지금은 학년 전환 선택이 필요하지 않습니다.");
         }
@@ -75,7 +77,7 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     }
 
     private void advance(Player player, TurnOutcome outcome) {
-        requireSchool(player);
+        rules.requireSchool(player);
         rules.requireNoPendingChoice(player);
         outcome.statDelta = rules.turnGrowth(player);
         player.getStats().apply(outcome.statDelta);
@@ -83,19 +85,16 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         if (!rules.isLastTurnOfYear(player)) {
             player.nextTurn(SchoolRules.AP_PER_TURN);
             outcome.resultCode = "TURN_ADVANCED";
-        } else if (player.getYear() >= SchoolRules.LAST_YEAR) {
+            return;
+        }
+        outcome.expiredCourses = certificateService.expireAtYearEnd(player, player.getYear() + 1);
+        if (player.getYear() >= SchoolRules.LAST_YEAR) {
             player.readyToGraduate();
             outcome.resultCode = "GRADUATION_READY";
         } else {
             player.nextYear(SchoolRules.AP_PER_TURN);
             rules.choiceRequiredFor(player.getYear()).ifPresent(kind -> player.requireChoice(kind.name()));
             outcome.resultCode = "YEAR_ADVANCED";
-        }
-    }
-
-    private static void requireSchool(Player player) {
-        if (player.getPhase() != Phase.SCHOOL) {
-            throw new BusinessException(ErrorCode.WRONG_PHASE, "재학 중에만 요청할 수 있습니다.");
         }
     }
 
@@ -106,11 +105,15 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private static final class TurnOutcome {
         private Map<String, Integer> statDelta = Map.of();
         private String resultCode;
+        private List<String> expiredCourses = List.of();
 
         private Map<String, Object> details(Player player) {
             Map<String, Object> details = new LinkedHashMap<>();
             details.put("year", player.getYear());
             details.put("turn", player.getTurn());
+            if (!expiredCourses.isEmpty()) {
+                details.put("expiredCourses", expiredCourses);
+            }
             if (player.getPendingChoice() != null) {
                 details.put("pendingChoice", player.getPendingChoice());
             }
