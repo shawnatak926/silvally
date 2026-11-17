@@ -156,6 +156,36 @@ public class Player extends BaseEntity {
     public int getYear() { return year; }
     public int getTurn() { return turn; }
     public void markCommand(UUID commandId) { lastCommandId = commandId; }
+    public int getAp() { return ap; }
+    public String getMajor() { return major; }
+    public String getTrack() { return track; }
+
+    public void startSchool(int apPerTurn) {
+        phase = Phase.SCHOOL;
+        year = 1;
+        turn = 1;
+        ap = apPerTurn;
+    }
+
+    public void spendAp(int cost) {
+        ap -= cost;
+    }
+
+    public void nextTurn(int apPerTurn) {
+        turn++;
+        ap = apPerTurn;
+    }
+
+    public void nextYear(int apPerTurn) {
+        year++;
+        turn = 1;
+        ap = apPerTurn;
+    }
+
+    public void readyToGraduate() {
+        phase = Phase.GRAD_READY;
+        ap = 0;
+    }
     public com.silvally.dto.response.PlayerView view() {
         return new com.silvally.dto.response.PlayerView(id, name, rulesVersion, phase.name(), year, turn,
             ap, version, stats.values(), applicationProfile, admissionTrack, beforeSchoolDay,
