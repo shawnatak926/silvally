@@ -280,7 +280,16 @@ public class Player extends BaseEntity {
     public com.silvally.dto.response.PlayerView view() {
         return new com.silvally.dto.response.PlayerView(id, name, rulesVersion, phase.name(), year, turn,
             ap, version, stats.values(), applicationProfile, admissionTrack, beforeSchoolDay,
-            initialCareerCode, currentCareerCode, major, track, resumeLevel);
+            initialCareerCode, currentCareerCode, major, track, resumeLevel, admissionEligibility(),
+            new com.silvally.dto.response.PlayerView.SchoolState(hasSemesterFocus() ? semesterFocus : null,
+                    vacationPending, practiceRemaining, pendingChoice, narshaStage, narshaRank,
+                    softwarewaveAttended, examPreparation));
+    }
+
+    public java.util.Map<String, Boolean> admissionEligibility() {
+        var result = new java.util.LinkedHashMap<String, Boolean>();
+        for (String track : java.util.List.of("GENERAL", "MEISTER", "LOCAL", "SOCIAL")) result.put(track, eligible(track));
+        return result;
     }
 
     protected Player() {

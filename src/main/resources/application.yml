@@ -31,6 +31,8 @@ springdoc:
     tags-sorter: alpha
     display-request-duration: true
 silvally:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
   narrative:
     llm:
       api-key: ${NARRATIVE_LLM_API_KEY:}

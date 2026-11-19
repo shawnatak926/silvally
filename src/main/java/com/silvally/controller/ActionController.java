@@ -6,6 +6,7 @@ import com.silvally.common.ApiResponse;
 import com.silvally.dto.request.PerformActionRequest;
 import com.silvally.dto.response.AvailableAction;
 import com.silvally.dto.response.MutationResult;
+import com.silvally.dto.response.TurnReadinessView;
 import com.silvally.service.ActivityService;
 import com.silvally.service.PlayerService;
 import jakarta.validation.Valid;
@@ -46,6 +47,12 @@ public class ActionController {
             @RequestHeader("Idempotency-Key") String idempotencyKey,
             @Valid @RequestBody PerformActionRequest request) {
         return ApiResponse.ok(activityService.performAction(playerId, expectedVersion, idempotencyKey, request));
+    }
+
+    @Operation(summary = "턴 진행 가능 여부와 필수 선택 대기 사유 조회")
+    @GetMapping("/turns/readiness")
+    public ApiResponse<TurnReadinessView> turnReadiness(@PathVariable UUID playerId) {
+        return ApiResponse.ok(playerService.getTurnReadiness(playerId));
     }
 
     @Operation(summary = "턴 종료")

@@ -9,6 +9,7 @@ import com.silvally.dto.response.HistoryPage;
 import com.silvally.dto.response.MutationResult;
 import com.silvally.dto.response.PlayerView;
 import com.silvally.dto.response.ProgressView;
+import com.silvally.dto.response.TurnReadinessView;
 import com.silvally.entity.Player;
 import com.silvally.repository.ActivityRecordRepository;
 import com.silvally.repository.CommandLogRepository;
@@ -53,6 +54,7 @@ public class PlayerServiceImpl implements PlayerService {
     private final HistoryService historyService;
     private final ObjectMapper objectMapper;
     private final TransactionTemplate transactionTemplate;
+    private final ProgressAssembler progressAssembler;
 
     public PlayerServiceImpl(PlayerRepository playerRepository,
                              CommandLogRepository commandLogRepository,
@@ -69,7 +71,9 @@ public class PlayerServiceImpl implements PlayerService {
                              PlatformTransactionManager transactionManager,
                              com.silvally.repository.InterviewQuestionRepository interviewQuestions,
                              com.silvally.repository.FieldLearningRepository fieldLearning,
-                             com.silvally.repository.ExamResultRepository examResults) {
+                             com.silvally.repository.ExamResultRepository examResults,
+                             ProgressAssembler progressAssembler) {
+        this.progressAssembler = progressAssembler;
         this.examResults = examResults;
         this.fieldLearning = fieldLearning;
         this.interviewQuestions = interviewQuestions;
@@ -149,7 +153,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public ProgressView getProgress(UUID playerId) {
-        throw new UnsupportedOperationException("TODO: 진행 현황 조회");
+        return progressAssembler.assemble(findPlayer(playerId));
     }
 
     @Override
@@ -161,6 +165,11 @@ public class PlayerServiceImpl implements PlayerService {
     @Transactional
     public MutationResult advanceTurn(UUID playerId, long expectedVersion, String idempotencyKey) {
         return schoolTurnService.advanceTurn(playerId, expectedVersion, idempotencyKey);
+    }
+
+    @Override
+    public TurnReadinessView getTurnReadiness(UUID playerId) {
+        return schoolTurnService.getTurnReadiness(playerId);
     }
 
     private Optional<PlayerView> replayCreate(String createKey, String requestHash) {

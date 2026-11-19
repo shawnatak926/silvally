@@ -2,12 +2,15 @@ package com.silvally.service;
 
 import com.silvally.dto.request.YearTransitionRequest;
 import com.silvally.dto.response.MutationResult;
+import com.silvally.dto.response.TurnReadinessView;
 import com.silvally.dto.response.YearTransitionView;
 
 import java.util.UUID;
 
 public interface SchoolTurnService {
     MutationResult advanceTurn(UUID playerId, long expectedVersion, String idempotencyKey);
+
+    TurnReadinessView getTurnReadiness(UUID playerId);
 
     YearTransitionView getYearTransition(UUID playerId);
 

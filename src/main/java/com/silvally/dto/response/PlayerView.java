@@ -20,6 +20,19 @@ public record PlayerView(
         String currentCareerCode,
         String major,
         String track,
-        int resumeScore
+        int resumeScore,
+        Map<String, Boolean> admissionEligibility,
+        SchoolState school
 ) {
+    public record SchoolState(
+            String semesterFocus,
+            boolean vacationPending,
+            int practiceRemaining,
+            String pendingChoice,
+            String narshaStage,
+            Integer narshaRank,
+            boolean softwarewaveAttended,
+            int examPreparation
+    ) {
+    }
 }
