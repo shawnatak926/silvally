@@ -9,10 +9,12 @@ import com.silvally.dto.response.ApplicationMutation;
 import com.silvally.dto.response.ApplicationView;
 import com.silvally.dto.response.EndingMutation;
 import com.silvally.dto.response.EndingView;
+import com.silvally.dto.response.InterviewValidationResult;
 import com.silvally.dto.response.MutationResult;
 import com.silvally.entity.ApplicationStatus;
 import com.silvally.entity.CatalogDef;
 import com.silvally.entity.CatalogKind;
+import com.silvally.entity.InterviewKind;
 import com.silvally.entity.JobApplication;
 import com.silvally.entity.Phase;
 import com.silvally.entity.Player;
@@ -46,6 +48,7 @@ public class CareerServiceImpl implements CareerService {
     private final SchoolRules schoolRules;
     private final ProjectRules projectRules;
     private final RecruitmentRules recruitmentRules;
+    private final InterviewService interviewService;
 
     public CareerServiceImpl(PlayerRepository playerRepository,
                              JobApplicationRepository jobApplicationRepository,
@@ -56,7 +59,8 @@ public class CareerServiceImpl implements CareerService {
                              ObjectMapper objectMapper,
                              SchoolRules schoolRules,
                              ProjectRules projectRules,
-                             RecruitmentRules recruitmentRules) {
+                             RecruitmentRules recruitmentRules,
+                             InterviewService interviewService) {
         this.playerRepository = playerRepository;
         this.jobApplicationRepository = jobApplicationRepository;
         this.commandExecutor = commandExecutor;
@@ -67,6 +71,7 @@ public class CareerServiceImpl implements CareerService {
         this.schoolRules = schoolRules;
         this.projectRules = projectRules;
         this.recruitmentRules = recruitmentRules;
+        this.interviewService = interviewService;
     }
 
     @Override
@@ -141,12 +146,21 @@ public class CareerServiceImpl implements CareerService {
                             details.put("passScore", rule.codingPass());
                         }
                         case RecruitmentRules.STEP_INTERVIEW -> {
+                            // 질문 발급·답변 검증과 시점 규칙은 공통 InterviewService가, 채점은 채용 단계가 맡는다.
+                            InterviewValidationResult interview = interviewService.submitAnswer(player,
+                                    InterviewKind.COMPANY, applicationId.toString(), request.questionId(),
+                                    request.answer());
                             spend(player, STEP_AP);
                             spent[0] = STEP_AP;
-                            int score = recruitmentRules.interviewScore(player, rule);
+                            int statScore = recruitmentRules.interviewScore(player, rule);
+                            int bonus = recruitmentRules.answerBonus(interview.answer());
+                            int score = Math.min(100, statScore + bonus);
                             application.recordInterview(score, score >= rule.interviewPass());
                             details.put("score", score);
+                            details.put("statScore", statScore);
+                            details.put("answerBonus", bonus);
                             details.put("passScore", rule.interviewPass());
+                            details.put("questionId", interview.questionId().toString());
                         }
                         default -> {
                             int composite = recruitmentRules.compositeScore(application.getD().intValue(),

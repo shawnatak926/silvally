@@ -60,7 +60,8 @@ public class ApplicationController {
                 .body(ApiResponse.ok(result));
     }
 
-    @Operation(summary = "채용 단계 진행 (CODING, INTERVIEW, RESULT)")
+    @Operation(summary = "채용 단계 진행 (CODING, INTERVIEW, RESULT)",
+            description = "INTERVIEW는 코딩 통과 후 3학년 5턴에, 질문 조회로 받은 questionId와 answer를 함께 보내야 한다.")
     @PostMapping("/{applicationId}/steps")
     public ApiResponse<ApplicationMutation> step(
             @PathVariable UUID playerId,

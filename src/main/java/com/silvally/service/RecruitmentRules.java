@@ -22,7 +22,8 @@ import java.util.SplittableRandom;
  *
  * <ul>
  *     <li>서류 = 포트폴리오 환산 점수 × 0.7 + 자격증(최대 {@value #CERTIFICATE_CAP}개) × {@value #CERTIFICATE_POINT} + 이력서 레벨</li>
- *     <li>코딩·회사 면접 = 기업이 정한 능력치 평균 × 1.2 + 20 + 기업·단계·회차별 고정 변동(±5)</li>
+ *     <li>코딩·회사 면접(능력치 점수) = 기업이 정한 능력치 평균 × 1.2 + 20 + 기업·단계·회차별 고정 변동(±5)</li>
+ *     <li>회사 면접 점수 = 능력치 점수 + 답변 가산점(답변 {@value #ANSWER_CHARS_PER_POINT}자마다 1점, 최대 {@value #ANSWER_BONUS_MAX}점)</li>
  *     <li>최종 종합 = 서류 × 0.3 + 코딩 × 0.35 + 면접 × 0.35</li>
  * </ul>
  */
@@ -32,6 +33,8 @@ public class RecruitmentRules {
     public static final String STEP_INTERVIEW = "INTERVIEW";
     public static final String STEP_RESULT = "RESULT";
 
+    static final int ANSWER_BONUS_MAX = 10;
+    static final int ANSWER_CHARS_PER_POINT = 40;
     static final int CERTIFICATE_CAP = 3;
     static final int CERTIFICATE_POINT = 5;
 
@@ -68,6 +71,14 @@ public class RecruitmentRules {
 
     public int interviewScore(Player player, CompanyRule rule) {
         return stepScore(player, rule, STEP_INTERVIEW, rule.interviewStats());
+    }
+
+    /** 면접 답변 분량에 따른 가산점. 질문에 성의 있게 답할수록 높고 최대값이 있다. */
+    public int answerBonus(String answer) {
+        if (answer == null) {
+            return 0;
+        }
+        return Math.min(ANSWER_BONUS_MAX, answer.strip().length() / ANSWER_CHARS_PER_POINT);
     }
 
     public int compositeScore(int document, int coding, int interview) {
