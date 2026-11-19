@@ -7,6 +7,7 @@ import com.silvally.dto.response.ApplicationMutation;
 import com.silvally.dto.response.ApplicationView;
 import com.silvally.dto.response.EndingMutation;
 import com.silvally.dto.response.EndingView;
+import com.silvally.entity.Player;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,4 +24,7 @@ public interface CareerService {
                             FinalizeGraduationRequest request);
 
     EndingView getEnding(UUID playerId);
+
+    /** 다음 턴으로 넘어갈 때 마감이 지난 진행 중 지원을 만료 처리하고 만료된 기업 코드를 돌려준다. */
+    List<String> expireOverdue(Player player, int nextAbsoluteTurn);
 }

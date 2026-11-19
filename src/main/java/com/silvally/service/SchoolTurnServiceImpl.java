@@ -25,15 +25,17 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private final SchoolRules rules;
     private final CertificateService certificateService;
     private final ProjectService projectService;
+    private final CareerService careerService;
 
     public SchoolTurnServiceImpl(PlayerRepository playerRepository, CommandExecutor commandExecutor,
                                  SchoolRules rules, CertificateService certificateService,
-                                 ProjectService projectService) {
+                                 ProjectService projectService, CareerService careerService) {
         this.playerRepository = playerRepository;
         this.commandExecutor = commandExecutor;
         this.rules = rules;
         this.certificateService = certificateService;
         this.projectService = projectService;
+        this.careerService = careerService;
     }
 
     @Override
@@ -84,7 +86,9 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         rules.requireNoPendingChoice(player);
         outcome.statDelta = rules.turnGrowth(player);
         player.getStats().apply(outcome.statDelta);
-        outcome.expiredProjects = projectService.expireOverdue(player, rules.absoluteTurn(player) + 1);
+        int nextTurn = rules.absoluteTurn(player) + 1;
+        outcome.expiredProjects = projectService.expireOverdue(player, nextTurn);
+        outcome.expiredApplications = careerService.expireOverdue(player, nextTurn);
 
         if (!rules.isLastTurnOfYear(player)) {
             player.nextTurn(SchoolRules.AP_PER_TURN);
@@ -111,6 +115,7 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         private String resultCode;
         private List<String> expiredCourses = List.of();
         private List<String> expiredProjects = List.of();
+        private List<String> expiredApplications = List.of();
 
         private Map<String, Object> details(Player player) {
             Map<String, Object> details = new LinkedHashMap<>();
@@ -121,6 +126,9 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
             }
             if (!expiredProjects.isEmpty()) {
                 details.put("expiredProjects", expiredProjects);
+            }
+            if (!expiredApplications.isEmpty()) {
+                details.put("expiredApplications", expiredApplications);
             }
             if (player.getPendingChoice() != null) {
                 details.put("pendingChoice", player.getPendingChoice());
