@@ -1,0 +1,11 @@
+server:
+  forward-headers-strategy: framework
+spring:
+  h2:
+    console:
+      enabled: false
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
