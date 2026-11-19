@@ -97,4 +97,16 @@ class InterviewServiceTest {
         ReflectionTestUtils.setField(a, "role", "BACKEND"); ReflectionTestUtils.setField(a, "status", ApplicationStatus.CODE_PASSED);
         return applications.saveAndFlush(a);
     }
+    @Test void simultaneousQuestionRefreshesShareOneQuestionAndDoNotChangeVersion() throws Exception {
+        Player p = candidate();
+        try (var pool = java.util.concurrent.Executors.newFixedThreadPool(6)) {
+            var start = new java.util.concurrent.CountDownLatch(1);
+            var futures = new java.util.ArrayList<java.util.concurrent.Future<com.silvally.dto.response.InterviewView>>();
+            for (int i = 0; i < 6; i++) futures.add(pool.submit(() -> { start.await(); return interviews.getSchoolQuestion(p.getId()); }));
+            start.countDown();
+            var first = futures.getFirst().get(10, java.util.concurrent.TimeUnit.SECONDS);
+            for (var future : futures) assertThat(future.get(10, java.util.concurrent.TimeUnit.SECONDS)).isEqualTo(first);
+        }
+        assertThat(players.findById(p.getId()).orElseThrow().getVersion()).isEqualTo(p.getVersion());
+    }
 }

@@ -68,6 +68,8 @@ public class EventFlowServiceImpl implements EventFlowService {
     }
     @Transactional
     public MutationResult choose(UUID id, String event, long version, String key, ChooseEventRequest request) {
+        if (request != null && request.motivation() != null && !event.equals("AD02"))
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "지원 동기는 AD02 서류 제출에서만 보낼 수 있습니다.");
         if (isSchoolEvent(event)) return schoolEvents.choose(id, event, version, key, request);
         if (key == null || key.isBlank() || key.length() > 200 || request == null)
             throw new BusinessException(ErrorCode.VALIDATION_ERROR);
@@ -126,7 +128,10 @@ public class EventFlowServiceImpl implements EventFlowService {
                 double general = first ? policy.documentScore("GENERAL", essay, grades, record) : score;
                 var decision = policy.decide(p.getSeed(), first ? 1 : 2, p.getAdmissionTrack(), score, general);
                 details.put("decision", decision);
-                if (first) details.put("submitted", effect);
+                if (first) {
+                    details.put("submitted", effect);
+                    if (request.motivation() != null) details.put("motivation", request.motivation().strip());
+                }
                 result = decision.passed() ? "PASSED" : "FAILED";
                 if (decision.shieldActivated()) result = "SHIELD_" + result;
                 if (decision.passed() && first) p.passDocuments();

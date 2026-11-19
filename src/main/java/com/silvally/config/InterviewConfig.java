@@ -9,8 +9,7 @@ import java.util.concurrent.*;
 public class InterviewConfig {
     @Bean @ConditionalOnMissingBean(InterviewQuestionGenerator.class)
     public InterviewQuestionGenerator mockInterviewQuestionGenerator() {
-        return context -> new InterviewQuestionGenerator.Generated(context.baseQuestion()
-                + (context.recentActivities().isEmpty() ? "" : " 최근 활동: " + String.join(" / ", context.recentActivities())), "MOCK");
+        return context -> new InterviewQuestionGenerator.Generated(InterviewQuestionGenerator.defaultQuestion(context), "MOCK");
     }
     @Bean(destroyMethod = "shutdownNow")
     public ExecutorService interviewQuestionExecutor() { return Executors.newVirtualThreadPerTaskExecutor(); }

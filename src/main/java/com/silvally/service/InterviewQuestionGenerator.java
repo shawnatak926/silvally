@@ -6,5 +6,10 @@ import java.util.List;
 public interface InterviewQuestionGenerator {
     record Context(String kind, String subjectCode, List<String> recentActivities, String baseQuestion) { }
     record Generated(String question, String source) { }
+    static String defaultQuestion(Context context) {
+        String question = context.baseQuestion() + (context.recentActivities().isEmpty() ? ""
+                : " 최근 활동: " + String.join(" / ", context.recentActivities()));
+        return question.substring(0, Math.min(1200, question.length()));
+    }
     Generated generate(Context context) throws Exception;
 }
