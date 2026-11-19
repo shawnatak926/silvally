@@ -68,7 +68,8 @@ public class EventServiceImpl implements EventService {
     private EventView view(Player p, EventDef e) {
         boolean current = available(p, e);
         return new EventView(e.getId().eventCode(), e.getTitle(), e.getSituation(), e.isRequired(),
-                choices.findByEventCodes(p.getRulesVersion(), List.of(e.getId().eventCode())).stream().map(c -> {
+                choices.findByEventCodes(p.getRulesVersion(), List.of(e.getId().eventCode())).stream()
+                .filter(c -> !(p.getYear() >= 3 && e.getId().eventCode().startsWith("VACATION_") && c.getId().choiceCode().equals("CAMP"))).map(c -> {
                     boolean enabled = current && p.getAp() >= c.getApCost();
                     return new EventView.Choice(c.getId().choiceCode(), c.getLabel(), c.getApCost(), enabled,
                             enabled ? null : "이미 선택했거나 시기·AP·필수 선택 조건을 만족하지 않습니다.");

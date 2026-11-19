@@ -61,7 +61,7 @@ public class RecruitmentRules {
                 .count();
         // 0.7 같은 실수 곱셈은 .5 경계에서 오차로 반올림이 갈리므로 정수로 계산한다.
         double score = portfolioScore * 7 / 10.0 + Math.min(certificates, CERTIFICATE_CAP) * CERTIFICATE_POINT
-                + player.getResumeLevel();
+                + player.getResumeLevel() + (player.isMild() ? 15 : 0);
         return clamp((int) Math.round(score));
     }
 
@@ -89,7 +89,7 @@ public class RecruitmentRules {
         Map<String, Integer> stats = player.getStats().toMap();
         double mean = statCodes.stream().mapToInt(stat -> stats.getOrDefault(stat, 0)).average().orElse(0);
         SplittableRandom random = new SplittableRandom((player.getSeed() + rule.code() + step).hashCode());
-        return clamp((int) Math.round(mean * 1.2 + 20 + random.nextInt(-5, 6)));
+        return clamp((int) Math.round(mean * 1.2 + 20 + random.nextInt(-5, 6) + (player.isMild() ? 15 : 0)));
     }
 
     private CompanyRule toRule(CatalogDef def) {

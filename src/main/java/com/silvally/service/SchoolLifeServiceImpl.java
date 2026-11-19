@@ -42,8 +42,8 @@ public class SchoolLifeServiceImpl implements SchoolLifeService {
     }
     private Offer offer(Player p) {
         if (p.getPhase() != Phase.SCHOOL || p.getPendingChoice() != null) return null;
-        if (p.isWithdrawalPending()) return draw(p, "WITHDRAWAL", () -> withdrawal());
-        int level = p.getStats().getS() >= 90 ? 90 : p.getStats().getS() >= 60 ? 60 : 0;
+        if (!p.isMild() && p.isWithdrawalPending()) return draw(p, "WITHDRAWAL", () -> withdrawal());
+        int level = !p.isMild() && p.getStats().getS() >= 90 ? 90 : p.getStats().getS() >= 60 ? 60 : 0;
         boolean crisisHandled = draws.findByPlayerIdAndPeriodKeyAndDrawKind(p.getId(), period(p), "STRESS_90")
                 .map(SchoolEventDraw::isResolved).orElse(false);
         if (level > 0 && !(level == 60 && crisisHandled)) {
@@ -219,6 +219,7 @@ public class SchoolLifeServiceImpl implements SchoolLifeService {
         return Map.of("stressBefore", before, "stressAfter", p.getStats().getS(), "total", p.getStats().getS() - before, "sources", sources);
     }
     private static void pressure(Player p, List<Map<String, Object>> sources, String code, String reason, int amount) {
+        if (amount > 0 && p.isMild()) amount = (amount + 1) / 2;
         int accumulated = sources.stream().mapToInt(s -> Math.max(0, (Integer) s.get("delta"))).sum();
         if (amount > 0) amount = Math.min(amount, Math.max(0, 5 - accumulated));
         if (amount == 0) return;

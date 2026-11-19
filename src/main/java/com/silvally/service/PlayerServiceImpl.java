@@ -96,15 +96,20 @@ public class PlayerServiceImpl implements PlayerService {
     public PlayerView create(String idempotencyKey, CreatePlayerRequest request) {
         String createKey = CommandExecutor.parseIdempotencyKey(idempotencyKey).toString();
         String profile = normalizeProfile(request.applicationProfile());
+        String edition = request.edition() == null ? "SPICY" : request.edition();
+        if (!Set.of("MILD", "SPICY").contains(edition)) throw new BusinessException(ErrorCode.VALIDATION_ERROR, "올바른 게임 버전을 선택해 주세요.");
+        var payload = new java.util.LinkedHashMap<String, Object>();
+        payload.put("name", request.name()); payload.put("applicationProfile", profile);
+        if (edition.equals("MILD")) payload.put("edition", edition);
         String requestHash = commandExecutor.hash(new CommandSpec<>("CREATE_PLAYER", "PLAYER",
-                new CreatePlayerRequest(request.name(), profile), PlayerView.class));
+                payload, PlayerView.class));
 
         Optional<PlayerView> replay = transactionTemplate.execute(status -> replayCreate(createKey, requestHash));
         if (replay.isPresent()) {
             return replay.get();
         }
         try {
-            return transactionTemplate.execute(status -> insert(request.name(), profile, createKey, requestHash));
+            return transactionTemplate.execute(status -> insert(request.name(), profile, createKey, requestHash, edition));
         } catch (DataIntegrityViolationException e) {
             return transactionTemplate.execute(status -> replayCreate(createKey, requestHash))
                     .orElseThrow(() -> new BusinessException(ErrorCode.IDEMPOTENCY_CONFLICT));
@@ -171,9 +176,10 @@ public class PlayerServiceImpl implements PlayerService {
         });
     }
 
-    private PlayerView insert(String name, String profile, String createKey, String requestHash) {
-        Player player = playerRepository.saveAndFlush(
-                Player.create(name, profile, createKey, requestHash));
+    private PlayerView insert(String name, String profile, String createKey, String requestHash, String edition) {
+        Player created = Player.create(name, profile, createKey, requestHash);
+        created.configureEdition(edition);
+        Player player = playerRepository.saveAndFlush(created);
         PlayerView view = player.view();
         playerRepository.saveCreateResponse(player.getId(), objectMapper.writeValueAsString(view));
         return view;

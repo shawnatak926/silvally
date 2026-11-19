@@ -99,6 +99,16 @@ public class Player extends BaseEntity {
     private Integer narshaRank;
     private boolean softwarewaveAttended;
     private boolean withdrawalPending;
+    private String edition;
+    public String getEdition() { return edition == null ? "SPICY" : edition; }
+    public boolean isMild() { return "MILD".equals(getEdition()); }
+    public void configureEdition(String value) {
+        edition = value;
+        if (isMild()) {
+            phase = Phase.CAREER_PICK; year = 1; turn = 1; ap = 3;
+            stats.apply(java.util.Map.of("P", 12, "F", 8, "B", 8, "I", 8, "EN", 10, "A", 8, "C", 12, "H", 10, "S", -6));
+        }
+    }
     @Lob private String schoolGrowthRemainders;
     public boolean isWithdrawalPending() { return withdrawalPending; }
     public void setWithdrawalPending(boolean pending) { withdrawalPending = pending; }
@@ -261,7 +271,7 @@ public class Player extends BaseEntity {
     public com.silvally.dto.response.PlayerView view() {
         return new com.silvally.dto.response.PlayerView(id, name, rulesVersion, phase.name(), year, turn,
             ap, version, stats.values(), applicationProfile, admissionTrack, beforeSchoolDay,
-            initialCareerCode, currentCareerCode, major, track, resumeLevel);
+            initialCareerCode, currentCareerCode, major, track, resumeLevel, getEdition());
     }
 
     protected Player() {
