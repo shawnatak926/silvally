@@ -168,3 +168,15 @@ INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COMPANY','DROID_FACTORY','드로이드팩토리','{"role": "ANDROID", "minYear": 3, "deadlineTurn": 66, "docPass": 35, "codingPass": 55, "interviewPass": 50, "offerPass": 60, "codingStats": ["P", "F"], "interviewStats": ["C", "A"]}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COMPANY','DUNGEON_GAMES','던전게임즈','{"role": "GAME", "minYear": 3, "deadlineTurn": 66, "docPass": 35, "codingPass": 55, "interviewPass": 50, "offerPass": 60, "codingStats": ["P", "I"], "interviewStats": ["C", "I"]}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COMPANY','DEEP_MIND_KR','딥마인드코리아','{"role": "AI", "minYear": 3, "deadlineTurn": 70, "docPass": 40, "codingPass": 60, "interviewPass": 55, "offerPass": 65, "codingStats": ["I", "A"], "interviewStats": ["A", "C"]}');
+
+-- 직무: order는 추천 동점 처리에 쓰는 고정 순번, stats는 직무 적합 능력치 가중치, tags는 비포스쿨 활동 태그와 맞춰 보는 값입니다.
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','WEB','웹 프론트엔드','{"order": 1, "stats": {"F": 3, "P": 1}, "tags": ["web", "design"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','BACKEND','백엔드','{"order": 2, "stats": {"B": 3, "P": 1}, "tags": ["backend", "algorithm", "logic"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','CROSS_PLATFORM','크로스플랫폼','{"order": 3, "stats": {"F": 2, "P": 2}, "tags": ["cross-platform", "web"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','ANDROID','안드로이드','{"order": 4, "stats": {"P": 3, "B": 1}, "tags": ["android"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','IOS','iOS','{"order": 5, "stats": {"P": 3, "F": 1}, "tags": ["ios"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','GAME','게임 개발','{"order": 6, "stats": {"P": 2, "I": 2}, "tags": ["game", "maker"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','NETWORK','네트워크','{"order": 7, "stats": {"B": 3, "A": 1}, "tags": ["network"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','SECURITY','보안','{"order": 8, "stats": {"B": 2, "A": 2}, "tags": ["security", "debugging"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','AI','AI 개발','{"order": 9, "stats": {"I": 3, "A": 1}, "tags": ["ai", "study"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','DESIGN','UI/UX 디자인','{"order": 10, "stats": {"F": 2, "C": 2}, "tags": ["design", "communication"]}');

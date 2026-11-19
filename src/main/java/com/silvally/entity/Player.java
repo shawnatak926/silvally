@@ -219,6 +219,15 @@ public class Player extends BaseEntity {
         this.ap = 0;
     }
     public int getResumeLevel() { return resumeLevel; }
+    public String getRecommendationJson() { return recommendationJson; }
+    public void storeRecommendation(String recommendationJson) { this.recommendationJson = recommendationJson; }
+    public void changeCareer(String roleCode) { this.currentCareerCode = roleCode; }
+    /** 희망 직무를 처음 확정하고 재학을 시작한다. */
+    public void confirmCareer(String roleCode, int apPerTurn) {
+        this.initialCareerCode = roleCode;
+        this.currentCareerCode = roleCode;
+        startSchool(apPerTurn);
+    }
     public String getInitialCareerCode() { return initialCareerCode; }
     public String getCurrentCareerCode() { return currentCareerCode; }
 
