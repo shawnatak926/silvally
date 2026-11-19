@@ -109,6 +109,22 @@ public class Player extends BaseEntity {
     private String narshaStage;
     private Integer narshaRank;
     private boolean softwarewaveAttended;
+    private boolean withdrawalPending;
+    private String edition;
+    public String getEdition() { return edition == null ? "SPICY" : edition; }
+    public boolean isMild() { return "MILD".equals(getEdition()); }
+    public void configureEdition(String value) {
+        edition = value;
+        if (isMild()) {
+            phase = Phase.CAREER_PICK; year = 1; turn = 1; ap = 3;
+            stats.apply(java.util.Map.of("P", 12, "F", 8, "B", 8, "I", 8, "EN", 10, "A", 8, "C", 12, "H", 10, "S", -6));
+        }
+    }
+    @Lob private String schoolGrowthRemainders;
+    public boolean isWithdrawalPending() { return withdrawalPending; }
+    public void setWithdrawalPending(boolean pending) { withdrawalPending = pending; }
+    public String getSchoolGrowthRemainders() { return schoolGrowthRemainders; }
+    public void setSchoolGrowthRemainders(String value) { schoolGrowthRemainders = value; }
 
     public String getSemesterFocus() { return semesterFocus; }
     public boolean hasSemesterFocus() { return semesterFocus != null && focusYear == year && focusSemester == (turn <= 12 ? 1 : 2); }
@@ -283,7 +299,7 @@ public class Player extends BaseEntity {
             initialCareerCode, currentCareerCode, major, track, resumeLevel, admissionEligibility(),
             new com.silvally.dto.response.PlayerView.SchoolState(hasSemesterFocus() ? semesterFocus : null,
                     vacationPending, practiceRemaining, pendingChoice, narshaStage, narshaRank,
-                    softwarewaveAttended, examPreparation));
+                    softwarewaveAttended, examPreparation), getEdition());
     }
 
     public java.util.Map<String, Boolean> admissionEligibility() {

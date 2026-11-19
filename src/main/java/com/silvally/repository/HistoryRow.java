@@ -15,6 +15,7 @@ public record HistoryRow(
         NarrativeStatus narrativeStatus,
         String narrative,
         NarrativeSource narrativeSource,
-        String narrativeModel
+        String narrativeModel,
+        String evidenceJson
 ) {
 }

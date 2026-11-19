@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
 import java.util.UUID;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -76,6 +77,22 @@ class TurnReadinessTest {
         });
         assertThatThrownBy(() -> fixture.advance(id)).isInstanceOfSatisfying(BusinessException.class,
                 e -> assertThat(e.getErrorCode()).isEqualTo(ErrorCode.CHOICE_REQUIRED));
+    }
+
+    @Test
+    void stressSupportBlocksReadinessAndAdvanceUntilResolved() {
+        UUID id = fixture.enrolledStudent();
+        fixture.modify(id, p -> p.getStats().apply(Map.of("S", 60 - p.getStats().getS())));
+        long version = fixture.version(id);
+
+        assertBlockedBy(id, "REQUIRED_EVENT", "STRESS_SUPPORT");
+        assertThat(fixture.version(id)).isEqualTo(version);
+        String rest = events.getEvent(id, "STRESS_SUPPORT").choices().getFirst().code();
+        choose(id, "STRESS_SUPPORT", rest);
+
+        assertThat(fixture.load(id).getStats().getS()).isLessThan(60);
+        assertThat(players.getTurnReadiness(id).canAdvance()).isTrue();
+        fixture.advance(id);
     }
 
     @Test

@@ -43,9 +43,7 @@ public class ExamServiceImpl implements ExamService {
         int gradeBefore = stats.getG();
         stats.changeGrade(StatRules.nextGrade(gradeBefore, score, kind));
         changes.addAll(StatChange.between(before, stats.values(), "EXAM_" + kind.name()));
-        Map<String, Integer> beforeStress = stats.values();
-        stats.apply(Map.of("S", StatRules.EXAM_STRESS));
-        changes.addAll(StatChange.between(beforeStress, stats.values(), "EXAM_STRESS"));
+        // SchoolLifeService owns exam pressure as part of the capped turn load.
         player.resetExamPreparation();
         ExamResult saved = examResults.save(new ExamResult(player, semester, kind, preparation, score,
                 gradeBefore, stats.getG()));

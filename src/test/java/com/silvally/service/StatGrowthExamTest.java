@@ -173,7 +173,8 @@ class StatGrowthExamTest {
         });
         UUID weak = student(p -> {
             setPeriod(p, 6);
-            p.getStats().apply(Map.of("H", 25 - p.getStats().getH(), "S", 90 - p.getStats().getS()));
+            // 상담 필수 사건 전의 상태에서, 낮은 체력과 준비 부족이 성적에 미치는 영향을 검증한다.
+            p.getStats().apply(Map.of("H", 25 - p.getStats().getH(), "S", 59 - p.getStats().getS()));
             p.getStats().changeGrade(90);
             p.spendAp(SchoolRules.AP_PER_TURN);
         });
@@ -184,6 +185,23 @@ class StatGrowthExamTest {
         assertThat(fixture.load(strong).getStats().getG()).isGreaterThan(60);
         assertThat(fixture.load(weak).getStats().getG()).isLessThan(90);
         assertThat(fixture.load(strong).getExamPreparation()).isZero();
+    }
+
+    @Test
+    @DisplayName("시험 성적과 학교 부담을 함께 저장하며 시험 스트레스는 중복 가산하지 않는다")
+    void examAndSchoolPressure_shareOneCappedLoad() {
+        UUID id = student(p -> setPeriod(p, 6));
+        int stressBefore = fixture.load(id).getStats().getS();
+
+        MutationResult result = fixture.advance(id);
+
+        assertThat(result.details()).containsKeys("exam", "stressLoad");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> load = (Map<String, Object>) result.details().get("stressLoad");
+        int pressure = ((Number) load.get("total")).intValue();
+        assertThat(pressure).isBetween(3, 5);
+        assertThat(fixture.load(id).getStats().getS() - stressBefore).isEqualTo(pressure);
+        assertThat(examResults.findByPlayerIdOrderByIdAsc(id)).hasSize(1);
     }
 
     @Test

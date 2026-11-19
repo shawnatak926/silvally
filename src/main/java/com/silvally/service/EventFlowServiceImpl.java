@@ -39,11 +39,12 @@ public class EventFlowServiceImpl implements EventFlowService {
         this.records = records; this.commands = commands; this.policy = policy; this.beforeSchool = beforeSchool;
     }
     private boolean isSchoolEvent(String code) {
-        return code.equals("J01") || code.startsWith("S") || code.startsWith("FOCUS_") || code.startsWith("VACATION_") || code.startsWith("NARSHA_");
+        return SchoolLifeService.owns(code) || code.equals("J01") || code.startsWith("S") || code.startsWith("FOCUS_") || code.startsWith("VACATION_") || code.startsWith("NARSHA_");
     }
     private Player player(UUID id) {
         return players.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
     }
+    @Transactional
     public List<EventView> list(UUID id) {
         Player p = player(id);
         if (p.getPhase() == Phase.SCHOOL) return schoolEvents.list(id);
@@ -51,6 +52,7 @@ public class EventFlowServiceImpl implements EventFlowService {
         if (p.getPhase() != Phase.ADMISSION_1 && p.getPhase() != Phase.ADMISSION_2) return List.of();
         return List.of(view(p, p.getAdmissionEvent()));
     }
+    @Transactional
     public EventView detail(UUID id, String event) { return view(player(id), event); }
     private EventView view(Player p, String code) {
         if (isSchoolEvent(code)) return schoolEvents.detail(p.getId(), code);

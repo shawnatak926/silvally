@@ -88,8 +88,7 @@ public final class StatRules {
     public static final int PREPARATION_PER_SPARE_AP = 2;
     public static final int ACADEMIC_FOCUS_PREPARATION = 2;
     public static final int PREPARATION_CAP = 20;
-    /** 시험 한 번에 더해지는 스트레스. 다른 사건이 시험 부담을 다룰 때도 이 값을 쓰고 중복 적용하지 않는다. */
-    public static final int EXAM_STRESS = 2;
+    // 시험일 스트레스는 SchoolLifeService의 턴 부담·상한 정책에서 한 번만 계산한다.
     private static final Map<Integer, ExamKind> EXAM_TURNS = Map.of(
             6, ExamKind.MIDTERM, 10, ExamKind.PERFORMANCE, 12, ExamKind.FINAL);
     private static final Map<ExamKind, Double> EXAM_WEIGHTS = Map.of(
