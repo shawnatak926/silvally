@@ -26,9 +26,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class RecruitmentServiceTest {
 
     private static final String COMPANY = "BYTE_WORKS";
+    private static final String SHORT_ANSWER = "짧은 답변";
+    private static final String LONG_ANSWER = "저는 백엔드 개발자로서 REST API 서버 프로젝트를 직접 설계하고 구현했습니다. "
+            .repeat(10);
 
     @Autowired
     private CareerService careerService;
+
+    @Autowired
+    private InterviewService interviewService;
 
     @Autowired
     private PlayerProjectRepository projectRepository;
@@ -50,9 +56,10 @@ class RecruitmentServiceTest {
 
         UUID applicationId = applied.application().id();
         assertThat(step(id, applicationId, "CODING").application().status()).isEqualTo("CODE_PASSED");
-        ApplicationMutation interview = step(id, applicationId, "INTERVIEW");
+        ApplicationMutation interview = interview(id, applicationId, LONG_ANSWER);
         assertThat(interview.application().status()).isEqualTo("INTERVIEW_PASSED");
         assertThat(interview.application().j()).isNotNull();
+        assertThat(interview.change().details()).containsEntry("answerBonus", 10).containsKey("questionId");
 
         ApplicationMutation result = step(id, applicationId, "RESULT");
         assertThat(result.application().status()).isEqualTo("OFFERED");
@@ -70,7 +77,7 @@ class RecruitmentServiceTest {
         step(id, applicationId, "CODING");
         fixture.addStats(id, Map.of("C", -15, "A", -15));
 
-        ApplicationMutation interview = step(id, applicationId, "INTERVIEW");
+        ApplicationMutation interview = interview(id, applicationId, SHORT_ANSWER);
 
         assertThat(interview.application().status()).isEqualTo("REJECTED");
         assertThat(interview.application().failureCode()).isEqualTo("INTERVIEW_FAILED");
@@ -111,7 +118,7 @@ class RecruitmentServiceTest {
         fixture.addStats(id, Map.of("P", 11, "B", 23, "C", 11, "A", 7));
         UUID applicationId = apply(id, COMPANY).application().id();
         step(id, applicationId, "CODING");
-        step(id, applicationId, "INTERVIEW");
+        interview(id, applicationId, SHORT_ANSWER);
 
         ApplicationMutation result = step(id, applicationId, "RESULT");
 
@@ -137,6 +144,59 @@ class RecruitmentServiceTest {
         assertError(() -> step(id, applicationId, "CODING"), ErrorCode.WRONG_STEP);
         assertError(() -> step(id, applicationId, "RESULT"), ErrorCode.WRONG_STEP);
         assertError(() -> step(id, applicationId, "PRESENTATION"), ErrorCode.VALIDATION_ERROR);
+    }
+
+    @Test
+    @DisplayName("회사 면접은 3학년 5턴에만 볼 수 있고 그 전에는 WRONG_STEP이다")
+    void interview_outsideInterviewTurn_wrongStep() {
+        UUID id = applicant(true);
+        strong(id);
+        UUID applicationId = apply(id, COMPANY).application().id();
+        step(id, applicationId, "CODING");
+
+        assertError(() -> interviewService.getCompanyQuestion(id, applicationId), ErrorCode.WRONG_STEP);
+        assertError(() -> step(id, applicationId, "INTERVIEW", UUID.randomUUID(), LONG_ANSWER), ErrorCode.WRONG_STEP);
+        assertThat(statusOf(id, applicationId)).isEqualTo("CODE_PASSED");
+    }
+
+    @Test
+    @DisplayName("면접 질문을 받지 않았거나 질문 ID·답변이 올바르지 않으면 면접을 진행할 수 없다")
+    void interview_invalidQuestionOrAnswer_rejected() {
+        UUID id = applicant(true);
+        strong(id);
+        UUID applicationId = apply(id, COMPANY).application().id();
+        step(id, applicationId, "CODING");
+        moveToInterviewTurn(id);
+
+        assertError(() -> step(id, applicationId, "INTERVIEW", UUID.randomUUID(), LONG_ANSWER), ErrorCode.WRONG_STEP);
+
+        UUID questionId = interviewService.getCompanyQuestion(id, applicationId).questionId();
+        assertError(() -> step(id, applicationId, "INTERVIEW", UUID.randomUUID(), LONG_ANSWER), ErrorCode.VALIDATION_ERROR);
+        assertError(() -> step(id, applicationId, "INTERVIEW", questionId, " "), ErrorCode.VALIDATION_ERROR);
+        assertError(() -> step(id, applicationId, "INTERVIEW", null, null), ErrorCode.VALIDATION_ERROR);
+        assertThat(statusOf(id, applicationId)).isEqualTo("CODE_PASSED");
+    }
+
+    @Test
+    @DisplayName("면접 답변이 길수록 가산점을 받지만 최대값을 넘지 않는다")
+    void interview_answerBonus_cappedAtMax() {
+        UUID shortId = applicant(true);
+        strong(shortId);
+        UUID shortApplication = apply(shortId, COMPANY).application().id();
+        step(shortId, shortApplication, "CODING");
+        ApplicationMutation shortResult = interview(shortId, shortApplication, SHORT_ANSWER);
+
+        UUID longId = applicant(true);
+        strong(longId);
+        UUID longApplication = apply(longId, COMPANY).application().id();
+        step(longId, longApplication, "CODING");
+        ApplicationMutation longResult = interview(longId, longApplication, LONG_ANSWER + LONG_ANSWER);
+
+        assertThat(shortResult.change().details()).containsEntry("answerBonus", 0);
+        assertThat(longResult.change().details()).containsEntry("answerBonus", RecruitmentRules.ANSWER_BONUS_MAX);
+        assertThat((int) longResult.change().details().get("score"))
+                .isEqualTo(Math.min(100, (int) longResult.change().details().get("statScore")
+                        + RecruitmentRules.ANSWER_BONUS_MAX));
     }
 
     @Test
@@ -178,14 +238,14 @@ class RecruitmentServiceTest {
         strong(id);
         UUID offered = apply(id, COMPANY).application().id();
         step(id, offered, "CODING");
-        step(id, offered, "INTERVIEW");
+        interview(id, offered, LONG_ANSWER);
         step(id, offered, "RESULT");
         fixture.advance(id);
         UUID inProgress = apply(id, "PIXEL_LAB").application().id();
 
         // 마감(58턴) 직전인 3학년 10턴(누적 58)에서 턴을 끝내면 다음 턴(59)이 마감을 넘는다.
         fixture.modify(id, player -> {
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < 4; i++) {
                 player.nextTurn(SchoolRules.AP_PER_TURN);
             }
         });
@@ -220,7 +280,7 @@ class RecruitmentServiceTest {
         strong(id);
         UUID applicationId = apply(id, COMPANY).application().id();
         step(id, applicationId, "CODING");
-        step(id, applicationId, "INTERVIEW");
+        interview(id, applicationId, LONG_ANSWER);
         step(id, applicationId, "RESULT");
         fixture.modify(id, player -> player.readyToGraduate());
 
@@ -265,6 +325,26 @@ class RecruitmentServiceTest {
     private ApplicationMutation step(UUID id, UUID applicationId, String step) {
         return careerService.proceedStep(id, applicationId, fixture.version(id), UUID.randomUUID().toString(),
                 new JobStepRequest(step));
+    }
+
+    private ApplicationMutation step(UUID id, UUID applicationId, String step, UUID questionId, String answer) {
+        return careerService.proceedStep(id, applicationId, fixture.version(id), UUID.randomUUID().toString(),
+                new JobStepRequest(step, questionId, answer));
+    }
+
+    /** 회사 면접 시점(3학년 5턴)으로 옮긴 뒤 질문을 받아 답변을 제출한다. */
+    private ApplicationMutation interview(UUID id, UUID applicationId, String answer) {
+        moveToInterviewTurn(id);
+        UUID questionId = interviewService.getCompanyQuestion(id, applicationId).questionId();
+        return step(id, applicationId, "INTERVIEW", questionId, answer);
+    }
+
+    private void moveToInterviewTurn(UUID id) {
+        fixture.modify(id, player -> {
+            while (player.getTurn() < 5) {
+                player.nextTurn(SchoolRules.AP_PER_TURN);
+            }
+        });
     }
 
     private String statusOf(UUID id, UUID applicationId) {
