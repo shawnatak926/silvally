@@ -22,29 +22,38 @@ public class EventFlowServiceImpl implements EventFlowService {
     private final ActivityRecordRepository records;
     private final EventCommandRepository commands;
     private final BeforeSchoolEventService beforeSchool;
-    private final AdmissionPolicy policy;
+    private final EventService schoolEvents;
+    private final InterviewService interviews;
+    private final SchoolInterviewEvaluator evaluator;
     private final HistoryService historyService;
+    private final AdmissionPolicy policy;
     private final JsonMapper json = JsonMapper.builder().build();
 
     public EventFlowServiceImpl(PlayerRepository players, EventDefRepository events,
             EventChoiceRepository choices, ActivityRecordRepository records,
             EventCommandRepository commands, AdmissionPolicy policy, BeforeSchoolEventService beforeSchool,
-            HistoryService historyService) {
-        this.historyService = historyService;
+            InterviewService interviews, SchoolInterviewEvaluator evaluator, HistoryService historyService, EventService schoolEvents) {
+        this.schoolEvents = schoolEvents;
+        this.interviews = interviews; this.evaluator = evaluator; this.historyService = historyService;
         this.players = players; this.events = events; this.choices = choices;
         this.records = records; this.commands = commands; this.policy = policy; this.beforeSchool = beforeSchool;
+    }
+    private boolean isSchoolEvent(String code) {
+        return code.equals("J01") || code.startsWith("S") || code.startsWith("FOCUS_") || code.startsWith("VACATION_") || code.startsWith("NARSHA_");
     }
     private Player player(UUID id) {
         return players.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
     }
     public List<EventView> list(UUID id) {
         Player p = player(id);
+        if (p.getPhase() == Phase.SCHOOL) return schoolEvents.list(id);
         if (p.getPhase() == Phase.BEFORE_SCHOOL) return List.of(beforeSchool.view(p, beforeSchool.currentEvent(p)));
         if (p.getPhase() != Phase.ADMISSION_1 && p.getPhase() != Phase.ADMISSION_2) return List.of();
         return List.of(view(p, p.getAdmissionEvent()));
     }
     public EventView detail(UUID id, String event) { return view(player(id), event); }
     private EventView view(Player p, String code) {
+        if (isSchoolEvent(code)) return schoolEvents.detail(p.getId(), code);
         if (code.startsWith("BS")) return beforeSchool.view(p, code);
         EventDef def = events.findById(new EventDef.Id(p.getRulesVersion(), code))
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
@@ -59,6 +68,7 @@ public class EventFlowServiceImpl implements EventFlowService {
     }
     @Transactional
     public MutationResult choose(UUID id, String event, long version, String key, ChooseEventRequest request) {
+        if (isSchoolEvent(event)) return schoolEvents.choose(id, event, version, key, request);
         if (key == null || key.isBlank() || key.length() > 200 || request == null)
             throw new BusinessException(ErrorCode.VALIDATION_ERROR);
         Player p = players.findByIdForUpdate(id).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
@@ -98,15 +108,25 @@ public class EventFlowServiceImpl implements EventFlowService {
             }
             case "AD02", "AD05" -> {
                 boolean first = event.equals("AD02");
+                double interviewScore = 0;
+                if (!first) {
+                    var validated = interviews.submitAnswer(p, InterviewKind.SCHOOL, "AD05", request.questionId(), request.answer());
+                    String answer = validated.answer();
+                    details.put("validatedInterview", validated);
+                    var evaluation = evaluator.evaluate(answer);
+                    interviewScore = evaluation.score();
+                    details.put("interview", evaluation);
+                    details.put("submitted", Map.of("questionId", request.questionId(), "answer", answer));
+                }
                 double essay = effect.path("essay").asDouble();
                 double grades = effect.path("grades").asDouble();
                 double record = effect.path("record").asDouble();
                 double score = first ? policy.documentScore(p.getAdmissionTrack(), essay, grades, record)
-                        : p.finalScore(effect.path("score").asDouble());
+                        : p.finalScore(interviewScore);
                 double general = first ? policy.documentScore("GENERAL", essay, grades, record) : score;
                 var decision = policy.decide(p.getSeed(), first ? 1 : 2, p.getAdmissionTrack(), score, general);
                 details.put("decision", decision);
-                details.put("submitted", effect);
+                if (first) details.put("submitted", effect);
                 result = decision.passed() ? "PASSED" : "FAILED";
                 if (decision.shieldActivated()) result = "SHIELD_" + result;
                 if (decision.passed() && first) p.passDocuments();
@@ -115,11 +135,13 @@ public class EventFlowServiceImpl implements EventFlowService {
             case "AD03", "AD04" -> p.prepare(event, effect.path("score").asDouble());
             default -> throw new BusinessException(ErrorCode.WRONG_STEP);
         }
+        details.put("scene", event.equals("AD05") ? "학교 면접 답변을 제출하고 최종 전형 결과를 확인했습니다." : choice.getLabel());
         String evidence = json.writeValueAsString(details);
         records.save(new ActivityRecord(p, event, code, result, evidence));
-        historyService.recordScene(p, new SceneRecord(event, code, result, evidence));
         p.markCommand(UUID.randomUUID());
         players.flush();
+        historyService.recordScene(p, new SceneRecord(event, code, result, evidence));
+        if (event.equals("AD04")) details.put("interviewQuestion", interviews.getSchoolQuestion(id));
         var response = new MutationResult(p.view(), event, 0, Map.of(), result, details);
         commands.save(new EventCommand(id, key, fingerprint, json.writeValueAsString(response)));
         return response;

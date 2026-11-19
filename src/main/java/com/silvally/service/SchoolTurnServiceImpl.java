@@ -20,16 +20,24 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class SchoolTurnServiceImpl implements SchoolTurnService {
 
+    private final tools.jackson.databind.ObjectMapper json;
+    private final FieldLearningService fieldLearning;
+    private final SchoolCalendar calendar;
     private final PlayerRepository playerRepository;
     private final CommandExecutor commandExecutor;
+    private final EventService schoolEvents;
     private final SchoolRules rules;
     private final CertificateService certificateService;
     private final ProjectService projectService;
     private final CareerService careerService;
 
     public SchoolTurnServiceImpl(PlayerRepository playerRepository, CommandExecutor commandExecutor,
-                                 SchoolRules rules, CertificateService certificateService,
+                                 SchoolRules rules, CertificateService certificateService, EventService schoolEvents, SchoolCalendar calendar, FieldLearningService fieldLearning, tools.jackson.databind.ObjectMapper json,
                                  ProjectService projectService, CareerService careerService) {
+        this.json = json;
+        this.fieldLearning = fieldLearning;
+        this.calendar = calendar;
+        this.schoolEvents = schoolEvents;
         this.playerRepository = playerRepository;
         this.commandExecutor = commandExecutor;
         this.rules = rules;
@@ -84,26 +92,29 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private void advance(Player player, TurnOutcome outcome) {
         rules.requireSchool(player);
         rules.requireNoPendingChoice(player);
-        outcome.statDelta = rules.turnGrowth(player);
-        player.getStats().apply(outcome.statDelta);
-        int nextTurn = rules.absoluteTurn(player) + 1;
-        outcome.expiredProjects = projectService.expireOverdue(player, nextTurn);
-        outcome.expiredApplications = careerService.expireOverdue(player, nextTurn);
-
-        if (!rules.isLastTurnOfYear(player)) {
-            player.nextTurn(SchoolRules.AP_PER_TURN);
-            outcome.resultCode = "TURN_ADVANCED";
-            return;
-        }
-        outcome.expiredCourses = certificateService.expireAtYearEnd(player, player.getYear() + 1);
-        if (player.getYear() >= SchoolRules.LAST_YEAR) {
-            player.readyToGraduate();
-            outcome.resultCode = "GRADUATION_READY";
+        schoolEvents.requireNoPendingEvent(player);
+        var before = player.getStats().values();
+        if (player.getPracticeRemaining() > 0) {
+            player.getStats().apply(Map.of("P", 2, "C", 1));
+            player.finishPracticeTurn();
+            outcome.resultCode = player.getPracticeRemaining() == 0
+                    ? calendar.resumeAfterVacation(player, outcome.extraDetails) : "PRACTICE_ADVANCED";
         } else {
-            player.nextYear(SchoolRules.AP_PER_TURN);
-            rules.choiceRequiredFor(player.getYear()).ifPresent(kind -> player.requireChoice(kind.name()));
-            outcome.resultCode = "YEAR_ADVANCED";
+            player.getStats().apply(rules.turnGrowth(player));
+            player.getStats().apply(calendar.focusGrowth(player));
+            // 방학 대기·캠프 실습 턴은 누적 턴이 그대로이므로 일반 턴 종료에서만 만료를 검사한다.
+            int nextTurn = rules.absoluteTurn(player) + 1;
+            outcome.expiredProjects = projectService.expireOverdue(player, nextTurn);
+            outcome.expiredApplications = careerService.expireOverdue(player, nextTurn);
+            fieldLearning.onTurnEnd(player).ifPresent(result -> outcome.extraDetails.put("fieldLearning", json.convertValue(result, Map.class)));
+            if (calendar.endsSemester(player)) {
+                player.awaitVacation(); outcome.resultCode = "VACATION_REQUIRED";
+            } else { player.nextTurn(SchoolRules.AP_PER_TURN); outcome.resultCode = "TURN_ADVANCED"; }
         }
+        outcome.statDelta = new LinkedHashMap<>();
+        player.getStats().values().forEach((stat, value) -> {
+            if (value.intValue() != before.get(stat)) outcome.statDelta.put(stat, value - before.get(stat));
+        });
     }
 
     private static String nullable(String value) {
@@ -112,13 +123,16 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
 
     private static final class TurnOutcome {
         private Map<String, Integer> statDelta = Map.of();
+        private Map<String, Object> extraDetails = new LinkedHashMap<>();
         private String resultCode;
         private List<String> expiredCourses = List.of();
         private List<String> expiredProjects = List.of();
         private List<String> expiredApplications = List.of();
 
         private Map<String, Object> details(Player player) {
-            Map<String, Object> details = new LinkedHashMap<>();
+            Map<String, Object> details = new LinkedHashMap<>(extraDetails);
+            details.put("vacationPending", player.isVacationPending());
+            details.put("practiceRemaining", player.getPracticeRemaining());
             details.put("year", player.getYear());
             details.put("turn", player.getTurn());
             if (!expiredCourses.isEmpty()) {

@@ -26,10 +26,19 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/players/{playerId}/applications")
 public class ApplicationController {
+    private final com.silvally.service.InterviewService interviews;
     private final CareerService careerService;
 
-    public ApplicationController(CareerService careerService) {
+    public ApplicationController(CareerService careerService, com.silvally.service.InterviewService interviews) {
+        this.interviews = interviews;
         this.careerService = careerService;
+    }
+
+    @Operation(summary = "회사 면접 질문 조회")
+    @GetMapping("/{applicationId}/interview")
+    public ApiResponse<com.silvally.dto.response.InterviewView> interview(@PathVariable UUID playerId,
+                                                                       @PathVariable UUID applicationId) {
+        return ApiResponse.ok(interviews.getCompanyQuestion(playerId, applicationId));
     }
 
     @Operation(summary = "지원 목록 조회")

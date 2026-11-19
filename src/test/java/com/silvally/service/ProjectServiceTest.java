@@ -111,7 +111,7 @@ class ProjectServiceTest {
         start(id, API);
         work(id, API);
 
-        MutationResult last = fixture.advanceTimes(id, 4);
+        MutationResult last = fixture.advanceTimes(id, 10);
 
         assertThat(last.details()).containsEntry("expiredProjects", java.util.List.of(API));
         assertThat(projectRepository.findByPlayerIdAndProjectCode(id, API).orElseThrow().getStatus())

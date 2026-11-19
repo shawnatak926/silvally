@@ -144,6 +144,7 @@ class SchoolTurnServiceTest {
     private void choose(UUID id, String code) {
         schoolTurnService.chooseYearTransition(id, fixture.version(id), UUID.randomUUID().toString(),
                 new YearTransitionRequest(code));
+        fixture.completeCalendarChoices(id);
     }
 
     private static void assertError(Runnable call, ErrorCode expected) {

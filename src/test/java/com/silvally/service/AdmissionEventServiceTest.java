@@ -20,6 +20,7 @@ class AdmissionEventServiceTest {
     @Autowired ActivityRecordRepository records;
     @Autowired EventCommandRepository commands;
     @Autowired AdmissionPolicy policy;
+    @Autowired InterviewService interviews;
 
     Player player(String track) {
         Player p = Player.admission("김일강", "OPEN");
@@ -30,7 +31,11 @@ class AdmissionEventServiceTest {
         return players.saveAndFlush(p);
     }
     MutationResult choose(Player p, String event, String choice) {
-        return service.chooseEvent(p.getId(), event, p.getVersion(), UUID.randomUUID().toString(), new ChooseEventRequest(choice));
+        ChooseEventRequest request = event.equals("AD05")
+            ? new ChooseEventRequest("ANSWER", null, interviews.getSchoolQuestion(p.getId()).questionId(),
+                "지원 동기 관심 활동 프로젝트 경험 문제 해결 오류 입학 계획 학습. ".repeat(8))
+            : new ChooseEventRequest(choice);
+        return service.chooseEvent(p.getId(), event, p.getVersion(), UUID.randomUUID().toString(), request);
     }
     @Test void qualificationPersistsAndUnsupportedTrackIsRejected() {
         Player p = player(null);

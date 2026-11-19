@@ -90,6 +90,30 @@ public class Player extends BaseEntity {
     private UUID lastCommandId;
 
     private String pendingChoice;
+    private String semesterFocus;
+    private int focusYear;
+    private int focusSemester;
+    private boolean vacationPending;
+    private int practiceRemaining;
+    private String narshaStage;
+    private Integer narshaRank;
+    private boolean softwarewaveAttended;
+
+    public String getSemesterFocus() { return semesterFocus; }
+    public boolean hasSemesterFocus() { return semesterFocus != null && focusYear == year && focusSemester == (turn <= 12 ? 1 : 2); }
+    public void chooseSemesterFocus(String focus) { semesterFocus = focus; focusYear = year; focusSemester = turn <= 12 ? 1 : 2; }
+    public boolean isVacationPending() { return vacationPending; }
+    public void awaitVacation() { vacationPending = true; }
+    public void chooseVacation(boolean camp) { vacationPending = false; practiceRemaining = camp ? 2 : 0; }
+    public int getPracticeRemaining() { return practiceRemaining; }
+    public void finishPracticeTurn() { if (practiceRemaining > 0) practiceRemaining--; }
+    public String getNarshaStage() { return narshaStage; }
+    public void setNarshaStage(String stage) { narshaStage = stage; }
+    public Integer getNarshaRank() { return narshaRank; }
+    public void rankNarsha(int rank) { narshaRank = rank; narshaStage = "RANKED"; }
+    public boolean isSoftwarewaveAttended() { return softwarewaveAttended; }
+    public void attendSoftwarewave() { softwarewaveAttended = true; }
+
 
     // 회차 생성 담당도 동일한 초기 상태를 사용할 수 있는 팩터리입니다.
     public static Player admission(String name, String profile) {

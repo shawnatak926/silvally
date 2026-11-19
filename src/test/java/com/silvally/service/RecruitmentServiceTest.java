@@ -158,7 +158,7 @@ class RecruitmentServiceTest {
     void apply_afterDeadline_locked() {
         UUID id = applicant(true);
         fixture.modify(id, player -> {
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 10; i++) {
                 player.nextTurn(SchoolRules.AP_PER_TURN);
             }
         });
@@ -183,7 +183,14 @@ class RecruitmentServiceTest {
         fixture.advance(id);
         UUID inProgress = apply(id, "PIXEL_LAB").application().id();
 
-        var last = fixture.advanceTimes(id, 3);
+        // 마감(58턴) 직전인 3학년 10턴(누적 58)에서 턴을 끝내면 다음 턴(59)이 마감을 넘는다.
+        fixture.modify(id, player -> {
+            for (int i = 0; i < 8; i++) {
+                player.nextTurn(SchoolRules.AP_PER_TURN);
+            }
+        });
+
+        var last = fixture.advance(id);
 
         assertThat(last.details()).containsEntry("expiredApplications", List.of("PIXEL_LAB"));
         assertThat(statusOf(id, inProgress)).isEqualTo("EXPIRED");
@@ -224,12 +231,14 @@ class RecruitmentServiceTest {
         assertThat(statusOf(id, applicationId)).isEqualTo("ACCEPTED");
     }
 
-    /** 3학년 1턴(누적 21턴) 학생. 포트폴리오가 있으면 백엔드 작품 1개(완성도 90)를 등록해 둔다. */
+    /** 3학년 1턴(누적 49턴, 1학년 24턴 기준) 학생. 포트폴리오가 있으면 백엔드 작품 1개(완성도 90)를 등록해 둔다. */
     private UUID applicant(boolean withPortfolio) {
         UUID id = fixture.enrolledStudent();
         fixture.modify(id, player -> {
             player.nextYear(SchoolRules.AP_PER_TURN);
             player.nextYear(SchoolRules.AP_PER_TURN);
+            // 학기 집중 선택이 필요한 필수 이벤트를 미리 끝내 두어 턴 종료가 막히지 않게 한다.
+            player.chooseSemesterFocus("P");
         });
         if (withPortfolio) {
             registeredProject(id, "REST_API_SERVER", 90);
@@ -238,7 +247,7 @@ class RecruitmentServiceTest {
     }
 
     private void registeredProject(UUID id, String projectCode, int quality) {
-        PlayerProject project = PlayerProject.start(id, projectCode, 3, 21, 24);
+        PlayerProject project = PlayerProject.start(id, projectCode, 3, 49, 58);
         project.finish(quality, true);
         project.registerPortfolio();
         projectRepository.save(project);
