@@ -1,12 +1,11 @@
 package com.silvally.service;
 
-import org.springframework.stereotype.Component;
+import com.silvally.entity.NarrativeSource;
 
-@Component
 public class TemplateNarrativeGenerator implements NarrativeGenerator {
 
     @Override
-    public String generate(NarrativeScene scene) {
+    public GeneratedNarrative generate(NarrativeScene scene) {
         StringBuilder text = new StringBuilder();
         text.append(when(scene)).append(", '").append(scene.title()).append("' 장면. ");
         if (scene.situation() != null && !scene.situation().isBlank()) {
@@ -14,7 +13,7 @@ public class TemplateNarrativeGenerator implements NarrativeGenerator {
         }
         text.append("나는 '").append(scene.choiceLabel()).append("'을(를) 선택했고, 결과는 ")
                 .append(scene.resultCode()).append("였다.");
-        return text.toString();
+        return new GeneratedNarrative(text.toString(), NarrativeSource.TEMPLATE, null);
     }
 
     private static String when(NarrativeScene scene) {

@@ -30,3 +30,10 @@ springdoc:
     path: /swagger-ui.html
     tags-sorter: alpha
     display-request-duration: true
+silvally:
+  narrative:
+    llm:
+      api-key: ${NARRATIVE_LLM_API_KEY:}
+      base-url: ${NARRATIVE_LLM_BASE_URL:}
+      model: ${NARRATIVE_LLM_MODEL:k-exaone_v2.5}
+      timeout: ${NARRATIVE_LLM_TIMEOUT:20s}

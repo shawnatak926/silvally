@@ -73,7 +73,7 @@ public class NarrativeServiceImpl implements NarrativeService {
             return;
         }
         try {
-            String text = generator.generate(scene(found.get()));
+            String text = generator.generate(scene(found.get())).text();
             narratives.markSaved(narrativeId, text);
         } catch (RuntimeException e) {
             log.warn("Narrative generation failed: narrativeId={}", narrativeId, e);
