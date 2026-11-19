@@ -76,3 +76,10 @@ INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COURSE','ENGLISH_SPEAKING','영어 말하기 방과후','{"certificate": "영어 말하기 평가", "minYear": 1, "requires": {"C": 20}, "exam": ["C", "A"], "passScore": 55, "validYears": 1}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COURSE','LINUX_MASTER','리눅스 방과후','{"certificate": "리눅스마스터 2급", "minYear": 2, "requires": {"B": 25}, "exam": ["B", "A"], "passScore": 65, "validYears": 0}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COURSE','NETWORK_ADMIN','네트워크 방과후','{"certificate": "네트워크관리사 2급", "minYear": 2, "requires": {"B": 20, "A": 30}, "exam": ["B", "A"], "passScore": 65, "validYears": 0}');
+
+-- 졸업 엔딩: 판정은 GraduationPolicy, 제목·본문은 이 카탈로그를 사용합니다.
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','ENDING','EMPLOYED','희망 직무 취업','{"body": "졸업과 함께 희망한 직무의 오퍼를 수락하고 사회에 첫걸음을 내딛었습니다."}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','ENDING','EMPLOYED_MISMATCH','다른 길로 취업','{"body": "희망 직무와는 다르지만 받은 오퍼를 수락해 새로운 분야에서 커리어를 시작했습니다."}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','ENDING','UNEMPLOYED','미취업 졸업','{"body": "아직 정해진 곳 없이 졸업했습니다. 쌓아 온 경험이 다음 도전의 밑거름이 될 것입니다."}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','ENDING','UNIVERSITY','대학 진학','{"body": "더 깊은 공부를 위해 대학 진학의 길을 선택했습니다."}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','ENDING','INDIE_DEV','개인 개발자','{"body": "포트폴리오의 작품을 발판 삼아 직접 만든 서비스로 승부하는 개인 개발자가 되었습니다."}');
