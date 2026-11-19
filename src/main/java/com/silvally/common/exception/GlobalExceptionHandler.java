@@ -11,6 +11,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -38,13 +39,27 @@ public class GlobalExceptionHandler {
         return build(ErrorCode.VALIDATION_ERROR, ErrorResponse.of(ErrorCode.VALIDATION_ERROR, details));
     }
 
-    @ExceptionHandler({
-            HttpMessageNotReadableException.class,
-            MissingRequestHeaderException.class,
-            MethodArgumentTypeMismatchException.class
-    })
+    @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleBadRequest(Exception e) {
         return build(ErrorCode.VALIDATION_ERROR, ErrorResponse.of(ErrorCode.VALIDATION_ERROR));
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingHeader(MissingRequestHeaderException e) {
+        return build(ErrorCode.VALIDATION_ERROR, ErrorResponse.of(ErrorCode.VALIDATION_ERROR,
+                "필수 헤더가 없습니다: " + e.getHeaderName(), Map.of("header", e.getHeaderName())));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingParameter(MissingServletRequestParameterException e) {
+        return build(ErrorCode.VALIDATION_ERROR, ErrorResponse.of(ErrorCode.VALIDATION_ERROR,
+                "필수 요청 값이 없습니다: " + e.getParameterName(), Map.of("parameter", e.getParameterName())));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        return build(ErrorCode.VALIDATION_ERROR, ErrorResponse.of(ErrorCode.VALIDATION_ERROR,
+                "값의 형식이 올바르지 않습니다: " + e.getName(), Map.of("parameter", e.getName())));
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)

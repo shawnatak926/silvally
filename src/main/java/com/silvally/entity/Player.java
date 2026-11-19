@@ -1,6 +1,7 @@
 package com.silvally.entity;
 
 import com.silvally.common.BaseEntity;
+import com.silvally.service.StatRules;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -43,6 +44,16 @@ public class Player extends BaseEntity {
 
     @Embedded
     private Stats stats;
+
+    @Embedded
+    private GrowthProgress growthProgress = new GrowthProgress();
+
+    @Column(length = 16)
+    private String trainedStats;
+
+    @org.hibernate.annotations.ColumnDefault("0")
+    @Column(nullable = false)
+    private int examPreparation;
 
     private String major;
 
@@ -138,8 +149,8 @@ public class Player extends BaseEntity {
         player.applicationProfile = profile == null ? "OPEN" : profile;
         player.rulesVersion = "v1.2";
         player.phase = Phase.ADMISSION_1;
-        player.stats = Stats.initial();
         player.seed = UUID.randomUUID().toString();
+        player.stats = StatRules.rollInitial(StatRules.statSeed(player.seed));
         return player;
     }
 
@@ -198,6 +209,20 @@ public class Player extends BaseEntity {
     public Integer getBeforeSchoolDay() { return beforeSchoolDay; }
     public String getSeed() { return seed; }
     public Stats getStats() { return stats; }
+    public boolean isTrained(String stat) { return trainedStats != null && trainedStats.contains("," + stat + ","); }
+    public void markTrained(String stat) {
+        if (!isTrained(stat)) trainedStats = (trainedStats == null ? "," : trainedStats) + stat + ",";
+    }
+    public void resetTrainedStats() { trainedStats = null; }
+    public int getExamPreparation() { return examPreparation; }
+    public void addExamPreparation(int amount) {
+        examPreparation = Math.min(StatRules.PREPARATION_CAP, examPreparation + amount);
+    }
+    public void resetExamPreparation() { examPreparation = 0; }
+    public GrowthProgress getGrowthProgress() {
+        if (growthProgress == null) growthProgress = new GrowthProgress();
+        return growthProgress;
+    }
     public int getYear() { return year; }
     public int getTurn() { return turn; }
     public void markCommand(UUID commandId) { lastCommandId = commandId; }
@@ -271,7 +296,16 @@ public class Player extends BaseEntity {
     public com.silvally.dto.response.PlayerView view() {
         return new com.silvally.dto.response.PlayerView(id, name, rulesVersion, phase.name(), year, turn,
             ap, version, stats.values(), applicationProfile, admissionTrack, beforeSchoolDay,
-            initialCareerCode, currentCareerCode, major, track, resumeLevel, getEdition());
+            initialCareerCode, currentCareerCode, major, track, resumeLevel, admissionEligibility(),
+            new com.silvally.dto.response.PlayerView.SchoolState(hasSemesterFocus() ? semesterFocus : null,
+                    vacationPending, practiceRemaining, pendingChoice, narshaStage, narshaRank,
+                    softwarewaveAttended, examPreparation), getEdition());
+    }
+
+    public java.util.Map<String, Boolean> admissionEligibility() {
+        var result = new java.util.LinkedHashMap<String, Boolean>();
+        for (String track : java.util.List.of("GENERAL", "MEISTER", "LOCAL", "SOCIAL")) result.put(track, eligible(track));
+        return result;
     }
 
     protected Player() {

@@ -4,7 +4,6 @@ import com.silvally.common.exception.*;
 import com.silvally.dto.response.*;
 import com.silvally.entity.*;
 import com.silvally.repository.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -20,12 +19,9 @@ public class SchoolLifeServiceImpl implements SchoolLifeService {
     private final ObjectMapper json;
     private final HistoryService history;
     private final GraduationSummaryBuilder summaries;
-    private final double growthRate;
     public SchoolLifeServiceImpl(SchoolEventDrawRepository draws, SchoolLifeContent content, ObjectMapper json,
-            HistoryService history, GraduationSummaryBuilder summaries, @Value("${silvally.growth.school-event-rate:0.25}") double growthRate) {
+            HistoryService history, GraduationSummaryBuilder summaries) {
         this.draws = draws; this.content = content; this.json = json; this.history = history; this.summaries = summaries;
-        if (growthRate < 0 || growthRate > 1) throw new IllegalArgumentException("school event growth rate must be 0..1");
-        this.growthRate = growthRate;
     }
     private record Offer(SchoolEventDraw draw, Event event) { }
     private static String period(Player p) {
@@ -91,20 +87,8 @@ public class SchoolLifeServiceImpl implements SchoolLifeService {
     }
     private void applyEffect(Player p, Map<String, Integer> requested) {
         if (requested == null) return;
-        var remainders = new LinkedHashMap<String, Double>();
-        if (p.getSchoolGrowthRemainders() != null) json.readTree(p.getSchoolGrowthRemainders()).properties()
-                .forEach(e -> remainders.put(e.getKey(), e.getValue().asDouble()));
-        var effect = new LinkedHashMap<String, Integer>();
-        requested.forEach((stat, value) -> {
-            if (stat.equals("G")) throw new IllegalArgumentException("School events must not directly change grades");
-            if (value > 0 && Set.of("P", "F", "B", "I", "A", "C", "EN").contains(stat)) {
-                double amount = value * growthRate + remainders.getOrDefault(stat, 0.0);
-                int applied = (int) Math.floor(amount + 1e-9);
-                effect.put(stat, applied); remainders.put(stat, amount - applied);
-            } else effect.put(stat, value);
-        });
-        p.setSchoolGrowthRemainders(json.writeValueAsString(remainders));
-        p.getStats().apply(effect);
+        if (requested.containsKey("G")) throw new IllegalArgumentException("School events must not directly change grades");
+        StatGrowth.apply(p, requested, "SCHOOL_EVENT");
     }
     private void withdraw(Player p) {
         var summary = new LinkedHashMap<>(summaries.build(p,

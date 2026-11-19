@@ -90,7 +90,8 @@ class CertificateServiceTest {
     @DisplayName("시험 점수가 합격선보다 낮으면 FAILED로 기록된다")
     void lowScore_failed() {
         UUID id = fixture.enrolledStudent();
-        fixture.addStats(id, Map.of("P", 5, "A", -24));
+        // Keep the enrollment prerequisite deterministic after initial-stat randomization.
+        fixture.modify(id, p -> p.getStats().apply(Map.of("P", 25 - p.getStats().getP(), "A", -p.getStats().getA())));
         enroll(id, INFO);
         attend(id, INFO);
         fixture.advance(id);

@@ -7,7 +7,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
 class SchoolPressureTest {
-    private final SchoolLifeServiceImpl life = new SchoolLifeServiceImpl(null, null, null, null, null, .25);
+    private final SchoolLifeServiceImpl life = new SchoolLifeServiceImpl(null, null, null, null, null);
     Player at(String seed, int year, int turn, int health, int stress) {
         Player p = Player.admission("압박 검증", "OPEN"); p.startSchool(3);
         ReflectionTestUtils.setField(p, "seed", seed);

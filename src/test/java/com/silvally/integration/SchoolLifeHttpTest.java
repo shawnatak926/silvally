@@ -49,7 +49,7 @@ class SchoolLifeHttpTest {
         assertThat(created.status()).isEqualTo(201);
         UUID id = UUID.fromString(created.data().path("data").path("id").asString());
         new TransactionTemplate(transactions).executeWithoutResult(status -> {
-            Player p = players.findById(id).orElseThrow(); p.startSchool(3); p.chooseSemesterFocus("C"); p.getStats().apply(Map.of("S", 72));
+            Player p = players.findById(id).orElseThrow(); p.startSchool(3); p.chooseSemesterFocus("C"); p.getStats().apply(Map.of("S", 90 - p.getStats().getS()));
         });
         long version = players.findById(id).orElseThrow().getVersion(); String path = "/players/" + id;
         try (var pool = Executors.newFixedThreadPool(2)) {

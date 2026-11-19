@@ -9,5 +9,6 @@ public interface EventService {
     List<EventView> list(UUID playerId);
     EventView detail(UUID playerId, String eventCode);
     MutationResult choose(UUID playerId, String eventCode, long version, String key, ChooseEventRequest request);
+    List<String> pendingRequiredEvents(Player player);
     void requireNoPendingEvent(Player player);
 }

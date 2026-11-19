@@ -11,6 +11,7 @@ import com.silvally.entity.Phase;
 import com.silvally.entity.Player;
 import com.silvally.repository.ActivityRecordRepository;
 import com.silvally.repository.PlayerRepository;
+import com.silvally.support.TestStats;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,6 +184,7 @@ class CareerPreferenceServiceTest {
         UUID id = playerService.create(UUID.randomUUID().toString(), new CreatePlayerRequest("student", null)).id();
         fixture.modify(id, player -> {
             ReflectionTestUtils.setField(player, "phase", Phase.CAREER_PICK);
+            TestStats.pin(player);
             player.getStats().apply(Map.of("F", 30));
             ReflectionTestUtils.setField(player, "beforeSchoolDay", 2);
             activityRecordRepository.save(new ActivityRecord(player, "BS02", "WEB", "COMPLETED",

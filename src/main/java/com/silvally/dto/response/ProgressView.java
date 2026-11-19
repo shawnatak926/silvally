@@ -5,7 +5,7 @@ import java.util.Map;
 
 public record ProgressView(
         PlayerView player,
-        List<Map<String, Object>> enrolments,
+        List<Map<String, Object>> enrollments,
         List<Map<String, Object>> projects,
         List<Map<String, Object>> qualifications,
         List<Map<String, Object>> yearSummaries,

@@ -7,6 +7,7 @@ import com.silvally.dto.response.HistoryPage;
 import com.silvally.dto.response.MutationResult;
 import com.silvally.dto.response.PlayerView;
 import com.silvally.dto.response.ProgressView;
+import com.silvally.dto.response.TurnReadinessView;
 
 import java.util.UUID;
 
@@ -24,4 +25,6 @@ public interface PlayerService {
     HistoryPage getHistory(UUID playerId, long afterId, int limit);
 
     MutationResult advanceTurn(UUID playerId, long expectedVersion, String idempotencyKey);
+
+    TurnReadinessView getTurnReadiness(UUID playerId);
 }

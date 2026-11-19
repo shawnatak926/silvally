@@ -37,8 +37,9 @@ public class GraduationSummaryBuilder {
     private final ActivityRecordRepository activityRecordRepository;
     private final CatalogDefRepository catalog;
     private final ObjectMapper objectMapper;
+    private final ExamService exams;
 
-    public GraduationSummaryBuilder(CourseEnrollmentRepository courseEnrollmentRepository,
+    public GraduationSummaryBuilder(ExamService exams, CourseEnrollmentRepository courseEnrollmentRepository,
                                     PlayerProjectRepository playerProjectRepository,
                                     ActivityRecordRepository activityRecordRepository,
                                     CatalogDefRepository catalog,
@@ -48,6 +49,7 @@ public class GraduationSummaryBuilder {
         this.activityRecordRepository = activityRecordRepository;
         this.catalog = catalog;
         this.objectMapper = objectMapper;
+        this.exams = exams;
     }
 
     /** 포트폴리오에 등록된 완료 작품 수. */
@@ -70,6 +72,9 @@ public class GraduationSummaryBuilder {
         summary.put("major", player.getMajor());
         summary.put("track", player.getTrack());
         summary.put("stats", player.getStats().toMap());
+        summary.put("grade", player.getStats().getG());
+        summary.put("exams", exams.results(player.getId()).stream()
+                .map(exam -> objectMapper.convertValue(exam, Map.class)).toList());
         summary.put("certificates", certificates(player));
         summary.put("projects", projects(player.getId()));
         summary.put("portfolioCount", portfolioCount(player.getId()));

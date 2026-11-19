@@ -26,7 +26,9 @@ class SchoolCalendarServiceTest {
         assertThat(selected.player().remainingAp()).isEqualTo(3);
         assertThat(selected.statDelta()).isEmpty();
         assertThat(selected.player().version()).isEqualTo(version + 1);
-        assertThat(fixture.advance(id).statDelta()).containsEntry("P", 2);
+        int p = fixture.milli(id, "P");
+        fixture.advance(id);
+        assertThat(fixture.milli(id, "P") - p).isEqualTo(500);
         assertThat(events.getEvent(id, "FOCUS_Y1_S1").choices()).allMatch(c -> !c.enabled());
     }
     com.silvally.dto.response.MutationResult choose(UUID id, String event, String choice) {
@@ -41,13 +43,14 @@ class SchoolCalendarServiceTest {
         assertThatThrownBy(() -> fixture.advance(id)).isInstanceOf(BusinessException.class);
         assertThat(choose(id, "VACATION_Y1_SUMMER", "CAMP").resultCode()).isEqualTo("CAMP_READY");
         assertThat(fixture.load(id).getPracticeRemaining()).isEqualTo(2);
-        var before = fixture.load(id).getStats().getP();
+        var before = fixture.milli(id, "P");
         var one = fixture.advance(id);
         assertThat(one.player().turn()).isEqualTo(12);
-        assertThat(one.statDelta()).containsEntry("P", 2);
+        assertThat(one.statDelta()).containsEntry("C", 1);
+        assertThat(fixture.milli(id, "P")).isEqualTo(before + 500);
         assertThat(fixture.load(id).getPracticeRemaining()).isEqualTo(1);
         assertThat(fixture.advance(id).player().turn()).isEqualTo(13);
-        assertThat(fixture.load(id).getStats().getP()).isEqualTo(before + 4);
+        assertThat(fixture.milli(id, "P")).isEqualTo(before + 1000);
         assertThat(events.getEvents(id)).extracting(e -> e.code()).containsExactly("FOCUS_Y1_S2");
         choose(id, "FOCUS_Y1_S2", "COMMUNICATION");
         fixture.advanceTimes(id, 11);

@@ -75,9 +75,14 @@ public class EventServiceImpl implements EventService {
                             enabled ? null : "이미 선택했거나 시기·AP·필수 선택 조건을 만족하지 않습니다.");
                 }).toList());
     }
-    @Override public void requireNoPendingEvent(Player p) {
-        List<String> pending = events.findEvents(p.getRulesVersion(), Phase.SCHOOL, p.getYear()).stream()
+    @Override public List<String> pendingRequiredEvents(Player p) {
+        var fixed = events.findEvents(p.getRulesVersion(), Phase.SCHOOL, p.getYear()).stream()
                 .filter(EventDef::isRequired).filter(e -> available(p, e)).map(e -> e.getId().eventCode()).toList();
+        if (!fixed.isEmpty()) return fixed;
+        return schoolLife.current(p).filter(EventView::required).map(e -> List.of(e.code())).orElse(List.of());
+    }
+    @Override public void requireNoPendingEvent(Player p) {
+        List<String> pending = pendingRequiredEvents(p);
         if (!pending.isEmpty()) throw new BusinessException(ErrorCode.CHOICE_REQUIRED, Map.of("events", pending));
         schoolLife.current(p).filter(EventView::required).ifPresent(e -> {
             throw new BusinessException(ErrorCode.CHOICE_REQUIRED, Map.of("events", List.of(e.code()), "blocksAuto", true));
@@ -117,7 +122,7 @@ public class EventServiceImpl implements EventService {
                     Map<String, Integer> before = p.getStats().values();
                     Map<String, Integer> growth = new LinkedHashMap<>();
                     effect.path("stats").properties().forEach(entry -> growth.put(entry.getKey(), entry.getValue().asInt()));
-                    p.getStats().apply(growth); p.spendAp(c.getApCost()); cost[0] = c.getApCost();
+                    StatGrowth.apply(p, growth, code); p.spendAp(c.getApCost()); cost[0] = c.getApCost();
                     p.getStats().values().forEach((stat, value) -> {
                         if (value.intValue() != before.get(stat)) delta.put(stat, value - before.get(stat));
                     });
