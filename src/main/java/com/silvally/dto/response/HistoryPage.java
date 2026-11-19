@@ -16,7 +16,9 @@ public record HistoryPage(
             String choiceCode,
             String resultCode,
             String narrativeStatus,
-            String narrative
+            String narrative,
+            String narrativeSource,
+            String narrativeModel
     ) {
     }
 }

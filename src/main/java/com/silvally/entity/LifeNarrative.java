@@ -49,6 +49,12 @@ public class LifeNarrative extends BaseEntity {
     @Lob
     private String contextJson;
 
+    @Enumerated(EnumType.STRING)
+    private NarrativeSource source;
+
+    @Column(length = 100)
+    private String model;
+
     protected LifeNarrative() {
     }
 
@@ -73,4 +79,6 @@ public class LifeNarrative extends BaseEntity {
     public int getAttempts() { return attempts; }
     public String getLastError() { return lastError; }
     public String getContextJson() { return contextJson; }
+    public NarrativeSource getSource() { return source; }
+    public String getModel() { return model; }
 }

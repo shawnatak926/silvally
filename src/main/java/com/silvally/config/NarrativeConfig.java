@@ -10,6 +10,9 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import tools.jackson.databind.ObjectMapper;
 
 @Configuration
@@ -26,6 +29,21 @@ public class NarrativeConfig {
         }
         log.info("Narrative generator: LLM model={} baseUrl={}", properties.model(), properties.baseUrl());
         return new LlmNarrativeGenerator(chatModel(properties), properties, json);
+    }
+
+    @Bean
+    public TaskExecutor narrativeExecutor(NarrativeLlmProperties properties) {
+        if (!properties.enabled()) {
+            return new SyncTaskExecutor();
+        }
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(2);
+        executor.setQueueCapacity(200);
+        executor.setThreadNamePrefix("narrative-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
+        return executor;
     }
 
     private static OpenAiChatModel chatModel(NarrativeLlmProperties properties) {

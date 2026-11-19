@@ -1,5 +1,6 @@
 package com.silvally.repository;
 
+import com.silvally.entity.NarrativeSource;
 import com.silvally.entity.NarrativeStatus;
 
 public record HistoryRow(
@@ -12,6 +13,8 @@ public record HistoryRow(
         String choiceCode,
         String resultCode,
         NarrativeStatus narrativeStatus,
-        String narrative
+        String narrative,
+        NarrativeSource narrativeSource,
+        String narrativeModel
 ) {
 }

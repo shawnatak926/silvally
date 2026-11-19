@@ -35,6 +35,7 @@ public class NarrativeServiceImpl implements NarrativeService {
     private final EventDefRepository eventDefs;
     private final EventChoiceRepository eventChoices;
     private final NarrativeGenerator generator;
+    private final NarrativeGenerator fallback = new TemplateNarrativeGenerator();
     private final NarrativeContextCollector contextCollector;
     private final ObjectMapper json;
     private final ApplicationEventPublisher publisher;
@@ -66,18 +67,31 @@ public class NarrativeServiceImpl implements NarrativeService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void write(Long narrativeId) {
         Optional<LifeNarrative> found = narratives.findById(narrativeId);
         if (found.isEmpty() || found.get().getStatus() == NarrativeStatus.SAVED) {
             return;
         }
+        NarrativeScene scene = null;
         try {
-            String text = generator.generate(scene(found.get())).text();
-            narratives.markSaved(narrativeId, text);
+            scene = scene(found.get());
+            GeneratedNarrative generated = generator.generate(scene);
+            narratives.markSaved(narrativeId, generated.text(), generated.source(), generated.model());
         } catch (RuntimeException e) {
-            log.warn("Narrative generation failed: narrativeId={}", narrativeId, e);
-            narratives.markFailed(narrativeId, truncate(e.getClass().getSimpleName() + ": " + e.getMessage()));
+            log.warn("Narrative generation failed: narrativeId={} error={}", narrativeId, e.toString());
+            narratives.markFailed(narrativeId, truncate(e.getClass().getSimpleName() + ": " + e.getMessage()),
+                    fallbackText(scene));
+        }
+    }
+
+    private String fallbackText(NarrativeScene scene) {
+        if (scene == null) {
+            return null;
+        }
+        try {
+            return fallback.generate(scene).text();
+        } catch (RuntimeException e) {
+            return null;
         }
     }
 
