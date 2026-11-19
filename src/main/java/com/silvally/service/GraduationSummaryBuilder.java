@@ -127,13 +127,17 @@ public class GraduationSummaryBuilder {
     private List<Map<String, Object>> fieldTrips(UUID playerId) {
         List<Map<String, Object>> result = new ArrayList<>();
         for (ActivityRecord record : activityRecordRepository.findByPlayerIdOrderByIdAsc(playerId)) {
-            if (!record.getEventCode().startsWith(FIELD_EVENT_PREFIX)) {
+            boolean currentProgram = record.getEventCode().equals("J01") || record.getEventCode().startsWith("J01_");
+            if (!record.getEventCode().startsWith(FIELD_EVENT_PREFIX) && !currentProgram) {
                 continue;
             }
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("eventCode", record.getEventCode());
             item.put("choiceCode", record.getChoiceCode());
             item.put("resultCode", record.getResultCode());
+            if (currentProgram && record.getEvidenceJson() != null && !record.getEvidenceJson().isBlank()) {
+                item.put("evidence", objectMapper.readValue(record.getEvidenceJson(), Map.class));
+            }
             result.add(item);
         }
         return result;

@@ -36,6 +36,7 @@ public class PlayerServiceImpl implements PlayerService {
     static final String DEFAULT_PROFILE = "OPEN";
     static final Set<String> PROFILES = Set.of("OPEN", "MAKER", "REGION", "ACCESS");
 
+    private final com.silvally.repository.FieldLearningRepository fieldLearning;
     private final com.silvally.repository.InterviewQuestionRepository interviewQuestions;
     private final PlayerRepository playerRepository;
     private final CommandLogRepository commandLogRepository;
@@ -60,7 +61,9 @@ public class PlayerServiceImpl implements PlayerService {
                              SchoolTurnService schoolTurnService,
                              ObjectMapper objectMapper,
                              PlatformTransactionManager transactionManager,
-                             com.silvally.repository.InterviewQuestionRepository interviewQuestions) {
+                             com.silvally.repository.InterviewQuestionRepository interviewQuestions,
+                             com.silvally.repository.FieldLearningRepository fieldLearning) {
+        this.fieldLearning = fieldLearning;
         this.interviewQuestions = interviewQuestions;
         this.playerRepository = playerRepository;
         this.commandLogRepository = commandLogRepository;
@@ -120,6 +123,7 @@ public class PlayerServiceImpl implements PlayerService {
                 .orElseThrow(PlayerServiceImpl::notFound);
         CommandExecutor.verifyVersion(player, expectedVersion);
 
+        fieldLearning.deleteById(playerId);
         interviewQuestions.deleteByPlayerId(playerId);
         commandLogRepository.deleteByPlayerId(playerId);
         courseEnrollmentRepository.deleteByPlayerId(playerId);

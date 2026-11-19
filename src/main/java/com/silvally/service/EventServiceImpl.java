@@ -13,6 +13,7 @@ import java.util.*;
 @Service
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
+    private final FieldLearningService fieldLearning;
     private final SchoolCalendar calendar;
     private final PlayerRepository players;
     private final EventDefRepository events;
@@ -24,7 +25,8 @@ public class EventServiceImpl implements EventService {
     private final ObjectMapper json;
     public EventServiceImpl(PlayerRepository players, EventDefRepository events, EventChoiceRepository choices,
             ActivityRecordRepository activities, CommandLogRepository history, CommandExecutor commands,
-            SchoolRules rules, ObjectMapper json, SchoolCalendar calendar) {
+            SchoolRules rules, ObjectMapper json, SchoolCalendar calendar, FieldLearningService fieldLearning) {
+        this.fieldLearning = fieldLearning;
         this.calendar = calendar;
         this.players = players; this.events = events; this.choices = choices; this.activities = activities;
         this.history = history; this.commands = commands; this.rules = rules; this.json = json;
@@ -91,6 +93,13 @@ public class EventServiceImpl implements EventService {
                     details.put("sceneSource", "MOCK"); details.put("sceneStatus", "READY");
                     details.put("tags", effect.path("tags")); details.put("scene", effect.path("scene").asString(c.getLabel()));
                     String result = calendar.apply(p, code, c.getId().choiceCode(), details);
+                    if (code.equals("J01")) {
+                        var selection = fieldLearning.select(p, c.getId().choiceCode());
+                        result = selection.status();
+                        details.put("fieldLearning", json.convertValue(selection, Map.class));
+                        details.put("scene", selection.selected() ? "현장학습에 신청하여 선발되었습니다."
+                                : "해외 현장학습 영어 기준에 미달하여 선발되지 않았습니다.");
+                    }
                     details.put("resultCode", result);
                     var activity = activities.save(new ActivityRecord(p, code, c.getId().choiceCode(), result, json.writeValueAsString(details)));
                     details.put("sceneId", activity.getId());

@@ -149,3 +149,8 @@ INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,hea
 INSERT INTO event_def (rules_version,event_code,phase,school_year,min_turn,max_turn,required,order_no,title,situation) VALUES ('v1.2','SOFTWAREWAVE','SCHOOL',2,23,23,false,0,'소프트웨이브 참가 선택','소프트웨이브 참가 선택 선택을 확정합니다.');
 INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','SOFTWAREWAVE','ATTEND','소프트웨이브 참가',0,false,'{"stats": {"C": 3}, "tags": ["softwarewave"], "scene": "나르샤 상위 팀 자격으로 소프트웨이브에 참가했습니다."}');
 INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','SOFTWAREWAVE','SKIP','참가하지 않음',0,false,'{"stats": {}, "tags": [], "scene": "이번 소프트웨이브에는 참가하지 않기로 했습니다."}');
+
+-- 가상 게임 현장학습: 3학년 3턴 신청, 해외 영어50 기준. 미달은 정상 미선발 결과입니다.
+INSERT INTO event_def (rules_version,event_code,phase,school_year,min_turn,max_turn,required,order_no,title,situation) VALUES ('v1.2','J01','SCHOOL',3,3,3,true,10,'현장학습 신청','국내 현장실습 또는 실리콘밸리 현장학습에 신청합니다. 해외는 영어 50점 이상이 필요합니다.');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','J01','DOMESTIC','국내 현장실습 신청',0,false,'{"stats":{},"tags":["field-learning","domestic"]}');
+INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,heavy,effect_json) VALUES ('v1.2','J01','SILICON_VALLEY','실리콘밸리 현장학습 신청',0,false,'{"stats":{},"tags":["field-learning","overseas"]}');

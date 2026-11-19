@@ -39,7 +39,7 @@ public class EventFlowServiceImpl implements EventFlowService {
         this.records = records; this.commands = commands; this.policy = policy; this.beforeSchool = beforeSchool;
     }
     private boolean isSchoolEvent(String code) {
-        return code.startsWith("S") || code.startsWith("FOCUS_") || code.startsWith("VACATION_") || code.startsWith("NARSHA_");
+        return code.equals("J01") || code.startsWith("S") || code.startsWith("FOCUS_") || code.startsWith("VACATION_") || code.startsWith("NARSHA_");
     }
     private Player player(UUID id) {
         return players.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));

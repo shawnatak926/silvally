@@ -20,6 +20,8 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class SchoolTurnServiceImpl implements SchoolTurnService {
 
+    private final tools.jackson.databind.ObjectMapper json;
+    private final FieldLearningService fieldLearning;
     private final SchoolCalendar calendar;
     private final PlayerRepository playerRepository;
     private final CommandExecutor commandExecutor;
@@ -28,7 +30,9 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private final CertificateService certificateService;
 
     public SchoolTurnServiceImpl(PlayerRepository playerRepository, CommandExecutor commandExecutor,
-                                 SchoolRules rules, CertificateService certificateService, EventService schoolEvents, SchoolCalendar calendar) {
+                                 SchoolRules rules, CertificateService certificateService, EventService schoolEvents, SchoolCalendar calendar, FieldLearningService fieldLearning, tools.jackson.databind.ObjectMapper json) {
+        this.json = json;
+        this.fieldLearning = fieldLearning;
         this.calendar = calendar;
         this.schoolEvents = schoolEvents;
         this.playerRepository = playerRepository;
@@ -93,6 +97,7 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         } else {
             player.getStats().apply(rules.turnGrowth(player));
             player.getStats().apply(calendar.focusGrowth(player));
+            fieldLearning.onTurnEnd(player).ifPresent(result -> outcome.extraDetails.put("fieldLearning", json.convertValue(result, Map.class)));
             if (calendar.endsSemester(player)) {
                 player.awaitVacation(); outcome.resultCode = "VACATION_REQUIRED";
             } else { player.nextTurn(SchoolRules.AP_PER_TURN); outcome.resultCode = "TURN_ADVANCED"; }

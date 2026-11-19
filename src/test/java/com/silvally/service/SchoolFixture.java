@@ -62,7 +62,7 @@ class SchoolFixture {
         for (var event : events.getEvents(playerId)) {
             if (!event.required()) continue;
             String choice = event.code().startsWith("FOCUS_") ? "COMMUNICATION"
-                : event.code().startsWith("VACATION_") ? "REST" : null;
+                : event.code().startsWith("VACATION_") ? "REST" : event.code().equals("J01") ? "DOMESTIC" : null;
             if (choice != null) last = events.chooseEvent(playerId, event.code(), version(playerId), UUID.randomUUID().toString(),
                     new com.silvally.dto.request.ChooseEventRequest(choice));
         }

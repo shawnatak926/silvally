@@ -24,6 +24,8 @@ public class Stats {
     private int h;
     @Column(name = "stat_s", nullable = false)
     private int s;
+    @Column(name = "stat_en", nullable = false)
+    private int en = 22;
 
     protected Stats() {
     }
@@ -43,10 +45,9 @@ public class Stats {
         return new Stats(20, 8, 8, 8, 24, 20, 72, 18);
     }
 
-    public java.util.Map<String, Integer> values() {
-        return java.util.Map.of("P", p, "F", f, "B", b, "I", i, "A", a, "C", c, "H", h, "S", s);
-    }
+    public Map<String, Integer> values() { return toMap(); }
     public void apply(java.util.Map<String, Integer> delta) {
+        en = clamp(en + delta.getOrDefault("EN", 0));
         p = clamp(p + delta.getOrDefault("P", 0));
         f = clamp(f + delta.getOrDefault("F", 0));
         b = clamp(b + delta.getOrDefault("B", 0));
@@ -68,9 +69,11 @@ public class Stats {
         map.put("C", c);
         map.put("H", h);
         map.put("S", s);
+        map.put("EN", en);
         return map;
     }
 
+    public int getEn() { return en; }
     public int getP() { return p; }
     public int getF() { return f; }
     public int getB() { return b; }
