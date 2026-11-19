@@ -185,6 +185,8 @@ public class Player extends BaseEntity {
     }
 
     public String getPendingChoice() { return pendingChoice; }
+    public String getInitialCareerCode() { return initialCareerCode; }
+    public String getCurrentCareerCode() { return currentCareerCode; }
 
     public void requireChoice(String choiceType) {
         pendingChoice = choiceType;
