@@ -48,6 +48,9 @@ public class Player extends BaseEntity {
     @Embedded
     private GrowthProgress growthProgress = new GrowthProgress();
 
+    @Column(length = 16)
+    private String trainedStats;
+
     private String major;
 
     private String track;
@@ -186,6 +189,11 @@ public class Player extends BaseEntity {
     public Integer getBeforeSchoolDay() { return beforeSchoolDay; }
     public String getSeed() { return seed; }
     public Stats getStats() { return stats; }
+    public boolean isTrained(String stat) { return trainedStats != null && trainedStats.contains("," + stat + ","); }
+    public void markTrained(String stat) {
+        if (!isTrained(stat)) trainedStats = (trainedStats == null ? "," : trainedStats) + stat + ",";
+    }
+    public void resetTrainedStats() { trainedStats = null; }
     public GrowthProgress getGrowthProgress() {
         if (growthProgress == null) growthProgress = new GrowthProgress();
         return growthProgress;

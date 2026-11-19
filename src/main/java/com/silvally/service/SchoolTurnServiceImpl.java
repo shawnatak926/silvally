@@ -11,6 +11,7 @@ import com.silvally.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,19 +96,21 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         schoolEvents.requireNoPendingEvent(player);
         var before = player.getStats().values();
         if (player.getPracticeRemaining() > 0) {
-            StatGrowth.apply(player, Map.of("P", 2, "C", 1), "CAMP_PRACTICE");
+            outcome.statChanges.addAll(StatGrowth.apply(player, Map.of("P", 2, "C", 1), "CAMP_PRACTICE"));
             player.finishPracticeTurn();
             outcome.resultCode = player.getPracticeRemaining() == 0
                     ? calendar.resumeAfterVacation(player, outcome.extraDetails) : "PRACTICE_ADVANCED";
         } else {
-            StatGrowth.apply(player, rules.turnGrowth(player), "TURN_GROWTH");
-            StatGrowth.apply(player, calendar.focusGrowth(player), "SEMESTER_FOCUS");
+            outcome.statChanges.addAll(StatGrowth.apply(player, rules.turnGrowth(player), "TURN_GROWTH"));
+            outcome.statChanges.addAll(StatGrowth.apply(player, calendar.focusGrowth(player), "SEMESTER_FOCUS"));
+            outcome.statChanges.addAll(StatGrowth.conditionDecline(player));
             // 방학 대기·캠프 실습 턴은 누적 턴이 그대로이므로 일반 턴 종료에서만 만료를 검사한다.
             int nextTurn = rules.absoluteTurn(player) + 1;
             outcome.expiredProjects = projectService.expireOverdue(player, nextTurn);
             outcome.expiredApplications = careerService.expireOverdue(player, nextTurn);
             fieldLearning.onTurnEnd(player).ifPresent(result -> outcome.extraDetails.put("fieldLearning", json.convertValue(result, Map.class)));
             if (calendar.endsSemester(player)) {
+                outcome.statChanges.addAll(StatGrowth.neglectDecline(player));
                 player.awaitVacation(); outcome.resultCode = "VACATION_REQUIRED";
             } else { player.nextTurn(SchoolRules.AP_PER_TURN); outcome.resultCode = "TURN_ADVANCED"; }
         }
@@ -124,6 +127,7 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private static final class TurnOutcome {
         private Map<String, Integer> statDelta = Map.of();
         private Map<String, Object> extraDetails = new LinkedHashMap<>();
+        private final List<StatChange> statChanges = new ArrayList<>();
         private String resultCode;
         private List<String> expiredCourses = List.of();
         private List<String> expiredProjects = List.of();
@@ -135,6 +139,9 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
             details.put("practiceRemaining", player.getPracticeRemaining());
             details.put("year", player.getYear());
             details.put("turn", player.getTurn());
+            if (!statChanges.isEmpty()) {
+                details.put("statChanges", statChanges.stream().map(StatChange::toMap).toList());
+            }
             if (!expiredCourses.isEmpty()) {
                 details.put("expiredCourses", expiredCourses);
             }
