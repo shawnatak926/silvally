@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @Component
 public class SchoolRules {
-    public static final int TURNS_PER_YEAR = 10;
+    public static final int TURNS_PER_YEAR = 24;
     public static final int AP_PER_TURN = 3;
     public static final int LAST_YEAR = 3;
     static final List<String> BASE_FOCUS = List.of("P", "A");
@@ -51,6 +51,7 @@ public class SchoolRules {
     public Map<String, Integer> turnGrowth(Player player) {
         Map<String, Integer> delta = new LinkedHashMap<>();
         focusStats(player).forEach(stat -> delta.merge(stat, 1, Integer::sum));
+        delta.put("EN", player.getYear() == 2 ? 3 : 2);
         int restH = player.getAp() > 0 ? player.getAp() * REST_H_PER_AP : -FATIGUE_H;
         delta.merge("H", restH, Integer::sum);
         return delta;
