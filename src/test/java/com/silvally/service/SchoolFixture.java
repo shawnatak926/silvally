@@ -16,12 +16,14 @@ import java.util.function.Consumer;
 @Component
 class SchoolFixture {
 
+    private final ActivityService events;
     private final PlayerService playerService;
     private final PlayerRepository playerRepository;
     private final TransactionTemplate tx;
 
     SchoolFixture(PlayerService playerService, PlayerRepository playerRepository,
-                  PlatformTransactionManager transactionManager) {
+                  PlatformTransactionManager transactionManager, ActivityService events) {
+        this.events = events;
         this.playerService = playerService;
         this.playerRepository = playerRepository;
         this.tx = new TransactionTemplate(transactionManager);
@@ -30,6 +32,8 @@ class SchoolFixture {
     UUID enrolledStudent() {
         PlayerView created = playerService.create(UUID.randomUUID().toString(), new CreatePlayerRequest("student", null));
         modify(created.id(), player -> player.startSchool(SchoolRules.AP_PER_TURN));
+        events.chooseEvent(created.id(), "FOCUS_Y1_S1", version(created.id()), UUID.randomUUID().toString(),
+                new com.silvally.dto.request.ChooseEventRequest("COMMUNICATION"));
         return created.id();
     }
 
@@ -53,10 +57,24 @@ class SchoolFixture {
         return playerService.advanceTurn(playerId, version(playerId), UUID.randomUUID().toString());
     }
 
+    MutationResult completeCalendarChoices(UUID playerId) {
+        MutationResult last = null;
+        for (var event : events.getEvents(playerId)) {
+            if (!event.required()) continue;
+            String choice = event.code().startsWith("FOCUS_") ? "COMMUNICATION"
+                : event.code().startsWith("VACATION_") ? "REST" : null;
+            if (choice != null) last = events.chooseEvent(playerId, event.code(), version(playerId), UUID.randomUUID().toString(),
+                    new com.silvally.dto.request.ChooseEventRequest(choice));
+        }
+        return last;
+    }
+
     MutationResult advanceTimes(UUID playerId, int times) {
         MutationResult last = null;
         for (int i = 0; i < times; i++) {
+            completeCalendarChoices(playerId);
             last = advance(playerId);
+            if ("VACATION_REQUIRED".equals(last.resultCode())) last = completeCalendarChoices(playerId);
         }
         return last;
     }

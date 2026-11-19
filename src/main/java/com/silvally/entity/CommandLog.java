@@ -80,6 +80,10 @@ public class CommandLog extends BaseEntity {
         log.httpStatus = 200;
         return log;
     }
+    public void recordActivity(String choiceCode, String evidenceJson) {
+        this.choiceCode = choiceCode;
+        this.evidenceJson = evidenceJson;
+    }
     public String getChoiceCode() { return choiceCode; }
     public String getEvidenceJson() { return evidenceJson; }
     public Integer getBeforeSchoolDay() { return beforeSchoolDay; }

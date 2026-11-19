@@ -20,7 +20,7 @@ import java.util.Optional;
 
 @Component
 public class SchoolRules {
-    public static final int TURNS_PER_YEAR = 10;
+    public static final int TURNS_PER_YEAR = 24;
     public static final int AP_PER_TURN = 3;
     public static final int LAST_YEAR = 3;
     static final List<String> BASE_FOCUS = List.of("P", "A");

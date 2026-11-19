@@ -54,6 +54,11 @@ public class EventDef {
     protected EventDef() {
     }
 
+    public Phase getPhase() { return phase; }
+    public int getYear() { return year; }
+    public int getMinTurn() { return minTurn; }
+    public int getMaxTurn() { return maxTurn; }
+
     public Id getId() {
         return id;
     }

@@ -23,10 +23,18 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/players/{playerId}/events")
 public class EventController {
+    private final com.silvally.service.InterviewService interviews;
     private final ActivityService activityService;
 
-    public EventController(ActivityService activityService) {
+    public EventController(ActivityService activityService, com.silvally.service.InterviewService interviews) {
+        this.interviews = interviews;
         this.activityService = activityService;
+    }
+
+    @Operation(summary = "학교 면접 질문 조회")
+    @GetMapping("/AD05/interview")
+    public ApiResponse<com.silvally.dto.response.InterviewView> interview(@PathVariable UUID playerId) {
+        return ApiResponse.ok(interviews.getSchoolQuestion(playerId));
     }
 
     @Operation(summary = "이벤트 목록 조회")
