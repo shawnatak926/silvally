@@ -90,6 +90,8 @@ public class CommandLog extends BaseEntity {
     }
     public String getChoiceCode() { return choiceCode; }
     public String getSubjectCode() { return subjectCode; }
+    public int getYear() { return year; }
+    public int getTurn() { return turn; }
     public String getResultCode() { return resultCode; }
     public String getEvidenceJson() { return evidenceJson; }
     public Integer getBeforeSchoolDay() { return beforeSchoolDay; }

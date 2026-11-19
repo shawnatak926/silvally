@@ -1,5 +1,7 @@
 package com.silvally.repository;
 
+import com.silvally.entity.NarrativeStatus;
+
 public record HistoryRow(
         Long logId,
         int year,
@@ -8,6 +10,8 @@ public record HistoryRow(
         String kind,
         String subjectCode,
         String choiceCode,
-        String resultCode
+        String resultCode,
+        NarrativeStatus narrativeStatus,
+        String narrative
 ) {
 }

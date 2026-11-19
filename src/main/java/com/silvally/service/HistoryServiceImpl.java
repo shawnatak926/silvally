@@ -22,10 +22,13 @@ public class HistoryServiceImpl implements HistoryService {
 
     private final PlayerRepository playerRepository;
     private final CommandLogRepository commandLogRepository;
+    private final NarrativeService narrativeService;
 
-    public HistoryServiceImpl(PlayerRepository playerRepository, CommandLogRepository commandLogRepository) {
+    public HistoryServiceImpl(PlayerRepository playerRepository, CommandLogRepository commandLogRepository,
+                              NarrativeService narrativeService) {
         this.playerRepository = playerRepository;
         this.commandLogRepository = commandLogRepository;
+        this.narrativeService = narrativeService;
     }
 
     @Override
@@ -44,9 +47,11 @@ public class HistoryServiceImpl implements HistoryService {
     @Transactional
     public CommandLog recordScene(Player player, SceneRecord scene) {
         UUID commandId = sceneCommandId(player, scene);
-        return commandLogRepository.findByPlayerIdAndCommandId(player.getId(), commandId)
-                .orElseGet(() -> commandLogRepository.save(CommandLog.scene(player, commandId, scene.sceneId(),
-                        scene.choiceCode(), scene.resultCode(), scene.evidenceJson())));
+        CommandLog sceneLog = commandLogRepository.findByPlayerIdAndCommandId(player.getId(), commandId)
+                .orElseGet(() -> commandLogRepository.saveAndFlush(CommandLog.scene(player, commandId,
+                        scene.sceneId(), scene.choiceCode(), scene.resultCode(), scene.evidenceJson())));
+        narrativeService.request(sceneLog);
+        return sceneLog;
     }
 
     static UUID sceneCommandId(Player player, SceneRecord scene) {
@@ -58,6 +63,7 @@ public class HistoryServiceImpl implements HistoryService {
 
     private static HistoryPage.Item toItem(HistoryRow row) {
         return new HistoryPage.Item(row.logId(), row.year(), row.turn(), row.beforeSchoolDay(),
-                row.kind(), row.subjectCode(), row.choiceCode(), row.resultCode());
+                row.kind(), row.subjectCode(), row.choiceCode(), row.resultCode(),
+                row.narrativeStatus() == null ? null : row.narrativeStatus().name(), row.narrative());
     }
 }
