@@ -1,6 +1,7 @@
 package com.silvally.repository;
 
 import com.silvally.entity.LifeNarrative;
+import com.silvally.entity.NarrativeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +14,9 @@ import java.util.UUID;
 public interface LifeNarrativeRepository extends JpaRepository<LifeNarrative, Long> {
 
     Optional<LifeNarrative> findByCommandLogId(Long commandLogId);
+
+    List<LifeNarrative> findTop3ByPlayerIdAndStatusAndCommandLogIdLessThanOrderByCommandLogIdDesc(
+            UUID playerId, NarrativeStatus status, Long commandLogId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""

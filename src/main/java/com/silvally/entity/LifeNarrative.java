@@ -46,16 +46,20 @@ public class LifeNarrative extends BaseEntity {
     @Column(length = 500)
     private String lastError;
 
+    @Lob
+    private String contextJson;
+
     protected LifeNarrative() {
     }
 
-    public static LifeNarrative pending(CommandLog log) {
+    public static LifeNarrative pending(CommandLog log, String contextJson) {
         LifeNarrative narrative = new LifeNarrative();
         narrative.playerId = log.getPlayerId();
         narrative.commandLogId = log.getId();
         narrative.sceneId = log.getSubjectCode();
         narrative.choiceCode = log.getChoiceCode();
         narrative.status = NarrativeStatus.PENDING;
+        narrative.contextJson = contextJson;
         return narrative;
     }
 
@@ -68,4 +72,5 @@ public class LifeNarrative extends BaseEntity {
     public String getText() { return text; }
     public int getAttempts() { return attempts; }
     public String getLastError() { return lastError; }
+    public String getContextJson() { return contextJson; }
 }
