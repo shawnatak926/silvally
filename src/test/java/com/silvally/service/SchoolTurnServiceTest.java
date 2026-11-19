@@ -42,7 +42,7 @@ class SchoolTurnServiceTest {
     }
 
     @Test
-    @DisplayName("턴 종료 시 1학년 기초 능력치가 오르고 남은 AP만큼 H가 회복된다")
+    @DisplayName("턴 종료 시 1학년 기초 능력치는 0.25배로 누적되고 남은 AP만큼 H가 회복된다")
     void advance_growsBaseStatsAndRestores() {
         UUID id = fixture.enrolledStudent();
         Player before = fixture.load(id);
@@ -51,8 +51,11 @@ class SchoolTurnServiceTest {
 
         Player after = fixture.load(id);
         assertThat(result.resultCode()).isEqualTo("TURN_ADVANCED");
-        assertThat(result.statDelta()).containsEntry("P", 1).containsEntry("A", 1).containsEntry("H", 6);
-        assertThat(after.getStats().getP()).isEqualTo(before.getStats().getP() + 1);
+        assertThat(result.statDelta()).containsEntry("H", 6).containsEntry("C", 1).doesNotContainKeys("P", "A", "G");
+        assertThat(after.getStats().getP()).isEqualTo(before.getStats().getP());
+        assertThat(after.getGrowthProgress().get("P")).isEqualTo(250);
+        assertThat(after.getGrowthProgress().get("A")).isEqualTo(250);
+        assertThat(after.getGrowthProgress().get("EN")).isEqualTo(500);
         assertThat(after.getTurn()).isEqualTo(2);
         assertThat(after.getAp()).isEqualTo(SchoolRules.AP_PER_TURN);
     }
@@ -118,8 +121,11 @@ class SchoolTurnServiceTest {
         Player player = fixture.load(id);
         assertThat(player.getMajor()).isEqualTo("SOFTWARE");
         assertThat(player.getPendingChoice()).isNull();
-        assertThat(fixture.advance(id).statDelta()).containsEntry("P", 1).containsEntry("B", 1)
-                .doesNotContainKey("A");
+        int p = fixture.milli(id, "P"), b = fixture.milli(id, "B"), a = fixture.milli(id, "A");
+        fixture.advance(id);
+        assertThat(fixture.milli(id, "P") - p).isEqualTo(250);
+        assertThat(fixture.milli(id, "B") - b).isEqualTo(250);
+        assertThat(fixture.milli(id, "A")).isEqualTo(a);
         assertError(() -> choose(id, "SECURITY"), ErrorCode.WRONG_STEP);
     }
 
@@ -133,7 +139,10 @@ class SchoolTurnServiceTest {
         MutationResult secondYearEnd = fixture.advanceTimes(id, SchoolRules.TURNS_PER_YEAR);
         assertThat(secondYearEnd.details()).containsEntry("pendingChoice", "TRACK");
         choose(id, "WEB");
-        assertThat(fixture.advance(id).statDelta()).containsEntry("B", 2).containsEntry("F", 1);
+        int b = fixture.milli(id, "B"), f = fixture.milli(id, "F");
+        fixture.advance(id);
+        assertThat(fixture.milli(id, "B") - b).isEqualTo(500);
+        assertThat(fixture.milli(id, "F") - f).isEqualTo(250);
 
         MutationResult thirdYearEnd = fixture.advanceTimes(id, SchoolRules.TURNS_PER_YEAR - 1);
         assertThat(thirdYearEnd.resultCode()).isEqualTo("GRADUATION_READY");
