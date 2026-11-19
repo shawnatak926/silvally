@@ -23,11 +23,14 @@ public class EventFlowServiceImpl implements EventFlowService {
     private final EventCommandRepository commands;
     private final BeforeSchoolEventService beforeSchool;
     private final AdmissionPolicy policy;
+    private final HistoryService historyService;
     private final JsonMapper json = JsonMapper.builder().build();
 
     public EventFlowServiceImpl(PlayerRepository players, EventDefRepository events,
             EventChoiceRepository choices, ActivityRecordRepository records,
-            EventCommandRepository commands, AdmissionPolicy policy, BeforeSchoolEventService beforeSchool) {
+            EventCommandRepository commands, AdmissionPolicy policy, BeforeSchoolEventService beforeSchool,
+            HistoryService historyService) {
+        this.historyService = historyService;
         this.players = players; this.events = events; this.choices = choices;
         this.records = records; this.commands = commands; this.policy = policy; this.beforeSchool = beforeSchool;
     }
@@ -112,7 +115,9 @@ public class EventFlowServiceImpl implements EventFlowService {
             case "AD03", "AD04" -> p.prepare(event, effect.path("score").asDouble());
             default -> throw new BusinessException(ErrorCode.WRONG_STEP);
         }
-        records.save(new ActivityRecord(p, event, code, result, json.writeValueAsString(details)));
+        String evidence = json.writeValueAsString(details);
+        records.save(new ActivityRecord(p, event, code, result, evidence));
+        historyService.recordScene(p, new SceneRecord(event, code, result, evidence));
         p.markCommand(UUID.randomUUID());
         players.flush();
         var response = new MutationResult(p.view(), event, 0, Map.of(), result, details);

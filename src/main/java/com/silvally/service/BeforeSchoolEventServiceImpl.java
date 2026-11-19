@@ -18,10 +18,13 @@ public class BeforeSchoolEventServiceImpl implements BeforeSchoolEventService {
     private final EventChoiceRepository choices;
     private final ActivityRecordRepository records;
     private final CommandLogRepository history;
+    private final HistoryService historyService;
     private final JsonMapper json = JsonMapper.builder().build();
     public BeforeSchoolEventServiceImpl(EventDefRepository events, EventChoiceRepository choices,
-                                    ActivityRecordRepository records, CommandLogRepository history) {
+                                    ActivityRecordRepository records, CommandLogRepository history,
+                                    HistoryService historyService) {
         this.events = events; this.choices = choices; this.records = records; this.history = history;
+        this.historyService = historyService;
     }
     public String currentEvent(Player p) { return "BS%02d".formatted(p.getBeforeSchoolDay()); }
     private Set<String> visited(Player p, String event) {
@@ -86,7 +89,7 @@ public class BeforeSchoolEventServiceImpl implements BeforeSchoolEventService {
             evidence.put("resultCode", "COMPLETED");
             String saved = json.writeValueAsString(evidence);
             records.save(new ActivityRecord(p, event, choice.getId().choiceCode(), "COMPLETED", saved));
-            history.save(CommandLog.activity(p, event, choice.getId().choiceCode(), saved));
+            historyService.recordScene(p, new SceneRecord(event, choice.getId().choiceCode(), "COMPLETED", saved));
             completed.add(evidence);
         }
         p.nextBeforeSchoolDay();
