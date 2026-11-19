@@ -12,13 +12,15 @@ import java.util.*;
 @Service
 @Transactional(readOnly = true)
 public class FieldLearningServiceImpl implements FieldLearningService {
+    private final NarrativeService narratives;
     private final PlayerRepository players;
     private final FieldLearningRepository learning;
     private final ActivityRecordRepository activities;
     private final CommandLogRepository history;
     private final ObjectMapper json;
     public FieldLearningServiceImpl(PlayerRepository players, FieldLearningRepository learning,
-            ActivityRecordRepository activities, CommandLogRepository history, ObjectMapper json) {
+            ActivityRecordRepository activities, CommandLogRepository history, ObjectMapper json, NarrativeService narratives) {
+        this.narratives = narratives;
         this.players = players; this.learning = learning; this.activities = activities; this.history = history; this.json = json;
     }
     @Override public FieldLearningView get(UUID playerId) {
@@ -69,7 +71,8 @@ public class FieldLearningServiceImpl implements FieldLearningService {
                 "resultCode", f.getStatus().name());
         String text = json.writeValueAsString(evidence);
         activities.save(new ActivityRecord(p, event, f.getPath().name(), f.getStatus().name(), text));
-        history.save(CommandLog.activity(p, event, f.getPath().name(), text));
+        CommandLog scene = history.save(CommandLog.scene(p, UUID.randomUUID(), event, f.getPath().name(), f.getStatus().name(), text));
+        narratives.request(scene);
         return Optional.of(view(f));
     }
     private FieldLearningView view(FieldLearning f) {

@@ -14,7 +14,9 @@ public record HistoryPage(
             String kind,
             String subjectCode,
             String choiceCode,
-            String resultCode
+            String resultCode,
+            String narrativeStatus,
+            String narrative
     ) {
     }
 }

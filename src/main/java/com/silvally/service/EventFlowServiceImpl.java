@@ -25,16 +25,16 @@ public class EventFlowServiceImpl implements EventFlowService {
     private final EventService schoolEvents;
     private final InterviewService interviews;
     private final SchoolInterviewEvaluator evaluator;
-    private final CommandLogRepository history;
+    private final HistoryService historyService;
     private final AdmissionPolicy policy;
     private final JsonMapper json = JsonMapper.builder().build();
 
     public EventFlowServiceImpl(PlayerRepository players, EventDefRepository events,
             EventChoiceRepository choices, ActivityRecordRepository records,
             EventCommandRepository commands, AdmissionPolicy policy, BeforeSchoolEventService beforeSchool,
-            InterviewService interviews, SchoolInterviewEvaluator evaluator, CommandLogRepository history, EventService schoolEvents) {
+            InterviewService interviews, SchoolInterviewEvaluator evaluator, HistoryService historyService, EventService schoolEvents) {
         this.schoolEvents = schoolEvents;
-        this.interviews = interviews; this.evaluator = evaluator; this.history = history;
+        this.interviews = interviews; this.evaluator = evaluator; this.historyService = historyService;
         this.players = players; this.events = events; this.choices = choices;
         this.records = records; this.commands = commands; this.policy = policy; this.beforeSchool = beforeSchool;
     }
@@ -138,9 +138,9 @@ public class EventFlowServiceImpl implements EventFlowService {
         details.put("scene", event.equals("AD05") ? "학교 면접 답변을 제출하고 최종 전형 결과를 확인했습니다." : choice.getLabel());
         String evidence = json.writeValueAsString(details);
         records.save(new ActivityRecord(p, event, code, result, evidence));
-        history.save(CommandLog.activity(p, event, code, evidence));
         p.markCommand(UUID.randomUUID());
         players.flush();
+        historyService.recordScene(p, new SceneRecord(event, code, result, evidence));
         if (event.equals("AD04")) details.put("interviewQuestion", interviews.getSchoolQuestion(id));
         var response = new MutationResult(p.view(), event, 0, Map.of(), result, details);
         commands.save(new EventCommand(id, key, fingerprint, json.writeValueAsString(response)));

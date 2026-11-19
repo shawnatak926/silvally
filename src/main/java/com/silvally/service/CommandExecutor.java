@@ -2,6 +2,7 @@ package com.silvally.service;
 
 import com.silvally.common.exception.BusinessException;
 import com.silvally.common.exception.ErrorCode;
+import com.silvally.dto.response.MutationResult;
 import com.silvally.entity.CommandLog;
 import com.silvally.entity.Player;
 import com.silvally.repository.CommandLogRepository;
@@ -70,8 +71,12 @@ public class CommandExecutor {
 
         T response = responder.apply(player);
         commandLogRepository.save(CommandLog.of(player, commandId, spec.kind(), spec.subjectCode(),
-                requestHash, 200, toJson(response), toJson(player.getStats().toMap())));
+                resultCodeOf(response), requestHash, 200, toJson(response), toJson(player.getStats().toMap())));
         return response;
+    }
+
+    private static String resultCodeOf(Object response) {
+        return response instanceof MutationResult mutation ? mutation.resultCode() : "OK";
     }
 
     public static void verifyVersion(Player player, long expectedVersion) {

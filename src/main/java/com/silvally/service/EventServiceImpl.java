@@ -13,6 +13,7 @@ import java.util.*;
 @Service
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
+    private final NarrativeService narratives;
     private final FieldLearningService fieldLearning;
     private final SchoolCalendar calendar;
     private final PlayerRepository players;
@@ -25,7 +26,8 @@ public class EventServiceImpl implements EventService {
     private final ObjectMapper json;
     public EventServiceImpl(PlayerRepository players, EventDefRepository events, EventChoiceRepository choices,
             ActivityRecordRepository activities, CommandLogRepository history, CommandExecutor commands,
-            SchoolRules rules, ObjectMapper json, SchoolCalendar calendar, FieldLearningService fieldLearning) {
+            SchoolRules rules, ObjectMapper json, SchoolCalendar calendar, FieldLearningService fieldLearning, NarrativeService narratives) {
+        this.narratives = narratives;
         this.fieldLearning = fieldLearning;
         this.calendar = calendar;
         this.players = players; this.events = events; this.choices = choices; this.activities = activities;
@@ -105,8 +107,9 @@ public class EventServiceImpl implements EventService {
                     details.put("sceneId", activity.getId());
                 }, p -> new MutationResult(p.view(), code, cost[0], delta, String.valueOf(details.get("resultCode")), details));
         // 공통 명령 로그 한 건에 장면·선택을 붙여 인생 기록과 멱등 응답을 함께 보존합니다.
-        history.findByPlayerIdAndCommandId(id, CommandExecutor.parseIdempotencyKey(key)).orElseThrow()
-                .recordActivity(request.choiceCode(), json.writeValueAsString(response.details()));
+        CommandLog log = history.findByPlayerIdAndCommandId(id, CommandExecutor.parseIdempotencyKey(key)).orElseThrow();
+        log.recordActivity(request.choiceCode(), json.writeValueAsString(response.details()));
+        narratives.request(log);
         return response;
     }
 }

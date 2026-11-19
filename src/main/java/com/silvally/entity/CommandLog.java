@@ -62,21 +62,29 @@ public class CommandLog extends BaseEntity {
     @Lob
     private String afterStatsJson;
 
+    private String resultCode;
+
     protected CommandLog() {
     }
 
     public static CommandLog activity(Player player, String event, String choice, String evidence) {
+        return scene(player, UUID.randomUUID(), event, choice, "COMPLETED", evidence);
+    }
+
+    public static CommandLog scene(Player player, UUID commandId, String sceneId, String choice,
+                                   String resultCode, String evidence) {
         CommandLog log = new CommandLog();
         log.playerId = player.getId();
-        log.commandId = UUID.randomUUID();
+        log.commandId = commandId;
         log.year = player.getYear();
         log.turn = player.getTurn();
         log.beforeSchoolDay = player.getBeforeSchoolDay();
         log.kind = "EVENT";
-        log.subjectCode = event;
+        log.subjectCode = sceneId;
         log.choiceCode = choice;
         log.evidenceJson = evidence;
-        log.requestHash = log.commandId.toString();
+        log.resultCode = resultCode;
+        log.requestHash = commandId.toString();
         log.httpStatus = 200;
         return log;
     }
@@ -85,10 +93,14 @@ public class CommandLog extends BaseEntity {
         this.evidenceJson = evidenceJson;
     }
     public String getChoiceCode() { return choiceCode; }
+    public String getSubjectCode() { return subjectCode; }
+    public int getYear() { return year; }
+    public int getTurn() { return turn; }
+    public String getResultCode() { return resultCode; }
     public String getEvidenceJson() { return evidenceJson; }
     public Integer getBeforeSchoolDay() { return beforeSchoolDay; }
 
-    public static CommandLog of(Player player, UUID commandId, String kind, String subjectCode,
+    public static CommandLog of(Player player, UUID commandId, String kind, String subjectCode, String resultCode,
                                 String requestHash, int httpStatus, String responseJson, String afterStatsJson) {
         CommandLog log = new CommandLog();
         log.playerId = player.getId();
@@ -102,6 +114,7 @@ public class CommandLog extends BaseEntity {
         log.httpStatus = httpStatus;
         log.responseJson = responseJson;
         log.afterStatsJson = afterStatsJson;
+        log.resultCode = resultCode;
         return log;
     }
 

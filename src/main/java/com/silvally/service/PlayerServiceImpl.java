@@ -15,6 +15,7 @@ import com.silvally.repository.CommandLogRepository;
 import com.silvally.repository.CourseEnrollmentRepository;
 import com.silvally.repository.EventCommandRepository;
 import com.silvally.repository.JobApplicationRepository;
+import com.silvally.repository.LifeNarrativeRepository;
 import com.silvally.repository.PlayerProjectRepository;
 import com.silvally.repository.PlayerRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -45,8 +46,10 @@ public class PlayerServiceImpl implements PlayerService {
     private final PlayerProjectRepository playerProjectRepository;
     private final ActivityRecordRepository activityRecordRepository;
     private final EventCommandRepository eventCommandRepository;
+    private final LifeNarrativeRepository lifeNarrativeRepository;
     private final CommandExecutor commandExecutor;
     private final SchoolTurnService schoolTurnService;
+    private final HistoryService historyService;
     private final ObjectMapper objectMapper;
     private final TransactionTemplate transactionTemplate;
 
@@ -57,8 +60,10 @@ public class PlayerServiceImpl implements PlayerService {
                              PlayerProjectRepository playerProjectRepository,
                              ActivityRecordRepository activityRecordRepository,
                              EventCommandRepository eventCommandRepository,
+                             LifeNarrativeRepository lifeNarrativeRepository,
                              CommandExecutor commandExecutor,
                              SchoolTurnService schoolTurnService,
+                             HistoryService historyService,
                              ObjectMapper objectMapper,
                              PlatformTransactionManager transactionManager,
                              com.silvally.repository.InterviewQuestionRepository interviewQuestions,
@@ -72,8 +77,10 @@ public class PlayerServiceImpl implements PlayerService {
         this.playerProjectRepository = playerProjectRepository;
         this.activityRecordRepository = activityRecordRepository;
         this.eventCommandRepository = eventCommandRepository;
+        this.lifeNarrativeRepository = lifeNarrativeRepository;
         this.commandExecutor = commandExecutor;
         this.schoolTurnService = schoolTurnService;
+        this.historyService = historyService;
         this.objectMapper = objectMapper;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
@@ -125,6 +132,7 @@ public class PlayerServiceImpl implements PlayerService {
 
         fieldLearning.deleteById(playerId);
         interviewQuestions.deleteByPlayerId(playerId);
+        lifeNarrativeRepository.deleteByPlayerId(playerId);
         commandLogRepository.deleteByPlayerId(playerId);
         courseEnrollmentRepository.deleteByPlayerId(playerId);
         jobApplicationRepository.deleteByPlayerId(playerId);
@@ -142,7 +150,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public HistoryPage getHistory(UUID playerId, long afterId, int limit) {
-        throw new UnsupportedOperationException("TODO: 이력 조회");
+        return historyService.getHistory(playerId, afterId, limit);
     }
 
     @Override

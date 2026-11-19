@@ -73,6 +73,12 @@ class FieldLearningServiceTest {
         assertThat(milestones).hasSize(1);
         assertThat(milestones.getFirst().getEvidenceJson()).contains("\"P\":2", "\"C\":3");
         assertThat(history.findByPlayerIdAndSubjectCodeOrderByIdAsc(id, "J01_COMPLETE")).hasSize(1);
+        assertThat(history.findByPlayerIdAndSubjectCodeOrderByIdAsc(id, "J01_PREPARE").getFirst().getResultCode()).isEqualTo("PREPARING");
+        assertThat(players.getHistory(id, 0, 50).items()).filteredOn(item -> item.subjectCode().startsWith("J01"))
+                .hasSize(3).allSatisfy(item -> {
+                    assertThat(item.narrativeStatus()).isEqualTo("SAVED");
+                    assertThat(item.narrative()).isNotBlank();
+                });
     }
     @Test void overseasEnglish49IsRejectedAndNeverCompletesDespiteLaterEnglishGrowth() {
         UUID id = thirdYearThirdTurn(49);

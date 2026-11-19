@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest @Import(SchoolFixture.class)
 class SchoolEventServiceTest {
+    @Autowired PlayerService players;
     @Autowired ActivityService events;
     @Autowired SchoolFixture fixture;
     @Autowired ActivityRecordRepository records;
@@ -35,6 +36,12 @@ class SchoolEventServiceTest {
         var replay = events.chooseEvent(id, "S01", version, key, new ChooseEventRequest("COOPERATE"));
         assertThat(replay.player()).isEqualTo(result.player());
         assertThat(records.findByPlayerIdAndEventCodeOrderByIdAsc(id, "S01")).hasSize(1);
+        assertThat(players.getHistory(id, 0, 50).items()).filteredOn(item -> item.subjectCode().equals("S01"))
+                .singleElement().satisfies(item -> {
+                    assertThat(item.resultCode()).isEqualTo("COMPLETED");
+                    assertThat(item.narrativeStatus()).isEqualTo("SAVED");
+                    assertThat(item.narrative()).isNotBlank();
+                });
         assertThat(events.getEvents(id)).extracting(e -> e.code()).doesNotContain("S01");
         assertThat(events.getEvent(id, "S01").choices()).allMatch(c -> !c.enabled());
         assertThatThrownBy(() -> events.chooseEvent(id, "S01", fixture.version(id), UUID.randomUUID().toString(), new ChooseEventRequest("COOPERATE")))
