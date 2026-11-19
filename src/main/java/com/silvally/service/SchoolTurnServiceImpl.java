@@ -27,13 +27,16 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private final CommandExecutor commandExecutor;
     private final EventService schoolEvents;
     private final SchoolRules rules;
+    private final SchoolLifeService schoolLife;
+    private final com.silvally.repository.CommandLogRepository commandLogs;
     private final CertificateService certificateService;
     private final ProjectService projectService;
     private final CareerService careerService;
 
     public SchoolTurnServiceImpl(PlayerRepository playerRepository, CommandExecutor commandExecutor,
                                  SchoolRules rules, CertificateService certificateService, EventService schoolEvents, SchoolCalendar calendar, FieldLearningService fieldLearning, tools.jackson.databind.ObjectMapper json,
-                                 ProjectService projectService, CareerService careerService) {
+                                 ProjectService projectService, CareerService careerService, SchoolLifeService schoolLife, com.silvally.repository.CommandLogRepository commandLogs) {
+        this.schoolLife = schoolLife; this.commandLogs = commandLogs;
         this.json = json;
         this.fieldLearning = fieldLearning;
         this.calendar = calendar;
@@ -50,11 +53,14 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     @Transactional
     public MutationResult advanceTurn(UUID playerId, long expectedVersion, String idempotencyKey) {
         TurnOutcome outcome = new TurnOutcome();
-        return commandExecutor.execute(playerId, expectedVersion, idempotencyKey,
+        var response = commandExecutor.execute(playerId, expectedVersion, idempotencyKey,
                 new CommandSpec<>("TURN", "TURN_END", Map.of(), MutationResult.class),
                 player -> advance(player, outcome),
                 player -> new MutationResult(player.view(), "TURN_END", 0,
                         outcome.statDelta, outcome.resultCode, outcome.details(player)));
+        commandLogs.findByPlayerIdAndCommandId(playerId, CommandExecutor.parseIdempotencyKey(idempotencyKey))
+                .orElseThrow().recordActivity("TURN_END", json.writeValueAsString(response.details()));
+        return response;
     }
 
     @Override
@@ -100,8 +106,12 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
             outcome.resultCode = player.getPracticeRemaining() == 0
                     ? calendar.resumeAfterVacation(player, outcome.extraDetails) : "PRACTICE_ADVANCED";
         } else {
+            // Pressure uses pre-rest health and the completed period, never the following turn.
+            var stressLoad = schoolLife.applyTurnPressure(player);
+            outcome.extraDetails.put("stressLoad", stressLoad);
             player.getStats().apply(rules.turnGrowth(player));
             player.getStats().apply(calendar.focusGrowth(player));
+            schoolLife.recordTurnScene(player, stressLoad);
             // 방학 대기·캠프 실습 턴은 누적 턴이 그대로이므로 일반 턴 종료에서만 만료를 검사한다.
             int nextTurn = rules.absoluteTurn(player) + 1;
             outcome.expiredProjects = projectService.expireOverdue(player, nextTurn);

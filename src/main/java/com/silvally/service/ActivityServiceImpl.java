@@ -47,11 +47,13 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
+    @Transactional
     public List<EventView> getEvents(UUID playerId) {
         return admissionEvents.list(playerId);
     }
 
     @Override
+    @Transactional
     public EventView getEvent(UUID playerId, String eventCode) {
         return admissionEvents.detail(playerId, eventCode);
     }

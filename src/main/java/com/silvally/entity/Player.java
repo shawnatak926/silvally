@@ -98,6 +98,12 @@ public class Player extends BaseEntity {
     private String narshaStage;
     private Integer narshaRank;
     private boolean softwarewaveAttended;
+    private boolean withdrawalPending;
+    @Lob private String schoolGrowthRemainders;
+    public boolean isWithdrawalPending() { return withdrawalPending; }
+    public void setWithdrawalPending(boolean pending) { withdrawalPending = pending; }
+    public String getSchoolGrowthRemainders() { return schoolGrowthRemainders; }
+    public void setSchoolGrowthRemainders(String value) { schoolGrowthRemainders = value; }
 
     public String getSemesterFocus() { return semesterFocus; }
     public boolean hasSemesterFocus() { return semesterFocus != null && focusYear == year && focusSemester == (turn <= 12 ? 1 : 2); }

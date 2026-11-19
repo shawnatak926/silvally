@@ -59,11 +59,14 @@ class SchoolFixture {
 
     MutationResult completeCalendarChoices(UUID playerId) {
         MutationResult last = null;
-        for (var event : events.getEvents(playerId)) {
-            if (!event.required()) continue;
+        for (int attempt = 0; attempt < 10; attempt++) {
+            var pending = events.getEvents(playerId).stream().filter(e -> e.required()).findFirst();
+            if (pending.isEmpty()) break;
+            var event = pending.get();
             String choice = event.code().startsWith("FOCUS_") ? "COMMUNICATION"
-                : event.code().startsWith("VACATION_") ? "REST" : event.code().equals("J01") ? "DOMESTIC" : null;
-            if (choice != null) last = events.chooseEvent(playerId, event.code(), version(playerId), UUID.randomUUID().toString(),
+                : event.code().startsWith("VACATION_") ? "REST" : event.code().equals("J01") ? "DOMESTIC"
+                : event.choices().getFirst().code();
+            last = events.chooseEvent(playerId, event.code(), version(playerId), UUID.randomUUID().toString(),
                     new com.silvally.dto.request.ChooseEventRequest(choice));
         }
         return last;

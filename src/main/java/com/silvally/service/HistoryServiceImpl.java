@@ -65,6 +65,6 @@ public class HistoryServiceImpl implements HistoryService {
         return new HistoryPage.Item(row.logId(), row.year(), row.turn(), row.beforeSchoolDay(),
                 row.kind(), row.subjectCode(), row.choiceCode(), row.resultCode(),
                 row.narrativeStatus() == null ? null : row.narrativeStatus().name(), row.narrative(),
-                row.narrativeSource() == null ? null : row.narrativeSource().name(), row.narrativeModel());
+                row.narrativeSource() == null ? null : row.narrativeSource().name(), row.narrativeModel(), row.evidenceJson());
     }
 }
