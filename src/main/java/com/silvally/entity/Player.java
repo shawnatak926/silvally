@@ -51,6 +51,10 @@ public class Player extends BaseEntity {
     @Column(length = 16)
     private String trainedStats;
 
+    @org.hibernate.annotations.ColumnDefault("0")
+    @Column(nullable = false)
+    private int examPreparation;
+
     private String major;
 
     private String track;
@@ -194,6 +198,11 @@ public class Player extends BaseEntity {
         if (!isTrained(stat)) trainedStats = (trainedStats == null ? "," : trainedStats) + stat + ",";
     }
     public void resetTrainedStats() { trainedStats = null; }
+    public int getExamPreparation() { return examPreparation; }
+    public void addExamPreparation(int amount) {
+        examPreparation = Math.min(StatRules.PREPARATION_CAP, examPreparation + amount);
+    }
+    public void resetExamPreparation() { examPreparation = 0; }
     public GrowthProgress getGrowthProgress() {
         if (growthProgress == null) growthProgress = new GrowthProgress();
         return growthProgress;

@@ -31,10 +31,12 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private final CertificateService certificateService;
     private final ProjectService projectService;
     private final CareerService careerService;
+    private final ExamService exams;
 
     public SchoolTurnServiceImpl(PlayerRepository playerRepository, CommandExecutor commandExecutor,
                                  SchoolRules rules, CertificateService certificateService, EventService schoolEvents, SchoolCalendar calendar, FieldLearningService fieldLearning, tools.jackson.databind.ObjectMapper json,
-                                 ProjectService projectService, CareerService careerService) {
+                                 ProjectService projectService, CareerService careerService, ExamService exams) {
+        this.exams = exams;
         this.json = json;
         this.fieldLearning = fieldLearning;
         this.calendar = calendar;
@@ -104,6 +106,8 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
             outcome.statChanges.addAll(StatGrowth.apply(player, rules.turnGrowth(player), "TURN_GROWTH"));
             outcome.statChanges.addAll(StatGrowth.apply(player, calendar.focusGrowth(player), "SEMESTER_FOCUS"));
             outcome.statChanges.addAll(StatGrowth.conditionDecline(player));
+            exams.onTurnEnd(player, outcome.statChanges)
+                    .ifPresent(exam -> outcome.extraDetails.put("exam", json.convertValue(exam, Map.class)));
             // 방학 대기·캠프 실습 턴은 누적 턴이 그대로이므로 일반 턴 종료에서만 만료를 검사한다.
             int nextTurn = rules.absoluteTurn(player) + 1;
             outcome.expiredProjects = projectService.expireOverdue(player, nextTurn);
