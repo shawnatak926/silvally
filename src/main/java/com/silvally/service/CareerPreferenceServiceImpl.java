@@ -20,6 +20,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,6 +36,7 @@ public class CareerPreferenceServiceImpl implements CareerPreferenceService {
     private final CommandExecutor commandExecutor;
     private final CareerRoleCatalog roleCatalog;
     private final CareerRecommender recommender;
+    private final CareerChangePolicy changePolicy;
     private final ObjectMapper objectMapper;
 
     public CareerPreferenceServiceImpl(PlayerRepository playerRepository,
@@ -43,6 +45,7 @@ public class CareerPreferenceServiceImpl implements CareerPreferenceService {
                                        CommandExecutor commandExecutor,
                                        CareerRoleCatalog roleCatalog,
                                        CareerRecommender recommender,
+                                       CareerChangePolicy changePolicy,
                                        ObjectMapper objectMapper) {
         this.playerRepository = playerRepository;
         this.activityRecordRepository = activityRecordRepository;
@@ -50,6 +53,7 @@ public class CareerPreferenceServiceImpl implements CareerPreferenceService {
         this.commandExecutor = commandExecutor;
         this.roleCatalog = roleCatalog;
         this.recommender = recommender;
+        this.changePolicy = changePolicy;
         this.objectMapper = objectMapper;
     }
 
@@ -66,7 +70,58 @@ public class CareerPreferenceServiceImpl implements CareerPreferenceService {
     @Transactional
     public CareerPreferenceMutation select(UUID playerId, long expectedVersion, String idempotencyKey,
                                            SelectCareerPreferenceRequest request) {
-        throw new UnsupportedOperationException("TODO: 희망 직무 확정·변경");
+        return commandExecutor.execute(playerId, expectedVersion, idempotencyKey,
+                new CommandSpec<>("CAREER_PREFERENCE", request.roleCode(), request, CareerPreferenceMutation.class),
+                player -> choose(player, request.roleCode()),
+                player -> new CareerPreferenceMutation(player.view(), view(player, loadRecord(player, false))));
+    }
+
+    private void choose(Player player, String roleCode) {
+        CareerRole role = roleCatalog.find(player, roleCode);
+        CareerPreferenceRecord record = loadRecord(player, false);
+        String from = player.getCurrentCareerCode();
+        String type;
+        if (player.getPhase() == Phase.CAREER_PICK) {
+            if (record.recommendations().stream().noneMatch(r -> r.roleCode().equals(role.code()))) {
+                throw new BusinessException(ErrorCode.LOCKED, "추천된 직무 중에서만 처음 확정할 수 있습니다.",
+                        Map.of("allowed", record.recommendations().stream().map(r -> r.roleCode()).toList()));
+            }
+            type = "SELECT";
+            player.confirmCareer(role.code(), SchoolRules.AP_PER_TURN);
+        } else if (player.getPhase() == Phase.SCHOOL) {
+            if (role.code().equals(from)) {
+                throw new BusinessException(ErrorCode.VALIDATION_ERROR, "이미 희망 중인 직무입니다.");
+            }
+            if (changesUsed(record) >= CareerChangePolicy.MAX_CHANGES) {
+                throw new BusinessException(ErrorCode.LOCKED, "희망 직무는 최대 "
+                        + CareerChangePolicy.MAX_CHANGES + "번까지 바꿀 수 있습니다.");
+            }
+            List<String> eligible = eligibleChangeRoles(player, record);
+            if (!eligible.contains(role.code())) {
+                throw new BusinessException(ErrorCode.LOCKED, "현재 조건에서는 바꿀 수 없는 직무입니다.",
+                        Map.of("eligible", eligible));
+            }
+            type = "CHANGE";
+            player.changeCareer(role.code());
+        } else {
+            throw new BusinessException(ErrorCode.WRONG_PHASE, "희망 직무는 비포스쿨 직후나 재학 중에만 정할 수 있습니다.");
+        }
+        List<CareerPreferenceRecord.Change> history = new ArrayList<>(record.history());
+        history.add(new CareerPreferenceRecord.Change(type, from, role.code(), player.getYear(), player.getTurn()));
+        player.storeRecommendation(objectMapper.writeValueAsString(
+                new CareerPreferenceRecord(record.stats(), record.recommendations(), history)));
+    }
+
+    private static int changesUsed(CareerPreferenceRecord record) {
+        return (int) record.history().stream().filter(change -> "CHANGE".equals(change.type())).count();
+    }
+
+    private List<String> eligibleChangeRoles(Player player, CareerPreferenceRecord record) {
+        Set<String> initialTop = new LinkedHashSet<>();
+        record.recommendations().forEach(r -> initialTop.add(r.roleCode()));
+        return changePolicy.eligibleRoles(player.getCurrentCareerCode(), initialTop,
+                recommender.scoreAll(roleCatalog.all(player), player.getStats().toMap(), activities(player)),
+                changesUsed(record));
     }
 
     private static void requirePreferencePhase(Player player) {
@@ -96,8 +151,9 @@ public class CareerPreferenceServiceImpl implements CareerPreferenceService {
     }
 
     private CareerPreferenceView view(Player player, CareerPreferenceRecord record) {
+        List<String> eligible = player.getPhase() == Phase.SCHOOL ? eligibleChangeRoles(player, record) : List.of();
         return new CareerPreferenceView(player.getInitialCareerCode(), player.getCurrentCareerCode(),
-                record.recommendations(), false, List.of());
+                record.recommendations(), !eligible.isEmpty(), eligible);
     }
 
     private List<CareerRecommender.Activity> activities(Player player) {
