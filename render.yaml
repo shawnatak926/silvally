@@ -10,3 +10,9 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
+      - key: NARRATIVE_LLM_API_KEY
+        sync: false
+      - key: NARRATIVE_LLM_BASE_URL
+        sync: false
+      - key: NARRATIVE_LLM_MODEL
+        value: k-exaone_v2.5

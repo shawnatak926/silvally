@@ -18,10 +18,12 @@ public interface CommandLogRepository extends JpaRepository<CommandLog, Long> {
 
     Optional<CommandLog> findByPlayerIdAndCommandId(UUID playerId, UUID commandId);
 
+    List<CommandLog> findTop5ByPlayerIdAndKindAndIdLessThanOrderByIdDesc(UUID playerId, String kind, Long id);
+
     @Query("""
             select new com.silvally.repository.HistoryRow(
                 c.id, c.year, c.turn, c.beforeSchoolDay, c.kind, c.subjectCode, c.choiceCode, c.resultCode,
-                n.status, n.text)
+                n.status, n.text, n.source, n.model)
             from CommandLog c
             left join LifeNarrative n on n.commandLogId = c.id
             where c.playerId = :playerId and c.id > :afterId
