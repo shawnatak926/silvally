@@ -27,6 +27,26 @@ npm run build:spicy
 
 전공역량 강화 캠프는 두 버전 모두 **1·2학년만** 제공합니다. 3학년 여름·겨울에는 캠프를 선택하거나 API로 강제 신청할 수 없습니다. 3학년 취업역량 캠프는 별도 콘텐츠로 유지합니다. 취업 지원 보너스는 게임용 규칙이며 실제 학교 취업률·채용 보장이 아닙니다.
 
+## 1차 배포: Vercel 순한맛
+
+Vercel에서 `shawnatak926/silvally` 저장소를 가져오고 **Root Directory를 `frontend`**로 지정합니다. 이 폴더의 `vercel.json`이 다음 값을 적용합니다.
+
+- Framework: Vite
+- Install Command: `npm ci`
+- Build Command: `npm run build:mild`
+- Output Directory: `dist/mild`
+- Node.js: 22.x (이 프로젝트의 최소 버전은 22.12)
+
+Production과 사용할 Preview 환경의 **`VITE_API_BASE_URL`**에 실제 배포한 Spring 서버 주소를 `/api/v1`까지 입력합니다. 예시 형식은 `https://your-api.example/api/v1`이며, 이 예시 도메인을 실제 주소로 사용하지 않습니다. 값 변경 후 다시 빌드·배포해야 합니다. 누락·HTTP·로컬 주소·잘못된 경로는 Vercel 빌드에서 거절합니다. 기존 `DAESOGO_BACKEND_URL`은 Vite 개발 서버용이므로 운영 환경의 API 연결 설정을 대신하지 않습니다.
+
+Vercel은 이 프론트엔드를 배포하며 Spring Boot 서버는 별도로 실행합니다. #32가 반영된 Spring 서버에서는 `CORS_ALLOWED_ORIGINS`에 실제 Vercel 웹 주소(경로·끝 슬래시 제외)를 등록합니다. 해당 설정은 `Content-Type`, `Idempotency-Key`, `X-Expected-Version` 헤더와 GET/POST/PUT/DELETE/OPTIONS 요청을 허용합니다. AI 키는 기존 서버에만 둡니다.
+
+`/play/:id`, `/ending/:id`는 `index.html`로 연결해 직접 접속·새로고침을 처리합니다. `/api`나 PDF·사진 경로를 SPA로 바꾸지 않습니다. 이 설정은 Spring API 프록시가 아니며, 브라우저는 `VITE_API_BASE_URL`로 직접 요청합니다. 실제 서버 주소가 아직 확정되지 않았으므로 특정 서버 URL을 코드에 고정하지 않았습니다.
+
+현재 API 계약 통합은 #32, 모드 저장·순한맛 규칙은 #30, 웹은 이 PR(#29)에 나뉘어 있습니다. 서버에 필요한 변경을 반영하고 API 계약을 맞춘 뒤 배포된 주소에서 회차 생성→희망 직무→턴 진행→새로고침→졸업을 확인해야 합니다. 프론트 빌드 성공만으로 온라인 게임이 완성된 것으로 표시하지 않습니다.
+
+공식 설정 근거: [Vercel의 Vite SPA 안내](https://vercel.com/docs/frameworks/frontend/vite#using-vite-to-make-spas), [vercel.json 설정](https://vercel.com/docs/project-configuration/vercel-json).
+
 ## 바로 플레이하기
 
 Node.js 22.12 이상에서 실행합니다.
