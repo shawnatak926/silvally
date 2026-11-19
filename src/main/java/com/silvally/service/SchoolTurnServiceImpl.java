@@ -95,13 +95,13 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         schoolEvents.requireNoPendingEvent(player);
         var before = player.getStats().values();
         if (player.getPracticeRemaining() > 0) {
-            player.getStats().apply(Map.of("P", 2, "C", 1));
+            StatGrowth.apply(player, Map.of("P", 2, "C", 1), "CAMP_PRACTICE");
             player.finishPracticeTurn();
             outcome.resultCode = player.getPracticeRemaining() == 0
                     ? calendar.resumeAfterVacation(player, outcome.extraDetails) : "PRACTICE_ADVANCED";
         } else {
-            player.getStats().apply(rules.turnGrowth(player));
-            player.getStats().apply(calendar.focusGrowth(player));
+            StatGrowth.apply(player, rules.turnGrowth(player), "TURN_GROWTH");
+            StatGrowth.apply(player, calendar.focusGrowth(player), "SEMESTER_FOCUS");
             // 방학 대기·캠프 실습 턴은 누적 턴이 그대로이므로 일반 턴 종료에서만 만료를 검사한다.
             int nextTurn = rules.absoluteTurn(player) + 1;
             outcome.expiredProjects = projectService.expireOverdue(player, nextTurn);

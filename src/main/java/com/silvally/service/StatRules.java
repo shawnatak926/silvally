@@ -1,9 +1,11 @@
 package com.silvally.service;
 
+import com.silvally.entity.GrowthProgress;
 import com.silvally.entity.Stats;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.SplittableRandom;
 import java.util.UUID;
 
@@ -19,6 +21,10 @@ public final class StatRules {
     }
 
     public static final Map<String, Range> INITIAL_RANGES = initialRanges();
+
+    /** 배율을 적용하는 기술(P·F·B·I)·학습(A)·영어(EN). 손실과 C·H·S는 그대로 반영한다. */
+    public static final Set<String> GROWTH_STATS = Set.of("P", "F", "B", "I", "A", "EN");
+    public static final double BASE_GROWTH_SCALE = 0.25;
 
     private StatRules() {
     }
@@ -55,5 +61,24 @@ public final class StatRules {
         } catch (IllegalArgumentException e) {
             return seed.hashCode();
         }
+    }
+
+    public static double highStatDamping(int current) {
+        if (current >= 85) return 0.25;
+        if (current >= 70) return 0.5;
+        if (current >= 50) return 0.75;
+        return 1.0;
+    }
+
+    public static double conditionFactor(int health, int stress) {
+        if (health < 30 || stress >= 80) return 0.5;
+        if (health < 50 || stress >= 60) return 0.75;
+        return 1.0;
+    }
+
+    /** 원래 성장량을 배율·감쇠·컨디션으로 줄인 1/1000점 단위 성장분. */
+    public static int scaledGrowth(int raw, int current, int health, int stress) {
+        return (int) Math.round(raw * GrowthProgress.UNIT * BASE_GROWTH_SCALE
+                * highStatDamping(current) * conditionFactor(health, stress));
     }
 }

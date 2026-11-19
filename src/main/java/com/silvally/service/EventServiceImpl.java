@@ -87,7 +87,7 @@ public class EventServiceImpl implements EventService {
                     Map<String, Integer> before = p.getStats().values();
                     Map<String, Integer> growth = new LinkedHashMap<>();
                     effect.path("stats").properties().forEach(entry -> growth.put(entry.getKey(), entry.getValue().asInt()));
-                    p.getStats().apply(growth); p.spendAp(c.getApCost()); cost[0] = c.getApCost();
+                    StatGrowth.apply(p, growth, code); p.spendAp(c.getApCost()); cost[0] = c.getApCost();
                     p.getStats().values().forEach((stat, value) -> {
                         if (value.intValue() != before.get(stat)) delta.put(stat, value - before.get(stat));
                     });

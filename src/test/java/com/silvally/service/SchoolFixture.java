@@ -3,6 +3,7 @@ package com.silvally.service;
 import com.silvally.dto.request.CreatePlayerRequest;
 import com.silvally.dto.response.MutationResult;
 import com.silvally.dto.response.PlayerView;
+import com.silvally.entity.GrowthProgress;
 import com.silvally.entity.Player;
 import com.silvally.repository.PlayerRepository;
 import org.springframework.stereotype.Component;
@@ -43,6 +44,12 @@ class SchoolFixture {
 
     void addStats(UUID playerId, Map<String, Integer> delta) {
         modify(playerId, player -> player.getStats().apply(delta));
+    }
+
+    /** 정수 능력치와 소수 누적분을 합친 1/1000점 단위 값. */
+    int milli(UUID playerId, String stat) {
+        Player player = load(playerId);
+        return player.getStats().get(stat) * GrowthProgress.UNIT + player.getGrowthProgress().get(stat);
     }
 
     Player load(UUID playerId) {

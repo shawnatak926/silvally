@@ -45,6 +45,9 @@ public class Player extends BaseEntity {
     @Embedded
     private Stats stats;
 
+    @Embedded
+    private GrowthProgress growthProgress = new GrowthProgress();
+
     private String major;
 
     private String track;
@@ -183,6 +186,10 @@ public class Player extends BaseEntity {
     public Integer getBeforeSchoolDay() { return beforeSchoolDay; }
     public String getSeed() { return seed; }
     public Stats getStats() { return stats; }
+    public GrowthProgress getGrowthProgress() {
+        if (growthProgress == null) growthProgress = new GrowthProgress();
+        return growthProgress;
+    }
     public int getYear() { return year; }
     public int getTurn() { return turn; }
     public void markCommand(UUID commandId) { lastCommandId = commandId; }
