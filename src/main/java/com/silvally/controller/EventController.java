@@ -24,11 +24,20 @@ import java.util.UUID;
 @RequestMapping("/api/v1/players/{playerId}/events")
 public class EventController {
     private final com.silvally.service.InterviewService interviews;
+    private final com.silvally.service.AdmissionResultService results;
     private final ActivityService activityService;
 
-    public EventController(ActivityService activityService, com.silvally.service.InterviewService interviews) {
+    public EventController(ActivityService activityService, com.silvally.service.InterviewService interviews, com.silvally.service.AdmissionResultService results) {
+        this.results = results;
         this.interviews = interviews;
         this.activityService = activityService;
+    }
+
+    @Operation(summary = "저장된 입학 전형 결과 조회 (AD02, AD05)")
+    @GetMapping("/{eventCode}/result")
+    public ApiResponse<com.silvally.dto.response.AdmissionResultView> result(@PathVariable UUID playerId,
+                                                                          @PathVariable String eventCode) {
+        return ApiResponse.ok(results.get(playerId, eventCode));
     }
 
     @Operation(summary = "학교 면접 질문 조회")

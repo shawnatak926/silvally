@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest(properties = "app.interview.timeout-ms=25")
 class InterviewFallbackServiceTest {
     @MockitoBean InterviewQuestionGenerator generator;
+    @Autowired com.silvally.repository.ActivityRecordRepository activities;
     @Autowired InterviewService interviews;
     @Autowired PlayerRepository players;
     @Autowired InterviewQuestionRepository questions;
@@ -36,5 +37,15 @@ class InterviewFallbackServiceTest {
         assertThat(first.source()).isEqualTo("FALLBACK");
         assertThat(first.question()).doesNotContain("늦은 질문");
         assertThat(interviews.getSchoolQuestion(p.getId())).isEqualTo(first);
+    }
+    @Test void fallbackKeepsSubmittedMotivationAndActivityContext() throws Exception {
+        given(generator.generate(any())).willThrow(new IllegalStateException("no AI key"));
+        Player p = candidate();
+        activities.saveAndFlush(new ActivityRecord(p, "AD02", "BALANCED", "PASSED",
+                "{\"motivation\":\"카페 재고 관리의 불편을 해결하고 싶습니다.\",\"scene\":\"재고 관리 프로그램 제작 경험을 제출했습니다.\"}"));
+        var q = interviews.getSchoolQuestion(p.getId());
+        assertThat(q.source()).isEqualTo("FALLBACK");
+        assertThat(q.question()).contains("카페 재고 관리", "프로그램 제작 경험");
+        assertThat(interviews.getSchoolQuestion(p.getId())).isEqualTo(q);
     }
 }

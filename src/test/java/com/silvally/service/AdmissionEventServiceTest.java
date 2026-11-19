@@ -33,7 +33,7 @@ class AdmissionEventServiceTest {
     MutationResult choose(Player p, String event, String choice) {
         ChooseEventRequest request = event.equals("AD05")
             ? new ChooseEventRequest("ANSWER", null, interviews.getSchoolQuestion(p.getId()).questionId(),
-                "지원 동기 관심 활동 프로젝트 경험 문제 해결 오류 입학 계획 학습. ".repeat(8))
+                com.silvally.support.AdmissionAnswers.STRONG)
             : new ChooseEventRequest(choice);
         return service.chooseEvent(p.getId(), event, p.getVersion(), UUID.randomUUID().toString(), request);
     }

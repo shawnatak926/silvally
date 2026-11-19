@@ -52,6 +52,12 @@ public class InterviewServiceImpl implements InterviewService {
                 ? "지원 동기, 직접 수행한 활동 경험과 문제 해결 과정, 입학 후 학습 계획을 구체적으로 설명해 주세요."
                 : "지원 직무에 필요한 기술 이해, 프로젝트 경험과 협업 과정, 직무 적합성을 구체적으로 설명해 주세요.";
         var saved = activities.findByPlayerIdOrderByIdAsc(playerId);
+        if (kind == InterviewKind.SCHOOL) {
+            String motivation = saved.stream().filter(a -> a.getEventCode().equals("AD02") && a.getEvidenceJson() != null)
+                    .map(a -> json.readTree(a.getEvidenceJson()).path("motivation").asString(""))
+                    .filter(text -> !text.isBlank()).reduce((previous, latest) -> latest).orElse("");
+            if (!motivation.isBlank()) base += " 제출한 지원 동기: " + motivation.substring(0, Math.min(400, motivation.length()));
+        }
         var recent = saved.stream().skip(Math.max(0, saved.size() - 3)).map(activity -> {
             String scene = activity.getEvidenceJson() == null ? "" : json.readTree(activity.getEvidenceJson()).path("scene").asString("");
             String text = activity.getEventCode() + ": " + (scene.isBlank() ? activity.getChoiceCode() : scene);
@@ -68,7 +74,7 @@ public class InterviewServiceImpl implements InterviewService {
         } catch (Exception e) {
             task.cancel(true);
             if (e instanceof InterruptedException) Thread.currentThread().interrupt();
-            generated = new InterviewQuestionGenerator.Generated(base, "FALLBACK");
+            generated = new InterviewQuestionGenerator.Generated(InterviewQuestionGenerator.defaultQuestion(context), "FALLBACK");
         }
         return questions.save(new InterviewQuestion(playerId, kind, subject, generated.question(), generated.source()));
     }

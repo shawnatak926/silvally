@@ -160,6 +160,9 @@ public class Player extends BaseEntity {
         if (event.equals("AD03")) { scratchScore = score; admissionEvent = "AD04"; }
         else { pythonScore = score; basicScore = (stats.getP() + stats.getA()) / 2.0; admissionEvent = "AD05"; }
     }
+    public java.util.Map<String, Double> admissionComponents(double interview) {
+        return java.util.Map.of("scratch", scratchScore, "python", pythonScore, "basic", basicScore, "interview", interview);
+    }
     public double finalScore(double interview) {
         return scratchScore * .25 + pythonScore * .30 + basicScore * .20 + interview * .25;
     }

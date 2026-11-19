@@ -32,16 +32,22 @@ public class AdmissionPolicy {
     public Decision decide(String seed, int stage, String track, double score, double generalScore) {
         int limit = stage == 1 ? 144 : 72;
         // 같은 단계에서는 특별전형/일반전형 모두 동일한 경쟁자와 제출 점수를 재사용합니다.
-        int rank = rank(seed, stage, score, limit * 2 - 1);
-        int generalRank = rank(seed, stage, generalScore, limit * 2 - 1);
+        double[] competitors = competitors(seed, stage, limit * 2 - 1);
+        int rank = rankAgainst(score, competitors);
+        int generalRank = rankAgainst(generalScore, competitors);
         boolean shield = !"GENERAL".equals(track) && rank > limit;
         return new Decision(rank <= limit || shield && generalRank <= limit,
                 shield, rank, limit, score, generalScore, generalRank);
     }
-    private int rank(String seed, int stage, double score, int competitors) {
+    private double[] competitors(String seed, int stage, int count) {
         var random = new SplittableRandom(seed.hashCode() * 31L + stage);
+        double[] scores = new double[count];
+        for (int n = 0; n < count; n++) scores[n] = 35 + random.nextDouble() * 60;
+        return scores;
+    }
+    int rankAgainst(double score, double[] competitors) {
         int rank = 1;
-        for (int n = 0; n < competitors; n++) if (35 + random.nextDouble() * 60 >= score) rank++;
+        for (double competitor : competitors) if (competitor >= score) rank++;
         return rank;
     }
 }
