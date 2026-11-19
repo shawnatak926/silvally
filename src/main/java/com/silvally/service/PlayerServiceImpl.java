@@ -45,6 +45,7 @@ public class PlayerServiceImpl implements PlayerService {
     private final EventCommandRepository eventCommandRepository;
     private final CommandExecutor commandExecutor;
     private final SchoolTurnService schoolTurnService;
+    private final HistoryService historyService;
     private final ObjectMapper objectMapper;
     private final TransactionTemplate transactionTemplate;
 
@@ -57,6 +58,7 @@ public class PlayerServiceImpl implements PlayerService {
                              EventCommandRepository eventCommandRepository,
                              CommandExecutor commandExecutor,
                              SchoolTurnService schoolTurnService,
+                             HistoryService historyService,
                              ObjectMapper objectMapper,
                              PlatformTransactionManager transactionManager) {
         this.playerRepository = playerRepository;
@@ -68,6 +70,7 @@ public class PlayerServiceImpl implements PlayerService {
         this.eventCommandRepository = eventCommandRepository;
         this.commandExecutor = commandExecutor;
         this.schoolTurnService = schoolTurnService;
+        this.historyService = historyService;
         this.objectMapper = objectMapper;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
@@ -134,7 +137,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public HistoryPage getHistory(UUID playerId, long afterId, int limit) {
-        throw new UnsupportedOperationException("TODO: 이력 조회");
+        return historyService.getHistory(playerId, afterId, limit);
     }
 
     @Override

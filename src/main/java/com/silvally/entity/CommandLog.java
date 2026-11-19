@@ -62,6 +62,8 @@ public class CommandLog extends BaseEntity {
     @Lob
     private String afterStatsJson;
 
+    private String resultCode;
+
     protected CommandLog() {
     }
 
@@ -76,6 +78,7 @@ public class CommandLog extends BaseEntity {
         log.subjectCode = event;
         log.choiceCode = choice;
         log.evidenceJson = evidence;
+        log.resultCode = "COMPLETED";
         log.requestHash = log.commandId.toString();
         log.httpStatus = 200;
         return log;
@@ -84,7 +87,7 @@ public class CommandLog extends BaseEntity {
     public String getEvidenceJson() { return evidenceJson; }
     public Integer getBeforeSchoolDay() { return beforeSchoolDay; }
 
-    public static CommandLog of(Player player, UUID commandId, String kind, String subjectCode,
+    public static CommandLog of(Player player, UUID commandId, String kind, String subjectCode, String resultCode,
                                 String requestHash, int httpStatus, String responseJson, String afterStatsJson) {
         CommandLog log = new CommandLog();
         log.playerId = player.getId();
@@ -98,6 +101,7 @@ public class CommandLog extends BaseEntity {
         log.httpStatus = httpStatus;
         log.responseJson = responseJson;
         log.afterStatsJson = afterStatsJson;
+        log.resultCode = resultCode;
         return log;
     }
 
