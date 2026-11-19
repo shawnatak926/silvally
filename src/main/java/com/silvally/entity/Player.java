@@ -185,6 +185,17 @@ public class Player extends BaseEntity {
     }
 
     public String getPendingChoice() { return pendingChoice; }
+    public String getEndingCode() { return endingCode; }
+    public String getEndingJson() { return endingJson; }
+
+    public void finishGraduation(String endingCode, String endingJson) {
+        this.phase = Phase.ENDED;
+        this.endingCode = endingCode;
+        this.endingJson = endingJson;
+        this.ap = 0;
+    }
+    public String getInitialCareerCode() { return initialCareerCode; }
+    public String getCurrentCareerCode() { return currentCareerCode; }
 
     public void requireChoice(String choiceType) {
         pendingChoice = choiceType;

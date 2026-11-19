@@ -69,4 +69,16 @@ public class PlayerProject {
     public ProjectStatus getStatus() {
         return status;
     }
+
+    public int getYear() {
+        return year;
+    }
+
+    public Integer getQuality() {
+        return quality;
+    }
+
+    public boolean isInPortfolio() {
+        return inPortfolio;
+    }
 }

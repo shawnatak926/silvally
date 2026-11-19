@@ -69,4 +69,27 @@ public class JobApplication {
     public ApplicationStatus getStatus() {
         return status;
     }
+
+    public String getRole() {
+        return role;
+    }
+
+    /** 졸업 시점에 수락할 수 있는 오퍼(수락 대기 또는 이미 수락) 여부. */
+    public boolean isOffer() {
+        return status == ApplicationStatus.OFFERED || status == ApplicationStatus.ACCEPTED;
+    }
+
+    public void accept() {
+        if (!isOffer()) {
+            throw new IllegalStateException("오퍼 상태가 아니라 수락할 수 없습니다: " + status);
+        }
+        status = ApplicationStatus.ACCEPTED;
+    }
+
+    public void decline() {
+        if (!isOffer()) {
+            throw new IllegalStateException("오퍼 상태가 아니라 거절할 수 없습니다: " + status);
+        }
+        status = ApplicationStatus.DECLINED;
+    }
 }
