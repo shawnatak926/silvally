@@ -54,6 +54,35 @@ public class PlayerProject {
     protected PlayerProject() {
     }
 
+    public static PlayerProject start(UUID playerId, String projectCode, int year, int startTurn, int endTurn) {
+        PlayerProject project = new PlayerProject();
+        project.playerId = playerId;
+        project.projectCode = projectCode;
+        project.year = year;
+        project.startTurn = startTurn;
+        project.endTurn = endTurn;
+        project.status = ProjectStatus.IN_PROGRESS;
+        project.workSnapshotsJson = "[]";
+        return project;
+    }
+
+    public void saveSnapshots(String workSnapshotsJson) {
+        this.workSnapshotsJson = workSnapshotsJson;
+    }
+
+    public void finish(int quality, boolean passed) {
+        this.quality = quality;
+        this.status = passed ? ProjectStatus.COMPLETE : ProjectStatus.FAILED;
+    }
+
+    public void expire() {
+        this.status = ProjectStatus.EXPIRED;
+    }
+
+    public void registerPortfolio() {
+        this.inPortfolio = true;
+    }
+
     public UUID getId() {
         return id;
     }
@@ -68,6 +97,18 @@ public class PlayerProject {
 
     public ProjectStatus getStatus() {
         return status;
+    }
+
+    public int getStartTurn() {
+        return startTurn;
+    }
+
+    public int getEndTurn() {
+        return endTurn;
+    }
+
+    public String getWorkSnapshotsJson() {
+        return workSnapshotsJson;
     }
 
     public int getYear() {

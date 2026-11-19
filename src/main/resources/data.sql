@@ -83,3 +83,10 @@ INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','ENDING','UNEMPLOYED','미취업 졸업','{"body": "아직 정해진 곳 없이 졸업했습니다. 쌓아 온 경험이 다음 도전의 밑거름이 될 것입니다."}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','ENDING','UNIVERSITY','대학 진학','{"body": "더 깊은 공부를 위해 대학 진학의 길을 선택했습니다."}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','ENDING','INDIE_DEV','개인 개발자','{"body": "포트폴리오의 작품을 발판 삼아 직접 만든 서비스로 승부하는 개인 개발자가 되었습니다."}');
+
+-- 프로젝트: role은 포트폴리오 환산 직무, focus는 작업 스냅샷에 반영하는 능력치입니다.
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','PROJECT','WEB_PORTFOLIO_SITE','포트폴리오 웹사이트','{"role": "WEB", "minYear": 1, "durationTurns": 4, "workRequired": 2, "focus": ["F", "P"], "passQuality": 45}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','PROJECT','REST_API_SERVER','REST API 서버','{"role": "BACKEND", "minYear": 1, "durationTurns": 4, "workRequired": 2, "focus": ["B", "P"], "passQuality": 45}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','PROJECT','ANDROID_NOTE_APP','안드로이드 메모 앱','{"role": "ANDROID", "minYear": 2, "durationTurns": 5, "workRequired": 3, "focus": ["P", "F"], "passQuality": 50}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','PROJECT','MINI_GAME','미니 게임','{"role": "GAME", "minYear": 2, "durationTurns": 5, "workRequired": 3, "focus": ["P", "I"], "passQuality": 50}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','PROJECT','CHATBOT','AI 챗봇','{"role": "AI", "minYear": 3, "durationTurns": 5, "workRequired": 3, "focus": ["I", "A"], "passQuality": 55}');

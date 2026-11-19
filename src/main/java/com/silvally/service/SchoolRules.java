@@ -56,6 +56,11 @@ public class SchoolRules {
         return delta;
     }
 
+    /** 입학 후 누적 턴(1학년 1턴 = 1). 프로젝트 기간·채용 마감처럼 학년을 넘는 기간 계산에 쓴다. */
+    public int absoluteTurn(Player player) {
+        return (player.getYear() - 1) * TURNS_PER_YEAR + player.getTurn();
+    }
+
     public boolean isLastTurnOfYear(Player player) {
         return player.getTurn() >= TURNS_PER_YEAR;
     }

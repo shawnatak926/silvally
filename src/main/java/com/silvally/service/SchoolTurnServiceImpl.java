@@ -24,13 +24,16 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private final CommandExecutor commandExecutor;
     private final SchoolRules rules;
     private final CertificateService certificateService;
+    private final ProjectService projectService;
 
     public SchoolTurnServiceImpl(PlayerRepository playerRepository, CommandExecutor commandExecutor,
-                                 SchoolRules rules, CertificateService certificateService) {
+                                 SchoolRules rules, CertificateService certificateService,
+                                 ProjectService projectService) {
         this.playerRepository = playerRepository;
         this.commandExecutor = commandExecutor;
         this.rules = rules;
         this.certificateService = certificateService;
+        this.projectService = projectService;
     }
 
     @Override
@@ -81,6 +84,7 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         rules.requireNoPendingChoice(player);
         outcome.statDelta = rules.turnGrowth(player);
         player.getStats().apply(outcome.statDelta);
+        outcome.expiredProjects = projectService.expireOverdue(player, rules.absoluteTurn(player) + 1);
 
         if (!rules.isLastTurnOfYear(player)) {
             player.nextTurn(SchoolRules.AP_PER_TURN);
@@ -106,6 +110,7 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         private Map<String, Integer> statDelta = Map.of();
         private String resultCode;
         private List<String> expiredCourses = List.of();
+        private List<String> expiredProjects = List.of();
 
         private Map<String, Object> details(Player player) {
             Map<String, Object> details = new LinkedHashMap<>();
@@ -113,6 +118,9 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
             details.put("turn", player.getTurn());
             if (!expiredCourses.isEmpty()) {
                 details.put("expiredCourses", expiredCourses);
+            }
+            if (!expiredProjects.isEmpty()) {
+                details.put("expiredProjects", expiredProjects);
             }
             if (player.getPendingChoice() != null) {
                 details.put("pendingChoice", player.getPendingChoice());

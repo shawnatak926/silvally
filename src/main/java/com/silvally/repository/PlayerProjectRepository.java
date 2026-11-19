@@ -4,11 +4,14 @@ import com.silvally.entity.PlayerProject;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface PlayerProjectRepository extends JpaRepository<PlayerProject, UUID> {
 
     List<PlayerProject> findByPlayerId(UUID playerId);
+
+    Optional<PlayerProject> findByPlayerIdAndProjectCode(UUID playerId, String projectCode);
 
     void deleteByPlayerId(UUID playerId);
 }
