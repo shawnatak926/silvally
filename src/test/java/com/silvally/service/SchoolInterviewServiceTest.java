@@ -19,7 +19,7 @@ class SchoolInterviewServiceTest {
     @Autowired ActivityRecordRepository records;
     @Autowired CommandLogRepository history;
     @Autowired org.springframework.test.web.servlet.MockMvc mvc;
-    final String strongAnswer = "지원 동기 관심 활동 프로젝트 경험 문제 해결 오류 입학 계획 학습. ".repeat(8);
+    final String strongAnswer = com.silvally.support.AdmissionAnswers.STRONG;
     Player candidate(int score) {
         Player p = Player.admission("지원자", "OPEN");
         p.selectAdmissionTrack("GENERAL"); p.passDocuments(); p.prepare("AD03", score); p.prepare("AD04", score);
@@ -35,7 +35,7 @@ class SchoolInterviewServiceTest {
         var first = events.chooseEvent(p.getId(), "AD05", p.getVersion(), key, request);
         assertThat(first.player().phase()).isEqualTo("BEFORE_SCHOOL");
         assertThat(first.details()).containsKeys("interview", "submitted", "decision", "scene");
-        var evaluation = (SchoolInterviewEvaluator.Evaluation) first.details().get("interview");
+        var evaluation = (com.silvally.dto.response.SchoolInterviewEvaluationView) first.details().get("interview");
         assertThat(evaluation.score()).isEqualTo(100);
         assertThat(evaluation.components()).hasSize(4);
         var saved = records.findByPlayerIdAndEventCodeOrderByIdAsc(p.getId(), "AD05");

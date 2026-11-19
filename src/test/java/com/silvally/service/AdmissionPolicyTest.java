@@ -32,4 +32,10 @@ class AdmissionPolicyTest {
         assertThat(policy.isEligible("MAKER", "LOCAL")).isFalse();
         assertThat(policy.isEligible("OPEN", "UNKNOWN")).isFalse();
     }
+    @Test void tiesCountBeforePlayerAndGameCapacitiesStayUnchanged() {
+        assertThat(policy.rankAgainst(80, new double[]{80, 81, 79})).isEqualTo(3);
+        assertThat(policy.decide("stable", 1, "GENERAL", 100, 100).limit()).isEqualTo(144);
+        assertThat(policy.decide("stable", 2, "GENERAL", 100, 100).limit()).isEqualTo(72);
+        assertThat(policy.decide("stable", 2, "GENERAL", 100, 100).rank()).isEqualTo(1);
+    }
 }

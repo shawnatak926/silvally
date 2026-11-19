@@ -111,11 +111,12 @@ public class EventFlowServiceImpl implements EventFlowService {
             case "AD02", "AD05" -> {
                 boolean first = event.equals("AD02");
                 double interviewScore = 0;
+                com.silvally.dto.response.SchoolInterviewEvaluationView evaluation = null;
                 if (!first) {
                     var validated = interviews.submitAnswer(p, InterviewKind.SCHOOL, "AD05", request.questionId(), request.answer());
                     String answer = validated.answer();
                     details.put("validatedInterview", validated);
-                    var evaluation = evaluator.evaluate(answer);
+                    evaluation = evaluator.evaluate(answer);
                     interviewScore = evaluation.score();
                     details.put("interview", evaluation);
                     details.put("submitted", Map.of("questionId", request.questionId(), "answer", answer));
@@ -136,6 +137,19 @@ public class EventFlowServiceImpl implements EventFlowService {
                 if (decision.shieldActivated()) result = "SHIELD_" + result;
                 if (decision.passed() && first) p.passDocuments();
                 else p.finishAdmission(decision.passed());
+                List<String> reasons = new ArrayList<>();
+                if (decision.shieldActivated()) {
+                    reasons.add("SPECIAL_TRACK_RANK_EXCEEDS_CAPACITY"); reasons.add("GENERAL_SHIELD_APPLIED");
+                    reasons.add(decision.passed() ? "GENERAL_SHIELD_PASSED" : "GENERAL_SHIELD_FAILED");
+                } else reasons.add(decision.passed() ? "TRACK_RANK_WITHIN_CAPACITY" : "GENERAL_RANK_EXCEEDS_CAPACITY");
+                if (!first) reasons.add("INTERVIEW_WEIGHT_25_PERCENT");
+                var resultView = new com.silvally.dto.response.AdmissionResultView(event, result, p.getAdmissionTrack(),
+                        decision.shieldActivated() ? "GENERAL" : p.getAdmissionTrack(),
+                        new com.silvally.dto.response.AdmissionResultView.Decision(decision.passed(), decision.shieldActivated(),
+                                decision.rank(), decision.limit(), decision.score(), decision.generalScore(), decision.generalRank()),
+                        first ? Map.of("essay", essay, "grades", grades, "record", record) : p.admissionComponents(interviewScore),
+                        evaluation, reasons, p.getPhase().name(), p.getBeforeSchoolDay());
+                details.put("admissionResult", resultView);
             }
             case "AD03", "AD04" -> p.prepare(event, effect.path("score").asDouble());
             default -> throw new BusinessException(ErrorCode.WRONG_STEP);
