@@ -1,6 +1,7 @@
 package com.silvally.entity;
 
 import com.silvally.common.BaseEntity;
+import com.silvally.service.StatRules;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -122,8 +123,8 @@ public class Player extends BaseEntity {
         player.applicationProfile = profile == null ? "OPEN" : profile;
         player.rulesVersion = "v1.2";
         player.phase = Phase.ADMISSION_1;
-        player.stats = Stats.initial();
         player.seed = UUID.randomUUID().toString();
+        player.stats = StatRules.rollInitial(StatRules.statSeed(player.seed));
         return player;
     }
 

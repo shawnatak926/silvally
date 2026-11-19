@@ -1,0 +1,59 @@
+package com.silvally.service;
+
+import com.silvally.entity.Stats;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.SplittableRandom;
+import java.util.UUID;
+
+/**
+ * 능력치 초기 범위·성장 배율·손실 하한·시험 공식을 모아 둔 게임용 가상 규칙.
+ * 학교 공식 산식이 아니다.
+ */
+public final class StatRules {
+
+    public static final String RULE_SOURCE = "GAME_RULE";
+
+    public record Range(int min, int max) {
+    }
+
+    public static final Map<String, Range> INITIAL_RANGES = initialRanges();
+
+    private StatRules() {
+    }
+
+    private static Map<String, Range> initialRanges() {
+        Map<String, Range> ranges = new LinkedHashMap<>();
+        ranges.put("P", new Range(19, 25));
+        ranges.put("F", new Range(5, 11));
+        ranges.put("B", new Range(5, 11));
+        ranges.put("I", new Range(5, 11));
+        ranges.put("A", new Range(22, 28));
+        ranges.put("G", new Range(60, 80));
+        ranges.put("C", new Range(19, 25));
+        ranges.put("H", new Range(64, 80));
+        ranges.put("S", new Range(12, 24));
+        ranges.put("EN", new Range(18, 26));
+        return Map.copyOf(ranges);
+    }
+
+    public static Stats rollInitial(long seed) {
+        SplittableRandom random = new SplittableRandom(seed);
+        Map<String, Integer> rolled = new LinkedHashMap<>();
+        for (String stat : Stats.KEYS) {
+            Range range = INITIAL_RANGES.get(stat);
+            rolled.put(stat, random.nextInt(range.min(), range.max() + 1));
+        }
+        return Stats.of(rolled);
+    }
+
+    public static long statSeed(String seed) {
+        try {
+            UUID uuid = UUID.fromString(seed);
+            return uuid.getMostSignificantBits() ^ Long.rotateLeft(uuid.getLeastSignificantBits(), 17);
+        } catch (IllegalArgumentException e) {
+            return seed.hashCode();
+        }
+    }
+}

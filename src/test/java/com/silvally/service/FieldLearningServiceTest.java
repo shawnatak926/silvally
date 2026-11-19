@@ -158,9 +158,9 @@ class FieldLearningServiceTest {
         assertThat(records.findByPlayerIdOrderByIdAsc(id)).isEmpty();
         assertThatThrownBy(() -> learning.get(id)).isInstanceOf(BusinessException.class);
     }
-    @Test void englishStartsAt22AndGrowthAndRewardsStayWithinBounds() {
+    @Test void englishStartsInDrawnRangeAndGrowthAndRewardsStayWithinBounds() {
         UUID id = fixture.enrolledStudent();
-        assertThat(fixture.load(id).view().stats()).containsEntry("EN", 22);
+        assertThat(fixture.load(id).view().stats().get("EN")).isBetween(18, 26);
         fixture.modify(id, p -> p.getStats().apply(Map.of("EN", 1000)));
         fixture.advance(id);
         assertThat(fixture.load(id).getStats().getEn()).isEqualTo(100);
