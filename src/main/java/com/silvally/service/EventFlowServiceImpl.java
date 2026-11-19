@@ -81,7 +81,7 @@ public class EventFlowServiceImpl implements EventFlowService {
                 throw new BusinessException(ErrorCode.IDEMPOTENCY_CONFLICT);
             return json.readValue(previous.get().getResponseJson(), MutationResult.class);
         }
-        if (p.getVersion() != version) throw new BusinessException(ErrorCode.VERSION_CONFLICT);
+        CommandExecutor.verifyVersion(p, version);
         if (event.startsWith("BS")) {
             var result = beforeSchool.apply(p, event, request);
             p.markCommand(UUID.randomUUID());
