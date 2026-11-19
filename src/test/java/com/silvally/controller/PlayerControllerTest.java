@@ -48,7 +48,7 @@ class PlayerControllerTest {
         UUID id = UUID.randomUUID();
         given(playerService.get(id)).willReturn(new PlayerView(
                 id, "tester", "v1.1", "ADMISSION_1", 0, 0, 0, 0L,
-                Map.of("P", 20), "OPEN", null, null, null, null, null, null, 0));
+                Map.of("P", 20), "OPEN", null, null, null, null, null, null, 0, Map.of("GENERAL", true), null));
 
         mockMvc.perform(get("/api/v1/players/{playerId}", id))
                 .andExpect(status().isOk())
@@ -191,6 +191,6 @@ class PlayerControllerTest {
 
     private static PlayerView view(UUID id, String name, long version) {
         return new PlayerView(id, name, "v1.1", "ADMISSION_1", 0, 0, 0, version,
-                Map.of("P", 20), "OPEN", null, null, null, null, null, null, 0);
+                Map.of("P", 20), "OPEN", null, null, null, null, null, null, 0, Map.of("GENERAL", true), null);
     }
 }
