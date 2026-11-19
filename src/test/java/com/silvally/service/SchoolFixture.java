@@ -6,6 +6,7 @@ import com.silvally.dto.response.PlayerView;
 import com.silvally.entity.GrowthProgress;
 import com.silvally.entity.Player;
 import com.silvally.repository.PlayerRepository;
+import com.silvally.support.TestStats;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -32,7 +33,10 @@ class SchoolFixture {
 
     UUID enrolledStudent() {
         PlayerView created = playerService.create(UUID.randomUUID().toString(), new CreatePlayerRequest("student", null));
-        modify(created.id(), player -> player.startSchool(SchoolRules.AP_PER_TURN));
+        modify(created.id(), player -> {
+            TestStats.pin(player);
+            player.startSchool(SchoolRules.AP_PER_TURN);
+        });
         events.chooseEvent(created.id(), "FOCUS_Y1_S1", version(created.id()), UUID.randomUUID().toString(),
                 new com.silvally.dto.request.ChooseEventRequest("COMMUNICATION"));
         return created.id();
