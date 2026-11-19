@@ -4,8 +4,10 @@ import com.silvally.common.exception.BusinessException;
 import com.silvally.common.exception.ErrorCode;
 import com.silvally.dto.request.YearTransitionRequest;
 import com.silvally.dto.response.MutationResult;
+import com.silvally.dto.response.TurnReadinessView;
 import com.silvally.dto.response.YearTransitionView;
 import com.silvally.entity.CatalogKind;
+import com.silvally.entity.Phase;
 import com.silvally.entity.Player;
 import com.silvally.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
@@ -58,6 +60,25 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
                 player -> advance(player, outcome),
                 player -> new MutationResult(player.view(), "TURN_END", 0,
                         outcome.statDelta, outcome.resultCode, outcome.details(player)));
+    }
+
+    @Override
+    public TurnReadinessView getTurnReadiness(UUID playerId) {
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "회차를 찾을 수 없습니다."));
+        List<TurnReadinessView.Blocker> blockers = new ArrayList<>();
+        if (player.getPhase() != Phase.SCHOOL) {
+            blockers.add(new TurnReadinessView.Blocker("PHASE", player.getPhase().name(), List.of()));
+        } else if (player.getPendingChoice() != null) {
+            YearTransitionView transition = rules.transitionView(player);
+            blockers.add(new TurnReadinessView.Blocker("YEAR_CHOICE", transition.pendingChoice(),
+                    transition.options().stream().map(YearTransitionView.Option::code).toList()));
+        } else {
+            schoolEvents.pendingRequiredEvents(player)
+                    .forEach(code -> blockers.add(new TurnReadinessView.Blocker("REQUIRED_EVENT", code, List.of())));
+        }
+        return new TurnReadinessView(player.getVersion(), player.getPhase().name(), player.getYear(), player.getTurn(),
+                blockers.isEmpty(), blockers);
     }
 
     @Override

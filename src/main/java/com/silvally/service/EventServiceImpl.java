@@ -63,9 +63,12 @@ public class EventServiceImpl implements EventService {
                             enabled ? null : "이미 선택했거나 시기·AP·필수 선택 조건을 만족하지 않습니다.");
                 }).toList());
     }
-    @Override public void requireNoPendingEvent(Player p) {
-        List<String> pending = events.findEvents(p.getRulesVersion(), Phase.SCHOOL, p.getYear()).stream()
+    @Override public List<String> pendingRequiredEvents(Player p) {
+        return events.findEvents(p.getRulesVersion(), Phase.SCHOOL, p.getYear()).stream()
                 .filter(EventDef::isRequired).filter(e -> available(p, e)).map(e -> e.getId().eventCode()).toList();
+    }
+    @Override public void requireNoPendingEvent(Player p) {
+        List<String> pending = pendingRequiredEvents(p);
         if (!pending.isEmpty()) throw new BusinessException(ErrorCode.CHOICE_REQUIRED, Map.of("events", pending));
     }
     @Override @Transactional

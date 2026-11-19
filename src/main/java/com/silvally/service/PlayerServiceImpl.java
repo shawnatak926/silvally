@@ -9,6 +9,7 @@ import com.silvally.dto.response.HistoryPage;
 import com.silvally.dto.response.MutationResult;
 import com.silvally.dto.response.PlayerView;
 import com.silvally.dto.response.ProgressView;
+import com.silvally.dto.response.TurnReadinessView;
 import com.silvally.entity.Player;
 import com.silvally.repository.ActivityRecordRepository;
 import com.silvally.repository.CommandLogRepository;
@@ -161,6 +162,11 @@ public class PlayerServiceImpl implements PlayerService {
     @Transactional
     public MutationResult advanceTurn(UUID playerId, long expectedVersion, String idempotencyKey) {
         return schoolTurnService.advanceTurn(playerId, expectedVersion, idempotencyKey);
+    }
+
+    @Override
+    public TurnReadinessView getTurnReadiness(UUID playerId) {
+        return schoolTurnService.getTurnReadiness(playerId);
     }
 
     private Optional<PlayerView> replayCreate(String createKey, String requestHash) {
