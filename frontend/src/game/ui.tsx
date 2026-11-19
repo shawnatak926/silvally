@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { editionName } from './editions'
 import photo from '../assets/campus-photo.png'
 import { ApiError } from '../api/client'
 import { isSchool, type AdmissionProtection, type CalendarPeriod, type InterviewEvaluation, type MutationResult, type PlayerView, type Stat, type Stats } from '../api/contracts'
@@ -52,7 +53,7 @@ export function Frame({
           <strong>대소고나</strong>
         </Link>
         {player && <div className="phase">
-          <strong>{phaseLabel(player)}</strong>
+          <strong>{phaseLabel(player)}</strong><span>{editionName(player.edition ?? 'SPICY')}</span>
           {player && isSchool(player) && <span title={currentPeriod?.theme}>{player.vacation ?
             `${player.vacation.season === 'SUMMER' ? '여름방학' : '겨울방학'}${player.vacation.campTurn ? ` · 캠프 ${player.vacation.campTurn}/2턴` : ''}` : currentPeriod
             ? `${currentPeriod.semester}학기 · ${currentPeriod.month}월` : schoolPeriod(player).label}</span>}
@@ -72,7 +73,7 @@ export function Journey({ player }: { player: PlayerView }) {
     player.year > 0 ? player.year + 1 : ['BEFORE_SCHOOL', 'CAREER_PICK'].includes(player.phase) ? 1 : 0
   return (
     <nav className="journey" aria-label="학교생활 진행">
-      <ol>{['지원', '비포스쿨', '1학년', '2학년', '3학년', '졸업'].map((name, index) => (
+      <ol>{['지원', '비포스쿨', '1학년', '2학년', '3학년', '졸업'].map((name, index) => player.edition === 'MILD' && index < 2 ? null : (
         <li key={name} aria-current={index === current ? 'step' : undefined}>
           {name}{index < current ? ' ✓' : index === current ? ' · 현재' : ''}
         </li>

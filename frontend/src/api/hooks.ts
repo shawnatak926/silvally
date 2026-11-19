@@ -48,7 +48,7 @@ export function useCommands() {
       const result = await mutation.mutateAsync(command)
       const player = resultPlayer(result)
       ui.journal(null)
-      if (player.demoScenario !== 'COUNSELING') useSavedGame.getState().save(player.id)
+      if (player.demoScenario !== 'COUNSELING') useSavedGame.getState().save(player.id, player.edition ?? 'SPICY')
       await queryClient.cancelQueries({ queryKey: ['player', player.id] })
       queryClient.setQueryData<PlayerView>(queryKey(player.id, ''), (current) =>
         current && current.version > player.version ? current : player,

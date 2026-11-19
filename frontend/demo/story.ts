@@ -74,7 +74,7 @@ function scene(game: DemoGame, suffix: string): [string, string] | null {
     const season = previous.vacationOpening?.season === 'SUMMER' ? '여름방학' : previous.vacationOpening ? '겨울방학' : null
     const facts = [base[1], ...(previous.setbacks ?? []).map((item) => item.reason),
       ...(previous.stressLoad?.sources ?? []).map((item) => item.reason)]
-    if (season) facts.push(`${season}이 시작됐다. 전공강화캠프에 참가하거나 쉴 수 있다.`)
+    if (season) facts.push(previous.year <= 2 ? `${season}이 시작됐다. 전공강화캠프에 참가하거나 쉴 수 있다.` : `${season}이 시작됐다. 쉬면서 취업과 졸업 이후 일정을 준비한다.`)
     for (const result of previous.assessments ?? []) {
       const change = result.gradeAfter - result.gradeBefore
       facts.push(`${result.title} 결과를 받았다. 성적은 ${change > 0 ? '올랐다' : change < 0 ? '떨어졌다' : '그대로였다'}.`)
@@ -106,6 +106,7 @@ function scene(game: DemoGame, suffix: string): [string, string] | null {
   }
   if (phase === 'ENDED' && game.ending) return [game.view.endReason === 'WITHDRAWAL' ? '다음 배움을 준비하며' : year ? '교문을 나서며' : '전형을 마치며', game.ending.body]
   if (phase === 'GRAD_READY') return ['졸업을 앞둔 마지막 주', '재학 일정이 끝났다. 지금까지의 기록을 보고 졸업 이후에 할 일을 정한다.']
+  if (phase === 'CAREER_PICK' && game.view.edition === 'MILD') return ['1학년 1학기의 시작', '새 교실에서 관심 분야와 기초 역량을 살펴보고 희망 직무를 정한다.']
   if (phase === 'CAREER_PICK') return ['관심 있는 일을 고르는 날', '비포스쿨에서 해 본 일을 떠올린다. 다음에는 어떤 일을 더 깊게 해 보고 싶은지 고를 차례다.']
   if (suffix === '/events/BS01/choices' && previous?.subjectCode === 'BS01') {
     const stop = beforeSchool[0].choices.find((choice) => choice.code === previous.choiceCode)

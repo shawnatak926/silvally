@@ -8,6 +8,7 @@ import {
 import { useCommands, usePlayerData, useStory } from './api/hooks'
 import { useGameUi, useSavedGame } from './state'
 import { onPlayer, Recruitment, useRecruitment, type RunPlayer } from './game/activities'
+import { editionName, lockedEdition, type GameEdition } from './game/editions'
 import { applicationTurn, semesterTurns } from './game/schedule'
 import { fieldLearningRoutes, isFieldLearningRoute } from './game/field-learning'
 import { admissionComponents, admissionProtection, jobLabel, label, stats } from './game/labels'
@@ -64,21 +65,28 @@ export default function App() {
 
 function Home({ run, busy, feedback }: { run: Run; busy: boolean; feedback: ReactNode }) {
   const [name, setName] = useState('')
-  const savedId = useSavedGame((state) => state.playerId)
+  const [edition, setEdition] = useState<GameEdition>(lockedEdition ?? 'MILD')
+  const savedId = useSavedGame((state) => state.playerIds?.[edition] ?? (edition === 'SPICY' && !Object.keys(state.playerIds ?? {}).length ? state.playerId : null))
   const saved = usePlayerData<PlayerView>(savedId ?? '', '')
   const savedMissing = saved.error instanceof ApiError && saved.error.status === 404
   return (
     <Frame>
       {feedback}
       <PhotoScene cover>
-        <Heading eyebrow="대소고 학교생활 시뮬레이션" title="대소고나">입학 지원서를 내는 날부터 졸업하는 날까지.</Heading>
-        <form className="create-form" onSubmit={(event) => { event.preventDefault(); if (name.trim() && !busy) run('POST', '/players', { name: name.trim() }) }}>
+        <Heading eyebrow="대소고 학교생활 시뮬레이션" title="대소고나">{edition === 'MILD' ? '1학년 1학기부터 시작하는 학교생활과 취업 준비.' : '입학 지원서를 내는 날부터 졸업하는 날까지.'}</Heading>
+        {lockedEdition ? <p className="edition-note">{editionName(edition)} 버전</p> : <fieldset className="edition-picker"><legend>플레이 버전</legend>
+          {(['MILD', 'SPICY'] as const).map((value) => <label key={value}>
+            <input type="radio" name="edition" aria-label={editionName(value)} checked={edition === value} onChange={() => setEdition(value)} />
+            <strong>{editionName(value)}</strong><small>{value === 'MILD' ? '1학년부터 · 휴식과 상담 · 취업 준비 지원' : '입학부터 · 기존 스트레스와 진로 선택'}</small>
+          </label>)}
+        </fieldset>}
+        <form className="create-form" onSubmit={(event) => { event.preventDefault(); if (name.trim() && !busy) run('POST', '/players', { name: name.trim(), edition }) }}>
           <label htmlFor="name">이름</label>
           <input id="name" maxLength={24} required value={name} placeholder="이름을 입력하세요" onChange={(event) => setName(event.target.value)} />
-          <button className="btn primary wide" type="submit" disabled={busy || !name.trim()}>지원 시작</button>
+          <button className="btn primary wide" type="submit" disabled={busy || !name.trim()}>{edition === 'MILD' ? '학교생활 시작' : '지원 시작'}</button>
         </form>
         {savedId && !savedMissing && <Link className="btn wide continue" to={`/play/${savedId}`}>이어서 하기</Link>}
-        {savedMissing && <small className="muted">저장된 회차를 찾지 못했습니다. 새 지원을 시작할 수 있습니다.</small>}
+        {savedMissing && <small className="muted">저장된 회차를 찾지 못했습니다. 새 회차를 시작할 수 있습니다.</small>}
       </PhotoScene>
       <div className="home-foot"><span>대소고 학교생활을 바탕으로 만든 비공식 게임</span>
         {import.meta.env.MODE === 'demo' && <span>로컬 데모</span>}</div>
@@ -97,6 +105,9 @@ function GameRoute({ run, busy, receipt, feedback, commandFailed, ending = false
         <Problem error={player.error} retry={() => { void player.refetch() }} /><Link className="btn wide continue" to="/">시작 화면</Link></> : <Loading />}
     </PhotoScene></Frame>
   )
+  if (lockedEdition && (player.data.edition ?? 'SPICY') !== lockedEdition) return <Frame><PhotoScene>
+    <Heading title="다른 버전의 회차입니다">이 버전에서 새 학교생활을 시작하거나 저장된 회차를 이어 주세요.</Heading><Link className="btn" to="/">시작 화면</Link>
+  </PhotoScene></Frame>
   if (ending !== (player.data.phase === 'ENDED')) return <Navigate replace to={`/${player.data.phase === 'ENDED' ? 'ending' : 'play'}/${id}`} />
   return <Game key={id} player={player.data} busy={busy} receipt={receipt?.player.id === id ? receipt : null}
     feedback={feedback} commandFailed={commandFailed} run={onPlayer(player.data, run)} />
@@ -378,7 +389,7 @@ function CareerPicker({ player, busy, run }: { player: PlayerView; busy: boolean
   if (career.error) return <Problem error={career.error} retry={() => { void career.refetch() }} />
   return (
     <>
-      <Heading eyebrow="진로 추천" title="희망 직무 선택" level={2}>비포스쿨에서 쌓은 경험을 바탕으로 고른 세 가지 직무입니다.</Heading>
+      <Heading eyebrow="진로 추천" title="희망 직무 선택" level={2}>{player.edition === 'MILD' ? '1학년 1학기, 현재 기초 역량을 바탕으로 추천한 세 가지 직무입니다.' : '비포스쿨에서 쌓은 경험을 바탕으로 고른 세 가지 직무입니다.'}</Heading>
       <ChoiceForm busy={busy} submit="이 직무로 시작" onSubmit={(roleCode) => run('PUT', '/career-preference', { roleCode })}
         options={career.data.recommendations.map((entry) => ({
           value: entry.roleCode, label: entry.label, tag: `${entry.rank}위 · ${entry.score.toFixed(2)}`,

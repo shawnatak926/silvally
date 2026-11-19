@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { GameEdition } from './game/editions'
 import type { PendingCommand } from './api/client'
 
 const journalKey = 'daesogo.pending-command.v1'
@@ -36,6 +37,11 @@ export const useGameUi = create<GameUi>((set) => ({
   setActive: (active) => set({ active }),
 }))
 
-export const useSavedGame = create<{ playerId: string | null; save: (id: string | null) => void }>()(
-  persist((set) => ({ playerId: null, save: (playerId) => set({ playerId }) }), { name: 'daesogo.saved-player.v1' }),
+export const useSavedGame = create<{
+  playerId: string | null
+  playerIds: Partial<Record<GameEdition, string | null>>
+  save: (id: string | null, edition?: GameEdition) => void
+}>()(
+  persist((set) => ({ playerId: null, playerIds: {}, save: (playerId, edition = 'SPICY') =>
+    set((state) => ({ playerId, playerIds: { ...(Object.keys(state.playerIds ?? {}).length ? state.playerIds : state.playerId ? { SPICY: state.playerId } : {}), [edition]: playerId } })) }), { name: 'daesogo.saved-player.v1' }),
 )

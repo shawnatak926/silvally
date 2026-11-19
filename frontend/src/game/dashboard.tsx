@@ -54,7 +54,7 @@ export function StudentRail({ player }: { player: PlayerView }) {
         <p className="eyebrow">학생 정보</p>
         <h2>{player.name}</h2>
         <dl className="student-details">
-          <div><dt>입학 전형</dt><dd>{label(player.admissionTrack)}</dd></div>
+          <div><dt>{player.edition === 'MILD' ? '시작 시점' : '입학 전형'}</dt><dd>{player.edition === 'MILD' ? '1학년 1학기' : label(player.admissionTrack)}</dd></div>
           <div><dt>희망 직무</dt><dd>{label(player.currentCareerCode)}</dd></div>
           <div><dt>2학년 학과</dt><dd>{label(player.major)}</dd></div>
           <div><dt>3학년 수업</dt><dd>{label(player.track)}</dd></div>

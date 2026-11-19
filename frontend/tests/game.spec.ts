@@ -17,6 +17,7 @@ function choiceHeading(page: Page, name: string) {
 async function enterBeforeSchool(page: Page) {
   await page.goto('/')
   await page.getByLabel('이름').fill('플레이어 A')
+  await page.getByRole('radio', { name: '매운맛', exact: true }).check()
   await page.getByRole('button', { name: '지원 시작' }).click()
   await expect(page.getByRole('meter', { name: '성적', exact: true })).toHaveAttribute('value', /^(6[0-9]|7[0-9]|80)$/)
   for (const label of [
@@ -275,6 +276,7 @@ test('작성 중인 장면을 보여주고 새 장면이 도착해도 입학 선
   })
   await page.goto('/')
   await page.getByLabel('이름').fill('입학생')
+  await page.getByRole('radio', { name: '매운맛', exact: true }).check()
   await page.getByRole('button', { name: '지원 시작' }).click()
   await expect(page.getByText('교문 너머에 학교가 보인다.')).toBeVisible()
   await page.getByRole('radio', { name: '일반전형' }).check()
@@ -288,6 +290,7 @@ test('장면 서버가 오류를 반환해도 입학 선택을 저장할 수 있
   await page.route('**/api/v1/players/*/story', (route) => route.fulfill({ status: 503, json: {} }))
   await page.goto('/')
   await page.getByLabel('이름').fill('장면 오류 체험')
+  await page.getByRole('radio', { name: '매운맛', exact: true }).check()
   await page.getByRole('button', { name: '지원 시작' }).click()
   await expect(page.getByRole('button', { name: '이야기 다시 불러오기' })).toBeVisible()
   await select(page, '일반전형')
@@ -343,6 +346,7 @@ test('360px 터치 화면에서 전형을 고르고 새로고침 후 이어 한�
   const page = await context.newPage()
   await page.goto('/')
   await page.getByLabel('이름').fill('모바일 학생')
+  await page.getByRole('radio', { name: '매운맛', exact: true }).check()
   await page.getByRole('button', { name: '지원 시작' }).tap()
   await page.getByText('일반전형', { exact: true }).tap()
   await page.getByRole('button', { name: '선택 확정' }).tap()
@@ -386,11 +390,13 @@ test('360px 화면에서 실리콘밸리 현장학습에 지원하고 참가 기
 test('시작 화면에서 상담 바로 체험 없이 기존 회차를 이어서 한다', async ({ page }) => {
   await page.goto('/')
   await page.getByLabel('이름').fill('기존 회차')
+  await page.getByRole('radio', { name: '매운맛', exact: true }).check()
   await page.getByRole('button', { name: '지원 시작' }).click()
   await expect(page).toHaveURL(/\/play\//)
   const savedGame = page.url()
   await page.goto('/')
   await expect(page.getByRole('button', { name: '3학년 상담 바로 체험' })).toHaveCount(0)
+  await page.getByRole('radio', { name: '매운맛', exact: true }).check()
   await page.getByRole('link', { name: '이어서 하기' }).click()
   await expect(page).toHaveURL(savedGame)
   await expect(choiceHeading(page, '지원 전형 선택')).toBeVisible()
@@ -399,6 +405,7 @@ test('시작 화면에서 상담 바로 체험 없이 기존 회차를 이어서
 test('응답이 유실되면 같은 명령 키와 버전으로 복구한다', async ({ page }) => {
   await page.goto('/')
   await page.getByLabel('이름').fill('재시도 학생')
+  await page.getByRole('radio', { name: '매운맛', exact: true }).check()
   await page.getByRole('button', { name: '지원 시작' }).click()
   await expect(page.getByRole('radio', { name: '일반전형' })).toBeVisible()
   const headers: Record<string, string>[] = []

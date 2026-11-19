@@ -87,8 +87,8 @@ export function createGame(body: Record<string, unknown>, fixedStats: boolean): 
     [code, fixedStats ? fixture : randomInt(min, max + 1)])) as Stats
   const admissionEligibility = (Object.keys(admissionTracks) as AdmissionTrack[])
     .filter((code) => randomInt(100) < admissionTracks[code].eligibilityChance)
-  return {
-    view: { id: randomUUID(), name, rulesVersion: 'v1.2', phase: 'ADMISSION_1', year: 0, turn: 0,
+  const game: DemoGame = {
+    view: { id: randomUUID(), name, edition: body.edition === 'MILD' ? 'MILD' : 'SPICY', rulesVersion: 'v1.2', phase: 'ADMISSION_1', year: 0, turn: 0,
       remainingAp: 0, version: 0, stats,
       admissionEligibility, resumeScore: 0 },
     admissionIndex: 0, admissionChoices: [], kit: 0, used: [], seen: [],
@@ -96,6 +96,13 @@ export function createGame(body: Record<string, unknown>, fixedStats: boolean): 
     projects: [], enrollments: [], applications: [], careerChanged: false,
     practiced: [], recommendations: [], evidence: [], history: [], snapshots: [],
   }
+  if (body.edition !== undefined && body.edition !== 'MILD' && body.edition !== 'SPICY') throw new DemoError(400, 'VALIDATION_ERROR', '올바른 게임 버전을 선택해 주세요.')
+  if (game.view.edition === 'MILD') {
+    for (const [key, boost] of Object.entries({ P: 12, F: 8, B: 8, I: 8, EN: 10, A: 8, C: 12, H: 10, S: -6 })) game.view.stats[key as Stat] = cap(game.view.stats[key as Stat] + boost)
+    Object.assign(game.view, { phase: 'CAREER_PICK', year: 1, turn: 1, remainingAp: 4 })
+    recommend(game)
+  }
+  return game
 }
 
 function createCounselingGame() {
@@ -134,8 +141,8 @@ function stressPeriod(g: DemoGame) {
 
 function stressEvent(g: DemoGame) {
   if (!isSchool(g.view)) return undefined
-  if (g.withdrawalPending) return withdrawalEvent
-  const level = g.view.stats.S >= 90 ? 90 : g.view.stats.S >= 60 ? 60 : 0
+  if (g.view.edition !== 'MILD' && g.withdrawalPending) return withdrawalEvent
+  const level = g.view.edition !== 'MILD' && g.view.stats.S >= 90 ? 90 : g.view.stats.S >= 60 ? 60 : 0
   if (!level || (g.stressHandled?.period === stressPeriod(g) && g.stressHandled.level >= level)) return undefined
   const random = eventRandom(g.view.id, `stress:${stressPeriod(g)}:${level}`)
   const choices = level === 90
@@ -218,6 +225,7 @@ function applyStressPressure(g: DemoGame): StressLoad {
   const stressBefore = g.view.stats.S
   const sources: StressLoad['sources'] = []
   const add = (code: string, reason: string, amount: number) => {
+    if (amount > 0 && g.view.edition === 'MILD') amount = Math.ceil(amount / 2)
     if (amount > 0) {
       const accumulated = sources.reduce((sum, source) => sum + Math.max(0, source.delta), 0)
       amount = Math.min(amount, Math.max(0, 5 - accumulated))
@@ -262,7 +270,7 @@ function requiredSchoolEvent(g: DemoGame) {
   if (g.view.year === 2 && !g.view.major) return majorEvent
   if (g.view.year === 3 && !g.view.track) return trackEvent
   const { year, turn, semesterFocus, vacation } = g.view
-  if (vacation) return vacation.campTurn === 0 ? vacationEvent(vacation.season) : undefined
+  if (vacation) return vacation.campTurn === 0 ? vacationEvent(vacation.season, g.view.year) : undefined
   if (!semesterFocus && (turn === 1 || turn === semesterTurns + 1)) return focusEvent
   if (year === 1 && turn >= 8 && turn <= 23 && !g.seen.includes(narshaTopicEvent.code)) return narshaTopicEvent
   if (year === 1 && turn === 14 && g.autoLife && !g.seen.includes(clubEvent.code)) return clubEvent
@@ -488,15 +496,7 @@ function chooseEvent(g: DemoGame, code: string, choiceCode: string, customTopic?
     if (day < 5) g.view.beforeSchoolDay = day + 1
     else {
       g.view.phase = 'CAREER_PICK'
-      g.recommendations = roles.map(([roleCode, label, , weights, tags], index) => {
-        const reasons = skills.map((statCode, i) => ({
-          statCode, value: g.view.stats[statCode], contribution: weights[i] * g.view.stats[statCode] / 100,
-        }))
-        const activityReasons = g.evidence.filter((item) => tags.includes(item.tag))
-        return { index, rank: 0, roleCode, label, score: Number((reasons.reduce((sum, item) => sum + item.contribution, 0) + 3 * activityReasons.length).toFixed(2)),
-          statReasons: reasons.sort((a, b) => b.contribution - a.contribution).slice(0, 2), activityReasons }
-      }).sort((a, b) => b.score - a.score || b.activityReasons.length - a.activityReasons.length || a.index - b.index)
-        .slice(0, 3).map(({ index: _index, ...item }, i) => ({ ...item, rank: i + 1 }))
+      recommend(g)
     }
   } else if (code === 'J01' && isFieldLearningRoute(choiceCode)) {
     g.fieldLearning = selectFieldLearning(choiceCode, g.view.stats.EN)
@@ -508,6 +508,7 @@ function chooseEvent(g: DemoGame, code: string, choiceCode: string, customTopic?
     resultCode = 'FOCUS_SELECTED'
   } else if (code === 'VACATION' && before.vacation) {
     details = { ...before.vacation, choice: choiceCode }
+    if (choiceCode === 'MAJOR_CAMP' && g.view.year >= 3) return block('전공역량 강화 캠프는 1·2학년만 참가합니다.')
     if (choiceCode === 'MAJOR_CAMP') {
       g.view.vacation = { ...before.vacation, campTurn: 1 }
       resultCode = 'CAMP_STARTED'
@@ -584,6 +585,18 @@ function answerAdmission(g: DemoGame, body: Record<string, unknown>) {
   g.seen.push('AD05')
   log(g, before, 'EVENT_CHOICE', 'AD05', result, 'ANSWER').admission = details
   return receipt(g, before, 'AD05', result, details)
+}
+
+function recommend(g: DemoGame) {
+  g.recommendations = roles.map(([roleCode, label, , weights, tags], index) => {
+        const reasons = skills.map((statCode, i) => ({
+          statCode, value: g.view.stats[statCode], contribution: weights[i] * g.view.stats[statCode] / 100,
+        }))
+        const activityReasons = g.evidence.filter((item) => tags.includes(item.tag))
+        return { index, rank: 0, roleCode, label, score: Number((reasons.reduce((sum, item) => sum + item.contribution, 0) + 3 * activityReasons.length).toFixed(2)),
+          statReasons: reasons.sort((a, b) => b.contribution - a.contribution).slice(0, 2), activityReasons }
+      }).sort((a, b) => b.score - a.score || b.activityReasons.length - a.activityReasons.length || a.index - b.index)
+        .slice(0, 3).map(({ index: _index, ...item }, i) => ({ ...item, rank: i + 1 }))
 }
 
 export function preferences(g: DemoGame): CareerPreferenceView {
@@ -999,8 +1012,8 @@ function apply(g: DemoGame, companyCode: string) {
   const T = technical(stats, company.role)
   const Q = portfolio(g, company.role)
   const certificate = ['CO_SW', 'CO_OPS'].includes(companyCode) && qualifications(g).length ? 4 : 0
-  const D = cap(.3 * T + .15 * stats.P + .35 * Q + .15 * g.view.resumeScore + .05 * stats.A + certificate)
-  const failureCode = T < company.cut[0] ? 'DOC_TECH' : Q < company.cut[1] ? 'DOC_PORTFOLIO' : D < company.cut[2] ? 'DOC_SCORE' : null
+  const D = cap(.3 * T + .15 * stats.P + .35 * Q + .15 * g.view.resumeScore + .05 * stats.A + certificate + (g.view.edition === 'MILD' ? 15 : 0))
+  const failureCode = T < Math.max(0, company.cut[0] - (g.view.edition === 'MILD' ? 10 : 0)) ? 'DOC_TECH' : Q < Math.max(0, company.cut[1] - (g.view.edition === 'MILD' ? 10 : 0)) ? 'DOC_PORTFOLIO' : D < company.cut[2] ? 'DOC_SCORE' : null
   const application: DemoApplication = { portfolioScore: Q, id: randomUUID(), companyCode, role: company.role, status: failureCode ? 'REJECTED' : 'DOC_PASSED', D, failureCode, p: failureCode ? 0 : null }
   g.applications.push(application)
   g.view.remainingAp--
@@ -1035,7 +1048,7 @@ function jobStep(g: DemoGame, id: string, step: string, body: Record<string, unk
   if (step === 'CODING' && application.status === 'DOC_PASSED') {
     jobTurn(g, codingTurn)
     if (fatigue(g)) return block('휴식 또는 회복 키트로 컨디션을 회복해 주세요.')
-    application.K = cap(.65 * stats.P + .35 * tech + (g.prep.coding ? 5 : 0) - penalty)
+    application.K = cap(.65 * stats.P + .35 * tech + (g.prep.coding ? 5 : 0) - penalty + (g.view.edition === 'MILD' ? 15 : 0))
     application.status = application.K >= cut[3] ? 'CODE_PASSED' : 'REJECTED'
     if (application.status === 'REJECTED') application.failureCode = 'CODING_CUT'
     applyStats(g, { H: -3, S: 4 })
@@ -1045,12 +1058,13 @@ function jobStep(g: DemoGame, id: string, step: string, body: Record<string, unk
     const quality = application.portfolioScore
     const technicalScore = .45 * tech + .25 * stats.C + .30 * quality
     const fitScore = .65 * stats.C + .20 * resumeScore + .15 * stats.A
-    const preparation = cap(.65 * technicalScore + .35 * fitScore + (g.prep.interview ? 5 : 0) - penalty)
+    const preparation = cap(.65 * technicalScore + .35 * fitScore + (g.prep.interview ? 5 : 0) - penalty + (g.view.edition === 'MILD' ? 15 : 0))
     if ('questionId' in body || 'answer' in body) {
       const answer = interviewAnswer(employmentInterview(g, id), body)
       application.interviewEvaluation = gradeInterview(answer, role)
     }
     application.J = application.interviewEvaluation ? .65 * application.interviewEvaluation.score + .35 * preparation : preparation
+    if (g.view.edition === 'MILD') application.J = cap(application.J + 10)
     application.status = application.J >= cut[4] ? 'INTERVIEW_PASSED' : 'REJECTED'
     if (application.status === 'REJECTED') application.failureCode = 'INTERVIEW_CUT'
     applyStats(g, { H: -3, S: 4 })
@@ -1058,6 +1072,7 @@ function jobStep(g: DemoGame, id: string, step: string, body: Record<string, unk
     jobTurn(g, resultTurn)
     const score = .3 * (application.D ?? 0) + .4 * (application.K ?? 0) + .3 * (application.J ?? 0)
     application.p = Math.max(15, Math.min(90, 55 + 1.2 * (score - cut[5])))
+    if (g.view.edition === 'MILD') application.p = Math.min(98, Math.max(80, application.p + 15))
     const sample = demoDraw(application.companyCode, g.view.rulesVersion)
     application.status = sample < Math.floor(application.p * 100) ? 'OFFERED' : 'REJECTED'
     if (application.status === 'REJECTED') application.failureCode = 'RESULT_CUT'

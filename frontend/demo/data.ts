@@ -130,11 +130,12 @@ export const focusEvent = event('TERM_FOCUS', '이번 학기에 집중할 것',
     { ...choice('FOCUS_ENGLISH', '영어와 글로벌 진로', { EN: 3 }), description: '기술 문서를 읽고 작업 내용을 영어로 설명합니다.' },
   ])
 
-export function vacationEvent(season: 'SUMMER' | 'WINTER') {
-  return event('VACATION', season === 'SUMMER' ? '여름방학' : '겨울방학', '방학을 어떻게 보낼지 고르세요.', [
+export function vacationEvent(season: 'SUMMER' | 'WINTER', year: number) {
+  const result = event('VACATION', season === 'SUMMER' ? '여름방학' : '겨울방학', '방학을 어떻게 보낼지 고르세요.', [
     { ...choice('MAJOR_CAMP', '전공강화캠프 참가'), description: '정규 학기 사이에 캠프를 2턴 진행합니다. 전공 기술과 프로그래밍을 연습합니다.' },
     { ...choice('VACATION_REST', '방학 동안 쉬기'), description: '체력을 회복하고 다음 일정으로 넘어갑니다.' },
   ])
+  return year <= 2 ? result : { ...result, situation: '3학년은 캠프 없이 쉬며 취업과 졸업 이후의 일정을 준비합니다.', choices: result.choices.filter((choice) => choice.code !== 'MAJOR_CAMP') }
 }
 
 export const stressSupportEvent = event('STRESS_SUPPORT', '잠시 숨을 고를 시간',

@@ -304,3 +304,10 @@ input::placeholder { color: var(--muted); }
 
 .stat-setbacks > li { border-left-color: #a45b43; }
 .stat-setbacks strong, .stat-setbacks span { color: #9b4935; }
+
+.edition-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border: 0; padding: 0; margin: 0 0 20px; }
+.edition-picker legend { margin-bottom: 8px; font-weight: 700; }
+.edition-picker label { display: grid; grid-template-columns: auto 1fr; gap: 6px 8px; padding: 12px; border: 1px solid var(--divider); cursor: pointer; }
+.edition-picker small { grid-column: 2; line-height: 1.5; }
+.edition-picker input { accent-color: var(--accent); }
+@media(max-width: 480px) { .edition-picker { grid-template-columns: 1fr; } }

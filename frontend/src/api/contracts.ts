@@ -7,6 +7,7 @@ export interface VacationView { season: 'SUMMER' | 'WINTER'; campTurn: number }
 export interface PlayerView {
   id: string
   name: string
+  edition?: 'MILD' | 'SPICY'
   rulesVersion: string
   demoScenario?: 'COUNSELING'
   endReason?: 'WITHDRAWAL'

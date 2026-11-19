@@ -3,13 +3,17 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "engines": { "node": ">=22.12.0" },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "vite",
     "demo": "vite --mode demo",
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b --pretty false",
-    "test": "playwright test"
+    "test": "playwright test",
+    "build:mild": "tsc -b && vite build --mode mild",
+    "build:spicy": "tsc -b && vite build --mode spicy"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.0",
