@@ -3,6 +3,8 @@ package com.silvally.service;
 import com.silvally.common.exception.BusinessException;
 import com.silvally.common.exception.ErrorCode;
 import com.silvally.dto.response.HistoryPage;
+import com.silvally.entity.CommandLog;
+import com.silvally.entity.Player;
 import com.silvally.repository.CommandLogRepository;
 import com.silvally.repository.HistoryRow;
 import com.silvally.repository.PlayerRepository;
@@ -10,6 +12,7 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +38,22 @@ public class HistoryServiceImpl implements HistoryService {
         List<HistoryPage.Item> items = rows.stream().limit(limit).map(HistoryServiceImpl::toItem).toList();
         Long nextAfterId = hasNext ? items.get(items.size() - 1).logId() : null;
         return new HistoryPage(items, nextAfterId);
+    }
+
+    @Override
+    @Transactional
+    public CommandLog recordScene(Player player, SceneRecord scene) {
+        UUID commandId = sceneCommandId(player, scene);
+        return commandLogRepository.findByPlayerIdAndCommandId(player.getId(), commandId)
+                .orElseGet(() -> commandLogRepository.save(CommandLog.scene(player, commandId, scene.sceneId(),
+                        scene.choiceCode(), scene.resultCode(), scene.evidenceJson())));
+    }
+
+    static UUID sceneCommandId(Player player, SceneRecord scene) {
+        String key = String.join("|", player.getId().toString(), scene.sceneId(), scene.choiceCode(),
+                String.valueOf(player.getYear()), String.valueOf(player.getTurn()),
+                String.valueOf(player.getBeforeSchoolDay()));
+        return UUID.nameUUIDFromBytes(key.getBytes(StandardCharsets.UTF_8));
     }
 
     private static HistoryPage.Item toItem(HistoryRow row) {

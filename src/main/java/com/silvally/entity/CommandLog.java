@@ -68,22 +68,29 @@ public class CommandLog extends BaseEntity {
     }
 
     public static CommandLog activity(Player player, String event, String choice, String evidence) {
+        return scene(player, UUID.randomUUID(), event, choice, "COMPLETED", evidence);
+    }
+
+    public static CommandLog scene(Player player, UUID commandId, String sceneId, String choice,
+                                   String resultCode, String evidence) {
         CommandLog log = new CommandLog();
         log.playerId = player.getId();
-        log.commandId = UUID.randomUUID();
+        log.commandId = commandId;
         log.year = player.getYear();
         log.turn = player.getTurn();
         log.beforeSchoolDay = player.getBeforeSchoolDay();
         log.kind = "EVENT";
-        log.subjectCode = event;
+        log.subjectCode = sceneId;
         log.choiceCode = choice;
         log.evidenceJson = evidence;
-        log.resultCode = "COMPLETED";
-        log.requestHash = log.commandId.toString();
+        log.resultCode = resultCode;
+        log.requestHash = commandId.toString();
         log.httpStatus = 200;
         return log;
     }
     public String getChoiceCode() { return choiceCode; }
+    public String getSubjectCode() { return subjectCode; }
+    public String getResultCode() { return resultCode; }
     public String getEvidenceJson() { return evidenceJson; }
     public Integer getBeforeSchoolDay() { return beforeSchoolDay; }
 
