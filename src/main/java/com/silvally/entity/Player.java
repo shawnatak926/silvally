@@ -218,6 +218,7 @@ public class Player extends BaseEntity {
         this.endingJson = endingJson;
         this.ap = 0;
     }
+    public int getResumeLevel() { return resumeLevel; }
     public String getInitialCareerCode() { return initialCareerCode; }
     public String getCurrentCareerCode() { return currentCareerCode; }
 

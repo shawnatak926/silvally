@@ -28,9 +28,12 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private final EventService schoolEvents;
     private final SchoolRules rules;
     private final CertificateService certificateService;
+    private final ProjectService projectService;
+    private final CareerService careerService;
 
     public SchoolTurnServiceImpl(PlayerRepository playerRepository, CommandExecutor commandExecutor,
-                                 SchoolRules rules, CertificateService certificateService, EventService schoolEvents, SchoolCalendar calendar, FieldLearningService fieldLearning, tools.jackson.databind.ObjectMapper json) {
+                                 SchoolRules rules, CertificateService certificateService, EventService schoolEvents, SchoolCalendar calendar, FieldLearningService fieldLearning, tools.jackson.databind.ObjectMapper json,
+                                 ProjectService projectService, CareerService careerService) {
         this.json = json;
         this.fieldLearning = fieldLearning;
         this.calendar = calendar;
@@ -39,6 +42,8 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         this.commandExecutor = commandExecutor;
         this.rules = rules;
         this.certificateService = certificateService;
+        this.projectService = projectService;
+        this.careerService = careerService;
     }
 
     @Override
@@ -97,6 +102,10 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         } else {
             player.getStats().apply(rules.turnGrowth(player));
             player.getStats().apply(calendar.focusGrowth(player));
+            // 방학 대기·캠프 실습 턴은 누적 턴이 그대로이므로 일반 턴 종료에서만 만료를 검사한다.
+            int nextTurn = rules.absoluteTurn(player) + 1;
+            outcome.expiredProjects = projectService.expireOverdue(player, nextTurn);
+            outcome.expiredApplications = careerService.expireOverdue(player, nextTurn);
             fieldLearning.onTurnEnd(player).ifPresent(result -> outcome.extraDetails.put("fieldLearning", json.convertValue(result, Map.class)));
             if (calendar.endsSemester(player)) {
                 player.awaitVacation(); outcome.resultCode = "VACATION_REQUIRED";
@@ -117,6 +126,8 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         private Map<String, Object> extraDetails = new LinkedHashMap<>();
         private String resultCode;
         private List<String> expiredCourses = List.of();
+        private List<String> expiredProjects = List.of();
+        private List<String> expiredApplications = List.of();
 
         private Map<String, Object> details(Player player) {
             Map<String, Object> details = new LinkedHashMap<>(extraDetails);
@@ -126,6 +137,12 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
             details.put("turn", player.getTurn());
             if (!expiredCourses.isEmpty()) {
                 details.put("expiredCourses", expiredCourses);
+            }
+            if (!expiredProjects.isEmpty()) {
+                details.put("expiredProjects", expiredProjects);
+            }
+            if (!expiredApplications.isEmpty()) {
+                details.put("expiredApplications", expiredApplications);
             }
             if (player.getPendingChoice() != null) {
                 details.put("pendingChoice", player.getPendingChoice());

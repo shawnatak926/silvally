@@ -9,8 +9,12 @@ import com.silvally.dto.response.ApplicationMutation;
 import com.silvally.dto.response.ApplicationView;
 import com.silvally.dto.response.EndingMutation;
 import com.silvally.dto.response.EndingView;
+import com.silvally.dto.response.InterviewValidationResult;
+import com.silvally.dto.response.MutationResult;
+import com.silvally.entity.ApplicationStatus;
 import com.silvally.entity.CatalogDef;
 import com.silvally.entity.CatalogKind;
+import com.silvally.entity.InterviewKind;
 import com.silvally.entity.JobApplication;
 import com.silvally.entity.Phase;
 import com.silvally.entity.Player;
@@ -21,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,6 +34,9 @@ import java.util.UUID;
 @Service
 @Transactional(readOnly = true)
 public class CareerServiceImpl implements CareerService {
+    static final int STEP_AP = 1;
+    private static final List<ApplicationStatus> IN_PROGRESS = List.of(
+            ApplicationStatus.DOC_PASSED, ApplicationStatus.CODE_PASSED, ApplicationStatus.INTERVIEW_PASSED);
 
     private final PlayerRepository playerRepository;
     private final JobApplicationRepository jobApplicationRepository;
@@ -36,6 +45,10 @@ public class CareerServiceImpl implements CareerService {
     private final GraduationSummaryBuilder summaryBuilder;
     private final CatalogDefRepository catalog;
     private final ObjectMapper objectMapper;
+    private final SchoolRules schoolRules;
+    private final ProjectRules projectRules;
+    private final RecruitmentRules recruitmentRules;
+    private final InterviewService interviewService;
 
     public CareerServiceImpl(PlayerRepository playerRepository,
                              JobApplicationRepository jobApplicationRepository,
@@ -43,7 +56,11 @@ public class CareerServiceImpl implements CareerService {
                              GraduationPolicy graduationPolicy,
                              GraduationSummaryBuilder summaryBuilder,
                              CatalogDefRepository catalog,
-                             ObjectMapper objectMapper) {
+                             ObjectMapper objectMapper,
+                             SchoolRules schoolRules,
+                             ProjectRules projectRules,
+                             RecruitmentRules recruitmentRules,
+                             InterviewService interviewService) {
         this.playerRepository = playerRepository;
         this.jobApplicationRepository = jobApplicationRepository;
         this.commandExecutor = commandExecutor;
@@ -51,25 +68,178 @@ public class CareerServiceImpl implements CareerService {
         this.summaryBuilder = summaryBuilder;
         this.catalog = catalog;
         this.objectMapper = objectMapper;
+        this.schoolRules = schoolRules;
+        this.projectRules = projectRules;
+        this.recruitmentRules = recruitmentRules;
+        this.interviewService = interviewService;
     }
 
     @Override
     public List<ApplicationView> getApplications(UUID playerId) {
-        throw new UnsupportedOperationException("TODO: 지원 목록");
+        playerRepository.findById(playerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "회차를 찾을 수 없습니다."));
+        return jobApplicationRepository.findByPlayerIdOrderByCompanyCodeAsc(playerId).stream()
+                .map(CareerServiceImpl::toView)
+                .toList();
     }
 
     @Override
     @Transactional
     public ApplicationMutation apply(UUID playerId, long expectedVersion, String idempotencyKey,
                                      ApplyJobRequest request) {
-        throw new UnsupportedOperationException("TODO: 기업 지원·서류 평가");
+        Map<String, Object> details = new LinkedHashMap<>();
+        JobApplication[] saved = new JobApplication[1];
+        return commandExecutor.execute(playerId, expectedVersion, idempotencyKey,
+                new CommandSpec<>("JOB_APPLY", request.companyCode(), request, ApplicationMutation.class),
+                player -> {
+                    schoolRules.requireSchool(player);
+                    schoolRules.requireNoPendingChoice(player);
+                    CompanyRule rule = recruitmentRules.find(player, request.companyCode());
+                    requireApplicable(player, rule);
+                    spend(player, STEP_AP);
+
+                    int portfolio = projectRules.portfolioScore(player, rule.role());
+                    int document = recruitmentRules.documentScore(player, portfolio);
+                    boolean passed = document >= rule.docPass();
+                    saved[0] = jobApplicationRepository.save(JobApplication.apply(player.getId(), rule.code(),
+                            rule.role(), schoolRules.absoluteTurn(player), portfolio, document, passed));
+                    details.put("companyCode", rule.code());
+                    details.put("score", document);
+                    details.put("passScore", rule.docPass());
+                },
+                player -> new ApplicationMutation(toView(saved[0]), new MutationResult(player.view(), "JOB_APPLY",
+                        STEP_AP, Map.of(), saved[0].getStatus() == ApplicationStatus.REJECTED ? "REJECTED" : "DOC_PASSED",
+                        details)));
     }
 
     @Override
     @Transactional
     public ApplicationMutation proceedStep(UUID playerId, UUID applicationId, long expectedVersion,
                                            String idempotencyKey, JobStepRequest request) {
-        throw new UnsupportedOperationException("TODO: 코딩·면접·결과 단계");
+        String step = parseStep(request.step());
+        Map<String, Object> details = new LinkedHashMap<>();
+        JobApplication[] target = new JobApplication[1];
+        int[] spent = new int[1];
+        return commandExecutor.execute(playerId, expectedVersion, idempotencyKey,
+                new CommandSpec<>("JOB_STEP", applicationId + ":" + step, request, ApplicationMutation.class),
+                player -> {
+                    schoolRules.requireSchool(player);
+                    schoolRules.requireNoPendingChoice(player);
+                    JobApplication application = jobApplicationRepository.findByIdAndPlayerId(applicationId, player.getId())
+                            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "지원 내역을 찾을 수 없습니다."));
+                    target[0] = application;
+                    CompanyRule rule = recruitmentRules.find(player, application.getCompanyCode());
+                    requireStepOrder(application, step);
+                    if (schoolRules.absoluteTurn(player) > rule.deadlineTurn()) {
+                        throw new BusinessException(ErrorCode.WRONG_STEP, "채용 마감이 지났습니다.",
+                                Map.of("deadlineTurn", rule.deadlineTurn()));
+                    }
+                    details.put("companyCode", rule.code());
+                    details.put("step", step);
+                    switch (step) {
+                        case RecruitmentRules.STEP_CODING -> {
+                            spend(player, STEP_AP);
+                            spent[0] = STEP_AP;
+                            int score = recruitmentRules.codingScore(player, rule);
+                            application.recordCoding(score, score >= rule.codingPass());
+                            details.put("score", score);
+                            details.put("passScore", rule.codingPass());
+                        }
+                        case RecruitmentRules.STEP_INTERVIEW -> {
+                            // 질문 발급·답변 검증과 시점 규칙은 공통 InterviewService가, 채점은 채용 단계가 맡는다.
+                            InterviewValidationResult interview = interviewService.submitAnswer(player,
+                                    InterviewKind.COMPANY, applicationId.toString(), request.questionId(),
+                                    request.answer());
+                            spend(player, STEP_AP);
+                            spent[0] = STEP_AP;
+                            int statScore = recruitmentRules.interviewScore(player, rule);
+                            int bonus = recruitmentRules.answerBonus(interview.answer());
+                            int score = Math.min(100, statScore + bonus);
+                            application.recordInterview(score, score >= rule.interviewPass());
+                            details.put("score", score);
+                            details.put("statScore", statScore);
+                            details.put("answerBonus", bonus);
+                            details.put("passScore", rule.interviewPass());
+                            details.put("questionId", interview.questionId().toString());
+                        }
+                        default -> {
+                            int composite = recruitmentRules.compositeScore(application.getD().intValue(),
+                                    application.getK().intValue(), application.getJ().intValue());
+                            application.recordResult(composite, composite >= rule.offerPass());
+                            details.put("score", composite);
+                            details.put("passScore", rule.offerPass());
+                        }
+                    }
+                },
+                player -> new ApplicationMutation(toView(target[0]), new MutationResult(player.view(), "JOB_STEP",
+                        spent[0], Map.of(), target[0].getStatus().name(), details)));
+    }
+
+    @Override
+    @Transactional
+    public List<String> expireOverdue(Player player, int nextAbsoluteTurn) {
+        List<String> expired = new ArrayList<>();
+        for (JobApplication application : jobApplicationRepository.findByPlayerIdAndStatusIn(player.getId(), IN_PROGRESS)) {
+            if (recruitmentRules.find(player, application.getCompanyCode()).deadlineTurn() < nextAbsoluteTurn) {
+                application.expire();
+                expired.add(application.getCompanyCode());
+            }
+        }
+        return expired;
+    }
+
+    private void requireApplicable(Player player, CompanyRule rule) {
+        List<String> reasons = new ArrayList<>();
+        if (player.getYear() < rule.minYear()) {
+            reasons.add(rule.minYear() + "학년부터 지원할 수 있습니다.");
+        }
+        if (schoolRules.absoluteTurn(player) > rule.deadlineTurn()) {
+            reasons.add("채용 마감이 지났습니다. (마감 " + rule.deadlineTurn() + "턴)");
+        }
+        if (jobApplicationRepository.existsByPlayerIdAndCompanyCode(player.getId(), rule.code())) {
+            reasons.add("이미 지원한 기업입니다.");
+        }
+        if (!reasons.isEmpty()) {
+            throw new BusinessException(ErrorCode.LOCKED, "지원할 수 없습니다.", Map.of("reasons", reasons));
+        }
+    }
+
+    /** 단계는 직전 단계를 통과한 상태에서만 진행할 수 있다. */
+    private static void requireStepOrder(JobApplication application, String step) {
+        ApplicationStatus required = switch (step) {
+            case RecruitmentRules.STEP_CODING -> ApplicationStatus.DOC_PASSED;
+            case RecruitmentRules.STEP_INTERVIEW -> ApplicationStatus.CODE_PASSED;
+            default -> ApplicationStatus.INTERVIEW_PASSED;
+        };
+        if (application.getStatus() != required) {
+            throw new BusinessException(ErrorCode.WRONG_STEP, "이전 전형을 통과해야 진행할 수 있습니다.",
+                    Map.of("status", application.getStatus().name(), "required", required.name()));
+        }
+    }
+
+    private static String parseStep(String raw) {
+        String step = raw == null ? "" : raw.trim().toUpperCase(java.util.Locale.ROOT);
+        if (!List.of(RecruitmentRules.STEP_CODING, RecruitmentRules.STEP_INTERVIEW,
+                RecruitmentRules.STEP_RESULT).contains(step)) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "알 수 없는 채용 단계입니다: " + raw,
+                    Map.of("allowed", List.of(RecruitmentRules.STEP_CODING, RecruitmentRules.STEP_INTERVIEW,
+                            RecruitmentRules.STEP_RESULT)));
+        }
+        return step;
+    }
+
+    private static ApplicationView toView(JobApplication application) {
+        return new ApplicationView(application.getId(), application.getCompanyCode(), application.getRole(),
+                application.getStatus().name(), application.getD(), application.getK(), application.getJ(),
+                application.getP(), application.getFailureCode());
+    }
+
+    private static void spend(Player player, int cost) {
+        if (player.getAp() < cost) {
+            throw new BusinessException(ErrorCode.INSUFFICIENT_AP,
+                    Map.of("required", cost, "remaining", player.getAp()));
+        }
+        player.spendAp(cost);
     }
 
     @Override

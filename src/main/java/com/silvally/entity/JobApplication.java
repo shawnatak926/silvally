@@ -54,6 +54,73 @@ public class JobApplication {
     protected JobApplication() {
     }
 
+    /** 지원과 서류 평가 결과를 함께 기록한다. 서류에서 떨어지면 바로 REJECTED. */
+    public static JobApplication apply(UUID playerId, String companyCode, String role, int appliedTurn,
+                                       int portfolioScore, int documentScore, boolean passed) {
+        JobApplication application = new JobApplication();
+        application.playerId = playerId;
+        application.companyCode = companyCode;
+        application.role = role;
+        application.appliedTurn = appliedTurn;
+        application.p = BigDecimal.valueOf(portfolioScore);
+        application.d = BigDecimal.valueOf(documentScore);
+        application.status = passed ? ApplicationStatus.DOC_PASSED : ApplicationStatus.REJECTED;
+        application.failureCode = passed ? null : "DOC_FAILED";
+        return application;
+    }
+
+    public void recordCoding(int score, boolean passed) {
+        k = BigDecimal.valueOf(score);
+        status = passed ? ApplicationStatus.CODE_PASSED : ApplicationStatus.REJECTED;
+        failureCode = passed ? null : "CODING_FAILED";
+    }
+
+    /** 회사 면접 점수와 통과 여부를 기록한다. */
+    public void recordInterview(int score, boolean passed) {
+        j = BigDecimal.valueOf(score);
+        status = passed ? ApplicationStatus.INTERVIEW_PASSED : ApplicationStatus.REJECTED;
+        failureCode = passed ? null : "INTERVIEW_FAILED";
+    }
+
+    public void recordResult(int composite, boolean offered) {
+        q = BigDecimal.valueOf(composite);
+        status = offered ? ApplicationStatus.OFFERED : ApplicationStatus.REJECTED;
+        failureCode = offered ? null : "RESULT_FAILED";
+    }
+
+    public void expire() {
+        status = ApplicationStatus.EXPIRED;
+        failureCode = "DEADLINE_PASSED";
+    }
+
+    public int getAppliedTurn() {
+        return appliedTurn;
+    }
+
+    public BigDecimal getQ() {
+        return q;
+    }
+
+    public BigDecimal getD() {
+        return d;
+    }
+
+    public BigDecimal getK() {
+        return k;
+    }
+
+    public BigDecimal getJ() {
+        return j;
+    }
+
+    public BigDecimal getP() {
+        return p;
+    }
+
+    public String getFailureCode() {
+        return failureCode;
+    }
+
     public UUID getId() {
         return id;
     }
