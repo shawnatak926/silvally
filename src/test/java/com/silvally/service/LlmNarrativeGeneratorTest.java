@@ -166,7 +166,7 @@ class LlmNarrativeGeneratorTest {
         NarrativeContext context = new NarrativeContext("우주", "SCHOOL", year, 5, null,
                 Map.of("P", 20 + year), "GENERAL", "SW", null, "BACKEND",
                 List.of(), List.of(), List.of(new NarrativeContext.RecentChoice(year, 4, null, "E00",
-                choice + "_PREV", "DONE")));
+                choice + "_PREV", "DONE")), List.of());
         List<String> previous = year == 1 ? List.of() : List.of("이전 장면 서사");
         return new NarrativeScene(sceneId, "장면 " + sceneId, "상황", choice, choice + " 선택", "DONE", "{}",
                 year, 5, null, context, previous);
