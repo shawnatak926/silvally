@@ -153,6 +153,57 @@ class LlmNarrativeGeneratorTest {
                 .isInstanceOf(NarrativeGenerationException.class);
     }
 
+    @Test
+    @DisplayName("학교 근거는 state와 분리해 분류·쪽수와 함께 보내고 게임 규칙과 사실 우선 지시를 함께 전달한다")
+    void schoolEvidence_sentSeparatelyWithGameRulesAndSystemRules() throws IOException {
+        reply.set(new Reply(200, completion(NARRATIVE, "k-exaone_v2.5"), 0));
+        var selector = new SchoolEvidenceSelector(new SchoolLifeContent(json), json);
+        var evidence = new java.util.ArrayList<>(selector.select("J01", "SILICON_VALLEY", "{}"));
+        evidence.addAll(selector.select("BS01", "DORMITORY", "{}").subList(1, 2));
+        evidence.addAll(selector.select("DAILY_REFLECTION", "REFLECT_NOTE", "{\"source\":{\"code\":\"NEUROW\"}}"));
+        String recorded = "{\"fieldLearning\":{\"status\":\"NOT_SELECTED\"},\"source\":{\"code\":\"GLOBAL_SELECTION\",\"fact\":\"중복 원문\"}}";
+
+        generator(Duration.ofSeconds(5)).generate(scene("J01", 3, "SILICON_VALLEY", recorded, evidence));
+
+        var payload = gameData(requestBodies.get(0));
+        assertThat(payload.path("state").has("schoolEvidence")).isFalse();
+        assertThat(payload.path("state").path("stats").path("S").asInt()).isEqualTo(40);
+        assertThat(payload.path("schoolEvidence")).extracting(e -> e.path("code").asString())
+                .containsExactly("GLOBAL_SELECTION", "GLOBAL_PERIOD_NOTE", "REBUILD_PLAN", "NEUROW");
+        var conflict = payload.path("schoolEvidence").get(1);
+        assertThat(conflict.path("classification").asString()).isEqualTo("CONFLICT");
+        assertThat(conflict.path("fact").asString()).contains("8주", "6주");
+        assertThat(conflict.path("url").asString()).endsWith("#page=4");
+        assertThat(payload.path("schoolEvidence").get(2).path("classification").asString()).isEqualTo("PLAN");
+        assertThat(payload.path("schoolEvidence").get(2).path("fact").asString()).contains("입주 예정");
+        assertThat(payload.path("schoolEvidence").get(3).path("fact").asString()).contains("스트레스 능력치 S와 다른 의미");
+        assertThat(payload.path("gameRules").toString()).contains("24턴", "비포스쿨은 5일", "2추가턴", "8턴 시작",
+                "22턴 순위", "상위 3팀", "EN) 50");
+        String sceneEvidence = payload.path("scene").path("evidence").asString();
+        assertThat(sceneEvidence).contains("NOT_SELECTED").doesNotContain("중복 원문");
+        String system = systemContent(requestBodies.get(0));
+        assertThat(system).contains("schoolEvidence", "scene.resultCode와 state에 기록된 것만",
+                "PLAN", "CONFLICT", "PAST_CASE", "gameRules", "전략적 사고", "개인정보");
+    }
+
+    @Test
+    @DisplayName("학교 근거가 없는 이전 스냅샷이나 맥락 없는 장면도 그대로 요청한다")
+    void legacySnapshotWithoutEvidence_stillGenerates() {
+        reply.set(new Reply(200, completion(NARRATIVE, "k-exaone_v2.5"), 0));
+        String recorded = "{\"source\":{\"code\":\"NEUROW\"}}";
+        LlmNarrativeGenerator generator = generator(Duration.ofSeconds(5));
+
+        assertThat(generator.generate(scene("DAILY_REFLECTION", 1, "REFLECT_NOTE", recorded, null)).text())
+                .isEqualTo(NARRATIVE);
+        assertThat(generator.generate(new NarrativeScene("X01", "장면", null, "PICK", "선택", "DONE", null,
+                1, 1, null, null, List.of())).text()).isEqualTo(NARRATIVE);
+
+        var legacy = gameData(requestBodies.get(0));
+        assertThat(legacy.path("schoolEvidence").isEmpty()).isTrue();
+        assertThat(legacy.path("scene").path("evidence").asString()).contains("NEUROW");
+        assertThat(gameData(requestBodies.get(1)).path("state").isNull()).isTrue();
+    }
+
     private LlmNarrativeGenerator generator(Duration timeout) {
         return (LlmNarrativeGenerator) new NarrativeConfig().narrativeGenerator(properties(API_KEY, timeout), json);
     }
@@ -163,12 +214,17 @@ class LlmNarrativeGeneratorTest {
     }
 
     private static NarrativeScene scene(String sceneId, int year, String choice) {
+        return scene(sceneId, year, choice, "{}", List.of());
+    }
+
+    private static NarrativeScene scene(String sceneId, int year, String choice, String evidenceJson,
+                                        List<NarrativeContext.SchoolEvidence> schoolEvidence) {
         NarrativeContext context = new NarrativeContext("우주", "SCHOOL", year, 5, null,
-                Map.of("P", 20 + year), "GENERAL", "SW", null, "BACKEND",
+                Map.of("P", 20 + year, "S", 40), "GENERAL", "SW", null, "BACKEND",
                 List.of(), List.of(), List.of(new NarrativeContext.RecentChoice(year, 4, null, "E00",
-                choice + "_PREV", "DONE")), List.of());
+                choice + "_PREV", "DONE")), schoolEvidence);
         List<String> previous = year == 1 ? List.of() : List.of("이전 장면 서사");
-        return new NarrativeScene(sceneId, "장면 " + sceneId, "상황", choice, choice + " 선택", "DONE", "{}",
+        return new NarrativeScene(sceneId, "장면 " + sceneId, "상황", choice, choice + " 선택", "DONE", evidenceJson,
                 year, 5, null, context, previous);
     }
 
@@ -186,11 +242,25 @@ class LlmNarrativeGeneratorTest {
     }
 
     private String userContent(String requestBody) {
+        return content(requestBody, "user");
+    }
+
+    private String systemContent(String requestBody) {
+        return content(requestBody, "system");
+    }
+
+    private String content(String requestBody, String role) {
         for (var message : json.readTree(requestBody).path("messages")) {
-            if ("user".equals(message.path("role").asString())) {
+            if (role.equals(message.path("role").asString())) {
                 return message.path("content").asString();
             }
         }
-        throw new AssertionError("user message missing: " + requestBody);
+        throw new AssertionError(role + " message missing: " + requestBody);
+    }
+
+    private tools.jackson.databind.JsonNode gameData(String requestBody) {
+        String user = userContent(requestBody);
+        return json.readTree(user.substring(user.indexOf("<game_data>") + "<game_data>".length(),
+                user.indexOf("</game_data>")).strip());
     }
 }
