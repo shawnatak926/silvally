@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 
 public record CreatePlayerRequest(
         @NotBlank @Size(min = 1, max = 24) String name,
-        String applicationProfile
+        String applicationProfile,
+        String edition
 ) {
+    public CreatePlayerRequest(String name, String applicationProfile) { this(name, applicationProfile, null); }
 }

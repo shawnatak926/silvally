@@ -50,6 +50,16 @@ class AdmissionEventServiceTest {
         assertThat(records.findByPlayerIdOrderByIdAsc(p.getId())).isEmpty();
         assertThat(players.findById(p.getId()).orElseThrow().getVersion()).isEqualTo(p.getVersion());
     }
+    @Test void staleAdmissionVersionReportsExpectedAndCurrentVersion() {
+        Player p = player(null);
+        assertThatThrownBy(() -> service.chooseEvent(p.getId(), "AD01", p.getVersion() + 5, UUID.randomUUID().toString(),
+                new ChooseEventRequest("GENERAL")))
+            .isInstanceOfSatisfying(BusinessException.class, e -> {
+                assertThat(e.getErrorCode()).isEqualTo(ErrorCode.VERSION_CONFLICT);
+                assertThat(e.getDetails()).containsEntry("expectedVersion", p.getVersion() + 5)
+                    .containsEntry("currentVersion", p.getVersion());
+            });
+    }
     @Test void specialFailureUsesSubmittedDocumentsOnceAndContinuesOriginalStage() {
         Player p = player("MEISTER");
         var result = choose(p, "AD02", "ACADEMIC");

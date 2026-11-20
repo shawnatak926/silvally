@@ -1,0 +1,1107 @@
+{
+  "schoolSources": {
+    "NARSHA": {
+      "title": "입학설명회 · 1·2학년 나르샤, 25~26쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=26",
+      "year": 2027,
+      "fact": "자료에서는 1학년 2학기 자유·클론코딩 프로젝트와 교내 발표, 2학년 1~2학기 자유 프로젝트와 ICT융합엑스포·서울 소프트웨이브를 소개합니다. 팀은 4~7명으로 안내됩니다. 게임의 1학년 8턴 시작과 상위 3팀 전시는 별도 가상 규칙입니다.",
+      "code": "NARSHA",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "EXPO": {
+      "title": "2학년 ICT융합 엑스포 운영 사례",
+      "url": "https://dgsw.dge.hs.kr/dgswh/na/ntt/selectNttInfo.do?mi=10091803&nttSn=41327417",
+      "year": 2026,
+      "fact": "10월 22일 대구 엑스코에서 부스 시연 평가와 2학년 나르샤 프로젝트 발표가 진행됐습니다.",
+      "code": "EXPO",
+      "classification": "PAST_CASE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "NARSHA_CASES": {
+      "title": "소프트웨어로 나르샤 역대 수상작",
+      "url": "https://dgsw.dge.hs.kr/dgswh/na/ntt/selectNttList.do?bbsId=10203524&mi=10208147",
+      "fact": "공개된 수상 사례에는 2024년 AI 홍보물 웹 서비스, 2025년 가족 교류 앱, 2026년 실시간 AI 비식별화 프로젝트가 있습니다.",
+      "code": "NARSHA_CASES",
+      "classification": "PAST_CASE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "HACKATHON": {
+      "title": "교내 소프트웨어 해커톤 운영 사례",
+      "url": "https://dgsw.dge.hs.kr/dgswh/na/ntt/selectNttInfo.do?mi=10091803&bbsId=10091803&nttSn=41239178",
+      "year": 2026,
+      "fact": "1·2학년이 참여한 여름 해커톤에서 아이디어를 정리하고 시제품을 만들고 개선했습니다.",
+      "code": "HACKATHON",
+      "classification": "PAST_CASE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "FESTIVAL": {
+      "title": "교내 축제 운영 사례",
+      "url": "https://dgsw.dge.hs.kr/dgswh/na/ntt/selectNttInfo.do?mi=10091803&bbsId=10091803&nttSn=41243679",
+      "year": 2026,
+      "fact": "교내 축제에서 학생들이 부스를 운영하고 가요제 등 무대에 참여했습니다.",
+      "code": "FESTIVAL",
+      "classification": "PAST_CASE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "SPORTS": {
+      "title": "사제동행 체육대회 운영 사례",
+      "url": "https://dgsw.dge.hs.kr/dgswh/na/ntt/selectNttInfo.do?mi=10091803&bbsId=10091803&nttSn=40843210",
+      "year": 2025,
+      "fact": "학교는 사제동행 체육대회와 함께 학생 운영 부스와 장기자랑이 열린 사례를 공개했습니다.",
+      "code": "SPORTS",
+      "classification": "PAST_CASE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "CLUB": {
+      "title": "창체 동아리 운영계획",
+      "url": "https://dgsw.dge.hs.kr/dgswh/cm/cntnts/cntntsView.do?cntntsId=10091770&mi=10091770",
+      "year": 2026,
+      "fact": "학교는 전공과 다양한 관심 영역에서 학생 중심 동아리 활동을 운영합니다.",
+      "code": "CLUB",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "SELF_CLUB": {
+      "title": "자율동아리 운영계획",
+      "url": "https://dgsw.dge.hs.kr/dgswh/cm/cntnts/cntntsView.do?cntntsId=10091771&mi=10091771",
+      "fact": "자율동아리는 학생들이 활동계획을 세우고 지도교사와 함께 운영하는 절차가 안내돼 있습니다.",
+      "code": "SELF_CLUB",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "DORM": {
+      "title": "기숙사 운영계획 게시판",
+      "url": "https://dgsw.dge.hs.kr/dgswh/na/ntt/selectNttList.do?bbsId=10091777&mi=10091777",
+      "year": 2026,
+      "fact": "학교는 기숙사 운영계획을 공지합니다. 게시판에서 2024~2026년 계획을 확인할 수 있습니다.",
+      "code": "DORM",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "MEALS": {
+      "title": "금주의 식단",
+      "url": "https://dgsw.dge.hs.kr/dgswh/ad/fm/foodmenu/selectFoodMenuView.do?mi=10091823",
+      "fact": "학교 급식 게시판은 주간 조식·중식·석식 정보를 공개합니다.",
+      "code": "MEALS",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "AFTER_SCHOOL": {
+      "title": "방과후학교 운영계획 게시판",
+      "url": "https://dgsw.dge.hs.kr/dgswh/na/ntt/selectNttList.do?bbsId=10091818&mi=10091818",
+      "year": 2026,
+      "fact": "학교는 방과후학교 운영계획과 만족도 조사 결과를 공개합니다.",
+      "code": "AFTER_SCHOOL",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "SCHOOL_LIFE": {
+      "title": "학교생활평점제 운영계획",
+      "url": "https://dgsw.dge.hs.kr/dgswh/na/ntt/selectNttInfo.do?mi=10091723&nttSn=41240738",
+      "year": 2026,
+      "fact": "교내 행사 지원, 실습실 정돈과 후배 멘토링 등 공동체 활동이 생활지도 계획에 소개됩니다.",
+      "code": "SCHOOL_LIFE",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "CAREER_EVENTS": {
+      "title": "학교교육활동 게시판",
+      "url": "https://dgsw.dge.hs.kr/dgswh/na/ntt/selectNttList.do?bbsId=10091803&mi=10091803",
+      "year": 2026,
+      "fact": "학교는 진로비전캠프, 기업체 탐방, 전공면접 캠프와 산학 프로젝트 발표 사례를 공개합니다.",
+      "code": "CAREER_EVENTS",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "CAREER_SUPPORT": {
+      "title": "대구광역시교육청 학교 소개",
+      "url": "https://www.dge.go.kr/meister/cm/cntnts/cntntsView.do?cntntsId=2927&mi=3455",
+      "year": 2025,
+      "fact": "교육청 학교 소개에서 전공 교육과정과 나르샤 프로젝트, 자격증·취업 지원, 실리콘밸리 현장학습을 안내합니다.",
+      "code": "CAREER_SUPPORT",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "CURRICULUM": {
+      "title": "입학설명회 · 교육과정 개요, 19쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=19",
+      "year": 2027,
+      "fact": "2026학년도 입학생 기준으로 1학년은 SW제품기획·파이썬·웹 입문·DB·JAVA 기초·인공지능 일반, 2학년은 공학·자료구조·네트워크·AI 모델링, 3학년은 화면 구현·서버 운영·CS 심화가 소개됩니다. 이 표를 모든 입학 연도의 확정 편제로 일반화하지 않습니다.",
+      "code": "CURRICULUM",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다.",
+      "appliesTo": "2026학년도 입학생 기준"
+    },
+    "DAILY_ROUTINE": {
+      "title": "입학설명회 · 학교 일과, 18쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=18",
+      "year": 2027,
+      "fact": "조회·정규 수업·청소·방과후학교·저녁 전공 스터디·기숙사 개인 시간·점호로 이어지는 일과와 주말 기숙사 휴무가 안내됩니다. 게임은 시간표를 압축한 24턴으로 진행합니다.",
+      "code": "DAILY_ROUTINE",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "NEUROW": {
+      "title": "입학설명회 · 뉴로우-S, 20~22쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=22",
+      "year": 2027,
+      "fact": "뉴로우-S는 소통·전략적 사고·자기성찰을 다루며 나보고서, 변화계획서, 매일 계획과 회고, 시나리오 훈련을 소개합니다. CSR의 S는 전략적 사고로, 게임의 스트레스 능력치 S와 다른 의미입니다.",
+      "code": "NEUROW",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "EMPLOYMENT_CAMPS": {
+      "title": "입학설명회 · 취업역량강화캠프, 23쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=23",
+      "year": 2027,
+      "fact": "1학년은 의사소통·서류전형, 2학년은 인성면접·자기소개서·포트폴리오, 3학년은 인성·직무별 기술면접 캠프를 안내합니다. 캠프 참여가 채용 합격을 보장하지는 않습니다.",
+      "code": "EMPLOYMENT_CAMPS",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "INDUSTRY_PROJECT": {
+      "title": "입학설명회 · 3학년 산학협력 프로젝트, 27쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=27",
+      "year": 2027,
+      "fact": "3학년 1학기 방과후에 기업 멘토와 학생 팀이 기업 요청 프로그램을 개발하는 채용 연계 산학협력 프로젝트가 소개됩니다. 분야에는 웹·앱·서버·게임엔진·IoT·머신러닝·빅데이터가 있습니다. 국내 기업 현장실습과 동일한 제도라고 단정하지 않습니다.",
+      "code": "INDUSTRY_PROJECT",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "VACATION_CAMP": {
+      "title": "입학설명회 · 여름·겨울 전공 캠프, 28쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=28",
+      "year": 2027,
+      "fact": "1·2학년 희망 학생이 방학에 코스별 전공 강의와 프로젝트 집중 개발을 하는 전공 역량 강화 캠프를 소개합니다. 게임에서는 1·2학년만 선택하며 캠프 2추가턴은 게임용 압축 규칙입니다.",
+      "code": "VACATION_CAMP",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "GLOBAL_PREPARATION": {
+      "title": "입학설명회 · 학년별 프로젝트 교육, 25쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=25",
+      "year": 2027,
+      "fact": "1·2학년 겨울방학 글로벌 온라인 인턴십, 3학년 글로벌 온라인 인턴십·현장실습이 안내됩니다. 사전 온라인 협업과 현지 파견은 구분된 준비·참여 단계로 참고합니다.",
+      "code": "GLOBAL_PREPARATION",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "GLOBAL_SELECTION": {
+      "title": "입학설명회 · 글로벌 인턴십 및 현장학습, 29쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=29",
+      "year": 2027,
+      "fact": "설명회는 3학년 10명, 7월 말~8월 말 6주와 인성 검증·자기소개서·성적·어학·면접·프로젝트 역량·현지 취업 의지 등을 소개합니다. 게임의 영어 50점 단일 선발은 이를 단순화한 가상 규칙입니다.",
+      "code": "GLOBAL_SELECTION",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "GLOBAL_PERIOD_NOTE": {
+      "title": "홈페이지 탑재 자료 · 신입생 특전, 4쪽",
+      "url": "/school-sources/school-web-2027.pdf#page=4",
+      "year": 2027,
+      "fact": "홈페이지 탑재 자료는 미국 실리콘밸리 우수 학생 파견을 8주로 표기하지만 입학설명회 29쪽은 6주로 안내합니다. 서로 다른 자료의 기간을 하나로 확정하지 않고 게임에서는 준비·참여 턴만 사용합니다.",
+      "code": "GLOBAL_PERIOD_NOTE",
+      "classification": "CONFLICT",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "STUDENT_LECTURES": {
+      "title": "입학설명회 · 학생 전문가 특강, 33쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=33",
+      "year": 2027,
+      "fact": "방과후 학생 전문가 특강에서 파이썬 서버, 스피치, 학교생활·취업 경험, 대회 준비, Docker 등 선배의 경험을 나누는 활동이 소개됩니다.",
+      "code": "STUDENT_LECTURES",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "ALUMNI_LECTURES": {
+      "title": "입학설명회 · 졸업생 특강, 34쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=34",
+      "year": 2027,
+      "fact": "졸업한 선배가 취업 준비부터 회사생활과 실무 기술까지 나누는 특강을 소개합니다. 특정 기업 채용이나 졸업생의 현재 재직 상태를 게임에서 보장하지 않습니다.",
+      "code": "ALUMNI_LECTURES",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "READING": {
+      "title": "입학설명회 · 내 손의 책·파이데이아, 35쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=35",
+      "year": 2027,
+      "fact": "내 손의 책 독서 습관 활동과 파이데이아 인문고전 독서·토론, 생각 확장과 생활 실천이 소개됩니다.",
+      "code": "READING",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "NOBEL_HACKATHON": {
+      "title": "입학설명회 · 노벨엔지니어링 해커톤, 36쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=36",
+      "year": 2027,
+      "fact": "소설 속 인물의 문제에 공감하고 자연어 기반 AI 코딩으로 해결책을 만든 뒤 이야기의 변화를 생각하는 노벨엔지니어링 해커톤과 SW축제를 소개합니다.",
+      "code": "NOBEL_HACKATHON",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "ART_SPORTS": {
+      "title": "입학설명회 · 1인 1악기·1인 1스포츠, 38쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=38",
+      "year": 2027,
+      "fact": "학기별 악기 또는 스포츠 활동으로 플루트·기타, 테니스·배드민턴·축구와 합동 연주회·교내 스포츠리그가 소개됩니다. 게임 선택은 해당 프로그램을 바탕으로 만든 장면입니다.",
+      "code": "ART_SPORTS",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "EQUIPMENT_SUPPORT": {
+      "title": "입학설명회 · 개발 기자재와 비용 지원, 49쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=49",
+      "year": 2027,
+      "fact": "대여 기자재에 개발용 노트북·태블릿·AI 서버·3D 프린터 등이 소개되며 클라우드·라이선스·AI 개발 도구·개발자 계정 등의 프로젝트 비용 지원을 안내합니다. 장비 대수는 자료 시점의 현황입니다.",
+      "code": "EQUIPMENT_SUPPORT",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "INFRASTRUCTURE": {
+      "title": "입학설명회 · 실습동 현황, 53쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=53",
+      "year": 2027,
+      "fact": "2023년 10월 준공된 실습동의 프로젝트 실습실 6개와 랩실 22개를 소개합니다. 학교 전체 시설의 현재 배치를 확정하는 근거로 확대하지 않습니다.",
+      "code": "INFRASTRUCTURE",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "REBUILD_PLAN": {
+      "title": "입학설명회 · 공간 재구조화 계획, 54쪽",
+      "url": "/school-sources/admissions-2027.pdf#page=54",
+      "year": 2027,
+      "fact": "본관 개축과 2인 1실 기숙사 증축, 2026년 12월 입주 예정이 안내됩니다. 완료를 확인한 자료는 아니므로 새 건물이나 2인실이 이미 운영 중이라고 서술하지 않습니다.",
+      "code": "REBUILD_PLAN",
+      "classification": "PLAN",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다.",
+      "appliesTo": "2026년 12월 입주 예정 안내이며 완료 미확인"
+    },
+    "SCHOOL_SUPPORT": {
+      "title": "신입생 홍보 학교안내 · 교육·개발 지원, 1쪽",
+      "url": "/school-sources/school-guide-2027.pdf#page=1",
+      "year": 2027,
+      "fact": "학교안내는 개발용 맥북, 자격증 응시료·온라인 유료 강의 지원, 기숙사비·방과후 지원을 소개합니다. 식비 등 예외가 있으며 취업률과 최소 포트폴리오 수는 학교 소개 내용으로 게임의 자동 지급·취업 확률에 적용하지 않습니다.",
+      "code": "SCHOOL_SUPPORT",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "QUALIFICATION_SUPPORT": {
+      "title": "진로진학 안내서 자료 · 자격증·성장경로, 1쪽",
+      "url": "/school-sources/career-guide-2027.pdf#page=1",
+      "year": 2027,
+      "fact": "프로그래밍 기능사, 네트워크관리사, SQLD, 리눅스마스터 등의 자격을 소개합니다. 기사·산업기사 등 장기 성장경로의 자격이 고교 재학만으로 자동 응시 가능한 것은 아닙니다.",
+      "code": "QUALIFICATION_SUPPORT",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "POST_EMPLOYMENT_STUDY": {
+      "title": "진로진학 안내서 자료 · 졸업생 후학습 사례, 4~5쪽",
+      "url": "/school-sources/career-guide-2027.pdf#page=4",
+      "year": 2027,
+      "fact": "졸업생이 기업 실무와 문서화·협업 경험을 쌓고 재직자 특별전형으로 후학습을 이어간 사례를 소개합니다. 모든 졸업생의 자동 진학이나 지원 자격을 뜻하지 않습니다.",
+      "code": "POST_EMPLOYMENT_STUDY",
+      "classification": "PAST_CASE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    },
+    "CAREER_PATHS": {
+      "title": "소프트웨어 계열별 성장경로, 1쪽",
+      "url": "/school-sources/growth-path-2027.pdf#page=1",
+      "year": 2027,
+      "fact": "성장경로는 취업뿐 아니라 진학·후학습·해외·창업·병역 등 여러 방향을 제시합니다. 각 경로의 별도 자격과 선발은 남아 있으므로 하나의 필수 성공 경로로 취급하지 않습니다.",
+      "code": "CAREER_PATHS",
+      "classification": "PUBLISHED_GUIDANCE",
+      "notice": "자료 발행 학년도와 실제 운영 연도는 다를 수 있습니다. 사건 시기·선택 효과·선발 수치는 게임용 가상 규칙입니다."
+    }
+  },
+  "schoolScenes": [
+    {
+      "year": 1,
+      "turn": 1,
+      "title": "조회에서 기숙사 점호까지",
+      "premise": "조회와 정규 수업, 청소, 방과후학교와 저녁 전공 스터디를 거쳐 기숙사로 돌아왔다. 수업만큼 쉬는 시간을 지키는 일도 학교생활의 일부였다.",
+      "source": "DAILY_ROUTINE"
+    },
+    {
+      "year": 1,
+      "turn": 2,
+      "title": "SW제품기획 · 사용자부터 생각하다",
+      "premise": "SW제품기획 수업에서 기능을 정하기 전에 누가 어떤 불편을 겪는지 적어 보았다. 파이썬과 웹개발 입문에서 배운 내용을 그 문제와 연결했다.",
+      "source": "CURRICULUM"
+    },
+    {
+      "year": 1,
+      "turn": 4,
+      "title": "뉴로우-S · 오늘과 내일 사이",
+      "premise": "계획과 실제 행동을 비교해 회고를 적었다. 하지 못한 일만 세기보다 내일 바꿀 수 있는 작은 행동을 골랐다.",
+      "source": "NEUROW"
+    },
+    {
+      "year": 1,
+      "turn": 7,
+      "title": "책에서 시작한 질문",
+      "premise": "내 손의 책과 파이데이아 활동을 소개받았다. 등장인물의 선택을 서로 다르게 이해한 이유를 듣고 내 생각을 적었다.",
+      "source": "READING"
+    },
+    {
+      "year": 1,
+      "turn": 11,
+      "title": "노벨엔지니어링 해커톤 안내",
+      "premise": "소설 속 문제를 AI 코딩으로 풀어 보고 이후 이야기를 생각하는 해커톤 방식을 살펴봤다. 빠르게 만든 기능도 사람이 직접 검증해야 한다는 점을 기억했다.",
+      "source": "NOBEL_HACKATHON"
+    },
+    {
+      "year": 1,
+      "turn": 14,
+      "title": "악기와 스포츠도 학교생활",
+      "premise": "기타와 플루트 합주, 테니스·배드민턴·축구 활동 안내를 살펴봤다. 화면 밖에서 친구와 호흡을 맞추는 시간도 필요했다.",
+      "source": "ART_SPORTS"
+    },
+    {
+      "year": 1,
+      "turn": 17,
+      "title": "학생 전문가 특강의 질문",
+      "premise": "방과후 학생 전문가 특강에서 선배가 서버와 Docker, 발표 준비의 시행착오를 이야기했다. 내 과제에도 적용할 수 있는 방법을 수첩에 적었다.",
+      "source": "STUDENT_LECTURES"
+    },
+    {
+      "year": 1,
+      "turn": 21,
+      "title": "겨울 온라인 인턴십 준비 안내",
+      "premise": "겨울 글로벌 온라인 인턴십 안내를 읽었다. 영어로 작업을 설명하고 온라인 협업 기록을 남기는 연습은 현지 파견과 별도로 준비할 수 있는 일이었다.",
+      "source": "GLOBAL_PREPARATION"
+    },
+    {
+      "year": 2,
+      "turn": 1,
+      "title": "기초에서 심화로",
+      "premise": "인공지능소프트웨어과와 소프트웨어개발과의 과목을 살펴봤다. 자료구조·네트워크·소프트웨어공학과 데이터·AI 모델링을 프로젝트에 연결할 방법을 생각했다.",
+      "source": "CURRICULUM"
+    },
+    {
+      "year": 2,
+      "turn": 4,
+      "title": "설계와 테스트를 함께 묻는 수업",
+      "premise": "실무 프로젝트 수업에서 실행 결과뿐 아니라 설계 이유와 테스트 방법을 설명해 보았다. 다른 학과를 골랐어도 관심 있는 기술을 계속 배울 수 있었다.",
+      "source": "CURRICULUM"
+    },
+    {
+      "year": 2,
+      "turn": 8,
+      "title": "멘토에게 가져갈 작업 기록",
+      "premise": "나르샤 팀들이 개발 로그와 해결하지 못한 문제를 정리하는 모습을 봤다. 나도 질문을 막연하게 남기지 않고 재현 순서와 함께 적어 보기로 했다.",
+      "source": "STUDENT_LECTURES"
+    },
+    {
+      "year": 2,
+      "turn": 11,
+      "title": "소설 속 문제와 팀의 시제품",
+      "premise": "노벨엔지니어링 해커톤 사례를 살펴봤다. 인물의 문제와 AI가 만든 기능이 맞닿는지 친구와 설명을 비교했다.",
+      "source": "NOBEL_HACKATHON"
+    },
+    {
+      "year": 2,
+      "turn": 15,
+      "title": "자기소개서에 남길 나의 역할",
+      "premise": "취업역량 캠프에서 팀의 성과와 개인의 기여를 구분해 설명하는 방법을 배웠다. 포트폴리오에 실패와 수정 과정도 남겨 볼 생각을 했다.",
+      "source": "EMPLOYMENT_CAMPS"
+    },
+    {
+      "year": 2,
+      "turn": 19,
+      "title": "국외 체험과 현장실습을 구분하다",
+      "premise": "학교 자료의 2학년 국외 현장체험과 3학년 글로벌 인턴십 안내를 비교했다. 학교 밖 경험에도 서로 다른 목적과 준비 과정이 있었다.",
+      "source": "GLOBAL_PERIOD_NOTE"
+    },
+    {
+      "year": 2,
+      "turn": 24,
+      "title": "두 번째 겨울의 계획",
+      "premise": "온라인 협업과 영어 소개 연습, 전공 캠프와 휴식 사이에서 다음 계획을 돌아봤다. 다른 친구와 같은 경로를 택할 필요는 없었다.",
+      "source": "GLOBAL_PREPARATION"
+    },
+    {
+      "year": 3,
+      "turn": 2,
+      "title": "전문 수업에서 실무로",
+      "premise": "응용 프로그래밍 화면 구현, 서버 구축·운영, CS 심화 같은 전문 수업을 프로젝트와 연결했다. 프론트엔드·백엔드 집중 선택 밖의 모바일·게임·AI 관심도 이어갈 수 있었다.",
+      "source": "CURRICULUM"
+    },
+    {
+      "year": 3,
+      "turn": 5,
+      "title": "기업 멘토가 묻는 완료 기준",
+      "premise": "산학협력 프로젝트 안내에서 기업 요청 기능과 검증 기준을 살펴봤다. 교내 기업 연계 프로젝트, 국내 기업 현장실습, 해외 현장학습은 서로 다른 경험임을 구분했다.",
+      "source": "INDUSTRY_PROJECT"
+    },
+    {
+      "year": 3,
+      "turn": 9,
+      "title": "기술면접에서 모른다고 말하는 법",
+      "premise": "직무별 기술면접 연습에서 설계 이유와 오류를 확인한 방법을 설명했다. 모르는 내용은 아는 척하기보다 다음에 확인할 순서를 정리했다.",
+      "source": "EMPLOYMENT_CAMPS"
+    },
+    {
+      "year": 3,
+      "turn": 14,
+      "title": "실무 뒤에도 이어지는 배움",
+      "premise": "졸업생의 실무·협업과 후학습 사례를 들었다. 취업 여부 하나로 학교생활을 평가하기보다 지금까지의 선택과 다음 학습을 함께 생각했다.",
+      "source": "POST_EMPLOYMENT_STUDY"
+    },
+    {
+      "year": 3,
+      "turn": 23,
+      "title": "교문 밖의 여러 경로",
+      "premise": "진학·후학습·취업·해외·창업 등 성장경로 자료를 읽고 내 기록을 돌아봤다. 어떤 길도 자동으로 보장되지 않지만 지금의 선택 뒤에도 배움은 이어질 수 있었다.",
+      "source": "CAREER_PATHS"
+    }
+  ],
+  "schoolActivities": [
+    {
+      "years": [
+        1,
+        2,
+        3
+      ],
+      "minTurn": 1,
+      "maxTurn": 24,
+      "event": {
+        "code": "DAILY_REFLECTION",
+        "title": "뉴로우-S · 오늘의 회고",
+        "situation": "오늘 세운 계획과 실제 행동을 비교하는 시간입니다. 잘한 일과 도움이 필요한 일을 나누어 적어 봅니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "REFLECT_NOTE",
+            "label": "막혔던 일과 다음 시도를 기록하기",
+            "delta": {
+              "A": 1,
+              "S": -3
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 스트레스 -3"
+          },
+          {
+            "code": "REFLECT_TALK",
+            "label": "친구의 이야기를 듣고 내 생각 나누기",
+            "delta": {
+              "C": 1,
+              "S": -4
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 스트레스 -4"
+          },
+          {
+            "code": "REFLECT_REDUCE",
+            "label": "내일 계획을 줄여 실행 가능하게 만들기",
+            "delta": {
+              "S": -5
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "스트레스 -5"
+          }
+        ],
+        "source": "NEUROW"
+      }
+    },
+    {
+      "years": [
+        1
+      ],
+      "minTurn": 2,
+      "maxTurn": 12,
+      "event": {
+        "code": "DAILY_PRODUCT",
+        "title": "SW제품기획 · 누구의 문제일까",
+        "situation": "기능 목록을 적기 전에 이 서비스를 사용할 사람과 불편한 순간을 정리합니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "PRODUCT_ASK",
+            "label": "친구에게 불편한 경험을 물어보기",
+            "delta": {
+              "C": 1,
+              "F": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 프론트엔드 +1"
+          },
+          {
+            "code": "PRODUCT_FLOW",
+            "label": "사용자 흐름과 필요한 데이터를 연결하기",
+            "delta": {
+              "P": 1,
+              "A": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "프로그래밍 +1 · 학습 +1"
+          },
+          {
+            "code": "PRODUCT_SCOPE",
+            "label": "첫 버전의 핵심 기능만 고르기",
+            "delta": {
+              "A": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 스트레스 -2"
+          }
+        ],
+        "source": "CURRICULUM"
+      }
+    },
+    {
+      "years": [
+        1,
+        2,
+        3
+      ],
+      "minTurn": 1,
+      "maxTurn": 24,
+      "event": {
+        "code": "DAILY_READING",
+        "title": "파이데이아 · 같은 책의 다른 해석",
+        "situation": "인문고전의 한 장면을 읽고 등장인물의 선택을 이야기합니다. 정답을 빨리 내기보다 서로의 이유를 들어 봅니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "READ_LISTEN",
+            "label": "다른 해석을 끝까지 듣고 질문하기",
+            "delta": {
+              "C": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 스트레스 -2"
+          },
+          {
+            "code": "READ_NOTE",
+            "label": "내 경험과 연결해 짧은 글 쓰기",
+            "delta": {
+              "A": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 스트레스 -2"
+          },
+          {
+            "code": "READ_REST",
+            "label": "조용히 읽으며 잠깐 속도 늦추기",
+            "delta": {
+              "S": -4
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "스트레스 -4"
+          }
+        ],
+        "source": "READING"
+      }
+    },
+    {
+      "years": [
+        1,
+        2,
+        3
+      ],
+      "minTurn": 3,
+      "maxTurn": 22,
+      "event": {
+        "code": "DAILY_ART_SPORTS",
+        "title": "1인 1악기·1스포츠 · 함께 맞추는 시간",
+        "situation": "학교에서 소개한 악기와 스포츠 활동을 체험하는 시간입니다. 친구와 호흡을 맞추거나 오늘의 컨디션을 살펴봅니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "ART_PRACTICE",
+            "label": "기타·플루트 합주에서 박자 맞추기",
+            "delta": {
+              "C": 1,
+              "S": -4
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 스트레스 -4"
+          },
+          {
+            "code": "SPORT_PRACTICE",
+            "label": "테니스·배드민턴·축구 기본기 연습하기",
+            "delta": {
+              "H": 3,
+              "S": -4
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "체력 +3 · 스트레스 -4"
+          },
+          {
+            "code": "SPORT_CARE",
+            "label": "몸 상태를 말하고 무리하지 않기",
+            "delta": {
+              "H": 2,
+              "S": -3
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "체력 +2 · 스트레스 -3"
+          }
+        ],
+        "source": "ART_SPORTS"
+      }
+    },
+    {
+      "years": [
+        1,
+        2,
+        3
+      ],
+      "minTurn": 3,
+      "maxTurn": 22,
+      "event": {
+        "code": "DAILY_STUDENT_TALK",
+        "title": "학생 전문가 특강 · 선배의 시행착오",
+        "situation": "방과후 특강에서 선배가 서버 개발과 Docker, 발표를 준비하며 겪은 일을 이야기합니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "SENIOR_QUESTION",
+            "label": "내가 막힌 부분을 질문하기",
+            "delta": {
+              "P": 1,
+              "C": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "프로그래밍 +1 · 의사소통 +1"
+          },
+          {
+            "code": "SENIOR_SPEECH",
+            "label": "프로젝트를 한 문장으로 설명해 보기",
+            "delta": {
+              "C": 2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +2"
+          },
+          {
+            "code": "SENIOR_NOTE",
+            "label": "내 프로젝트에 적용할 점만 적기",
+            "delta": {
+              "A": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 스트레스 -2"
+          }
+        ],
+        "source": "STUDENT_LECTURES"
+      }
+    },
+    {
+      "years": [
+        1,
+        2,
+        3
+      ],
+      "minTurn": 3,
+      "maxTurn": 22,
+      "event": {
+        "code": "DAILY_SUPPORT_REQUEST",
+        "title": "개발 지원 · 필요한 도구부터 정리하기",
+        "situation": "프로젝트에 필요한 클라우드와 개발 도구, 대여 기자재를 살펴봅니다. 신청 전에 목적과 필요한 범위를 정리할 수 있습니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "SUPPORT_PLAN",
+            "label": "필요한 도구와 사용 목적을 적기",
+            "delta": {
+              "A": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 스트레스 -2"
+          },
+          {
+            "code": "SUPPORT_TEAM",
+            "label": "팀에서 이미 쓰는 도구를 함께 확인하기",
+            "delta": {
+              "C": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 스트레스 -2"
+          },
+          {
+            "code": "SUPPORT_LIMIT",
+            "label": "지금 있는 환경으로 최소 기능부터 검증하기",
+            "delta": {
+              "P": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "프로그래밍 +1"
+          }
+        ],
+        "source": "EQUIPMENT_SUPPORT"
+      }
+    },
+    {
+      "years": [
+        1,
+        2
+      ],
+      "minTurn": 9,
+      "maxTurn": 12,
+      "event": {
+        "code": "DAILY_NOBEL",
+        "title": "노벨엔지니어링 · 소설 속 문제를 코드로",
+        "situation": "소설 속 인물이 겪는 불편을 읽고 해결책을 생각합니다. AI가 만든 코드도 직접 시험하며 원래 문제를 해결하는지 확인합니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "NOBEL_EMPATHY",
+            "label": "인물의 문제와 사용 환경부터 정리하기",
+            "delta": {
+              "A": 1,
+              "C": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 의사소통 +1"
+          },
+          {
+            "code": "NOBEL_VERIFY",
+            "label": "AI가 만든 시제품을 직접 테스트하기",
+            "delta": {
+              "P": 1,
+              "I": 1,
+              "S": 2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "프로그래밍 +1 · AI +1 · 스트레스 +2"
+          },
+          {
+            "code": "NOBEL_STORY",
+            "label": "해결 뒤 달라질 이야기를 팀과 써 보기",
+            "delta": {
+              "C": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 스트레스 -2"
+          }
+        ],
+        "source": "NOBEL_HACKATHON"
+      }
+    },
+    {
+      "years": [
+        1,
+        2
+      ],
+      "minTurn": 17,
+      "maxTurn": 24,
+      "event": {
+        "code": "DAILY_GLOBAL_PREP",
+        "title": "겨울 온라인 인턴십 · 준비할 것을 살펴보다",
+        "situation": "글로벌 온라인 인턴십 안내를 보고 관심 있는 준비 활동을 골라 봅니다. 안내를 읽거나 연습하는 것으로 파견이 확정되지는 않습니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "GLOBAL_ENGLISH",
+            "label": "내 프로젝트를 영어 세 문장으로 소개하기",
+            "delta": {
+              "EN": 2,
+              "C": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "영어 +2 · 의사소통 +1"
+          },
+          {
+            "code": "GLOBAL_REMOTE",
+            "label": "온라인 협업 과제와 작업 기록 살펴보기",
+            "delta": {
+              "P": 1,
+              "C": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "프로그래밍 +1 · 의사소통 +1"
+          },
+          {
+            "code": "GLOBAL_BALANCE",
+            "label": "국내 진로도 함께 비교하며 준비 계획 세우기",
+            "delta": {
+              "A": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 스트레스 -2"
+          }
+        ],
+        "source": "GLOBAL_PREPARATION"
+      }
+    },
+    {
+      "years": [
+        1
+      ],
+      "minTurn": 13,
+      "maxTurn": 22,
+      "event": {
+        "code": "DAILY_CAMP_YEAR1",
+        "title": "1학년 취업역량 캠프 · 경험을 말로",
+        "situation": "의사소통과 서류전형 준비 활동에서 작은 경험을 내 말로 설명해 봅니다. 입학시험이나 회사 채용 결과를 결정하는 사건은 아닙니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "CAMP1_ROLE",
+            "label": "팀 활동에서 내 역할을 구체적으로 설명하기",
+            "delta": {
+              "C": 1,
+              "A": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 학습 +1"
+          },
+          {
+            "code": "CAMP1_LISTEN",
+            "label": "짝의 설명을 듣고 빠진 맥락 알려주기",
+            "delta": {
+              "C": 2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +2"
+          },
+          {
+            "code": "CAMP1_RECORD",
+            "label": "배운 점과 다음 목표를 활동 기록에 적기",
+            "delta": {
+              "A": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 스트레스 -2"
+          }
+        ],
+        "source": "EMPLOYMENT_CAMPS"
+      }
+    },
+    {
+      "years": [
+        2
+      ],
+      "minTurn": 13,
+      "maxTurn": 22,
+      "event": {
+        "code": "DAILY_CAMP_YEAR2",
+        "title": "2학년 취업역량 캠프 · 결과보다 과정",
+        "situation": "자기소개서와 포트폴리오 초안을 펼쳤습니다. 결과 화면과 내가 해결한 문제를 어떻게 함께 보여 줄지 생각합니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "CAMP2_EVIDENCE",
+            "label": "문제를 재현하고 해결한 증거 정리하기",
+            "delta": {
+              "A": 1,
+              "P": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 프로그래밍 +1"
+          },
+          {
+            "code": "CAMP2_FEEDBACK",
+            "label": "짝과 인성면접 답변 피드백 나누기",
+            "delta": {
+              "C": 2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +2"
+          },
+          {
+            "code": "CAMP2_LESS",
+            "label": "내가 맡은 부분만 명확하게 추리기",
+            "delta": {
+              "C": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 스트레스 -2"
+          }
+        ],
+        "source": "EMPLOYMENT_CAMPS"
+      }
+    },
+    {
+      "years": [
+        3
+      ],
+      "minTurn": 2,
+      "maxTurn": 20,
+      "event": {
+        "code": "DAILY_CAMP_YEAR3",
+        "title": "3학년 취업역량 캠프 · 직무 질문 앞에서",
+        "situation": "희망 직무와 프로젝트 경험을 연결해 기술면접을 연습합니다. 모르는 질문에는 확인 방법과 다음 학습을 설명할 수 있습니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "CAMP3_TECH",
+            "label": "설계 선택과 테스트 근거 설명하기",
+            "delta": {
+              "P": 1,
+              "C": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "프로그래밍 +1 · 의사소통 +1"
+          },
+          {
+            "code": "CAMP3_HONEST",
+            "label": "모르는 부분과 확인 방법을 구분하기",
+            "delta": {
+              "A": 1,
+              "C": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 의사소통 +1"
+          },
+          {
+            "code": "CAMP3_HELP",
+            "label": "피드백을 받고 질문 목록부터 정리하기",
+            "delta": {
+              "C": 1,
+              "S": -3
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 스트레스 -3"
+          }
+        ],
+        "source": "EMPLOYMENT_CAMPS"
+      }
+    },
+    {
+      "years": [
+        3
+      ],
+      "minTurn": 2,
+      "maxTurn": 12,
+      "event": {
+        "code": "DAILY_INDUSTRY_PROJECT",
+        "title": "산학협력 프로젝트 · 기업 멘토의 질문",
+        "situation": "기업이 요청한 기능의 사용 조건과 검증 방법을 묻는 시간입니다. 교내 산학 프로젝트의 준비 장면이며 국내 현장실습이나 채용 합격을 뜻하지 않습니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "INDUSTRY_REQUIREMENTS",
+            "label": "요구사항과 완료 기준을 확인하기",
+            "delta": {
+              "A": 1,
+              "C": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 의사소통 +1"
+          },
+          {
+            "code": "INDUSTRY_TEST",
+            "label": "오류 재현과 테스트 계획을 함께 설명하기",
+            "delta": {
+              "P": 1,
+              "C": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "프로그래밍 +1 · 의사소통 +1"
+          },
+          {
+            "code": "INDUSTRY_SCOPE",
+            "label": "팀 일정에 맞게 구현 범위를 조율하기",
+            "delta": {
+              "C": 1,
+              "S": -3
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 스트레스 -3"
+          }
+        ],
+        "source": "INDUSTRY_PROJECT"
+      }
+    },
+    {
+      "years": [
+        2,
+        3
+      ],
+      "minTurn": 5,
+      "maxTurn": 24,
+      "event": {
+        "code": "DAILY_ALUMNI",
+        "title": "졸업생 특강 · 취업 이후의 배움",
+        "situation": "선배가 회사에서 배운 협업과 문서화, 실무 뒤에 다시 공부하게 된 경험을 들려줍니다. 각자의 다음 길은 다를 수 있습니다.",
+        "required": false,
+        "choices": [
+          {
+            "code": "ALUMNI_WORK",
+            "label": "실무에서 도움이 된 학교 경험 질문하기",
+            "delta": {
+              "C": 1,
+              "A": 1
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 학습 +1"
+          },
+          {
+            "code": "ALUMNI_STUDY",
+            "label": "선취업 후학습 경로를 내 계획과 비교하기",
+            "delta": {
+              "A": 1,
+              "S": -2
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "학습 +1 · 스트레스 -2"
+          },
+          {
+            "code": "ALUMNI_PATH",
+            "label": "취업·학습·개인 개발의 다음 목표 적기",
+            "delta": {
+              "C": 1,
+              "S": -3
+            },
+            "tag": null,
+            "cost": 0,
+            "description": "의사소통 +1 · 스트레스 -3"
+          }
+        ],
+        "source": "POST_EMPLOYMENT_STUDY"
+      }
+    }
+  ]
+}

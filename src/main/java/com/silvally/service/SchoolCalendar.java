@@ -35,6 +35,7 @@ public class SchoolCalendar {
             p.chooseSemesterFocus(stat);
             details.put("focusStat", stat);
         } else if (event.startsWith("VACATION_")) {
+            if (choice.equals("CAMP") && p.getYear() >= 3) throw new BusinessException(ErrorCode.LOCKED, "전공역량 강화 캠프는 1·2학년만 참가합니다.");
             p.chooseVacation(choice.equals("CAMP"));
             if (p.getPracticeRemaining() == 0) return resumeAfterVacation(p, details);
             details.put("practiceRemaining", 2);

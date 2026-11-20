@@ -48,7 +48,7 @@ class PlayerControllerTest {
         UUID id = UUID.randomUUID();
         given(playerService.get(id)).willReturn(new PlayerView(
                 id, "tester", "v1.1", "ADMISSION_1", 0, 0, 0, 0L,
-                Map.of("P", 20), "OPEN", null, null, null, null, null, null, 0));
+                Map.of("P", 20), "OPEN", null, null, null, null, null, null, 0, Map.of("GENERAL", true), null));
 
         mockMvc.perform(get("/api/v1/players/{playerId}", id))
                 .andExpect(status().isOk())
@@ -189,8 +189,30 @@ class PlayerControllerTest {
                 .andExpect(jsonPath("$.data.deleted").value(true));
     }
 
+    @Test
+    @DisplayName("필수 헤더가 없으면 400 VALIDATION_ERROR와 누락된 헤더 이름을 반환한다")
+    void missingHeader_returnsHeaderName() throws Exception {
+        mockMvc.perform(post("/api/v1/players")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"tester\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.error.details.header").value("Idempotency-Key"));
+        verify(playerService, never()).create(anyString(), any());
+    }
+
+    @Test
+    @DisplayName("버전 헤더가 숫자가 아니면 400 VALIDATION_ERROR와 잘못된 값의 이름을 반환한다")
+    void malformedVersionHeader_returnsParameterName() throws Exception {
+        mockMvc.perform(delete("/api/v1/players/{playerId}", UUID.randomUUID())
+                        .header("X-Expected-Version", "latest"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.error.details.parameter").value("X-Expected-Version"));
+    }
+
     private static PlayerView view(UUID id, String name, long version) {
         return new PlayerView(id, name, "v1.1", "ADMISSION_1", 0, 0, 0, version,
-                Map.of("P", 20), "OPEN", null, null, null, null, null, null, 0);
+                Map.of("P", 20), "OPEN", null, null, null, null, null, null, 0, Map.of("GENERAL", true), null);
     }
 }

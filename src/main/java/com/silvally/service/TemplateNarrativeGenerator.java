@@ -11,8 +11,10 @@ public class TemplateNarrativeGenerator implements NarrativeGenerator {
         if (scene.situation() != null && !scene.situation().isBlank()) {
             text.append(scene.situation()).append(' ');
         }
-        text.append("나는 '").append(scene.choiceLabel()).append("'을(를) 선택했고, 결과는 ")
-                .append(scene.resultCode()).append("였다.");
+        if (!"OBSERVE".equals(scene.choiceCode())) {
+            text.append("나는 '").append(scene.choiceLabel()).append("'을(를) 선택했고, 결과는 ")
+                    .append(scene.resultCode()).append("였다.");
+        }
         return new GeneratedNarrative(text.toString(), NarrativeSource.TEMPLATE, null);
     }
 

@@ -14,6 +14,7 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
     private final NarrativeService narratives;
+    private final SchoolLifeService schoolLife;
     private final FieldLearningService fieldLearning;
     private final SchoolCalendar calendar;
     private final PlayerRepository players;
@@ -26,7 +27,8 @@ public class EventServiceImpl implements EventService {
     private final ObjectMapper json;
     public EventServiceImpl(PlayerRepository players, EventDefRepository events, EventChoiceRepository choices,
             ActivityRecordRepository activities, CommandLogRepository history, CommandExecutor commands,
-            SchoolRules rules, ObjectMapper json, SchoolCalendar calendar, FieldLearningService fieldLearning, NarrativeService narratives) {
+            SchoolRules rules, ObjectMapper json, SchoolCalendar calendar, FieldLearningService fieldLearning, NarrativeService narratives, SchoolLifeService schoolLife) {
+        this.schoolLife = schoolLife;
         this.narratives = narratives;
         this.fieldLearning = fieldLearning;
         this.calendar = calendar;
@@ -47,26 +49,44 @@ public class EventServiceImpl implements EventService {
         return p.getPhase() == Phase.SCHOOL && p.getPendingChoice() == null && p.getYear() == e.getYear()
                 && p.getTurn() >= e.getMinTurn() && p.getTurn() <= e.getMaxTurn() && !completed(p, e.getId().eventCode()) && calendar.available(p, e.getId().eventCode());
     }
-    @Override public List<EventView> list(UUID id) {
-        Player p = player(id);
+    @Override @Transactional public List<EventView> list(UUID id) {
+        Player p = players.findByIdForUpdate(id).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
         if (p.getPhase() != Phase.SCHOOL || p.getPendingChoice() != null) return List.of();
-        return events.findEvents(p.getRulesVersion(), Phase.SCHOOL, p.getYear()).stream()
+        var fixed = events.findEvents(p.getRulesVersion(), Phase.SCHOOL, p.getYear()).stream()
                 .filter(e -> available(p, e)).map(e -> view(p, e)).toList();
+        if (fixed.stream().anyMatch(EventView::required)) return fixed;
+        var life = schoolLife.current(p);
+        if (life.isPresent() && life.get().required()) return List.of(life.get());
+        var offered = new ArrayList<>(fixed); life.ifPresent(offered::add); return List.copyOf(offered);
     }
-    @Override public EventView detail(UUID id, String code) { Player p = player(id); return view(p, event(p, code)); }
+    @Override @Transactional public EventView detail(UUID id, String code) {
+        Player p = players.findByIdForUpdate(id).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        if (SchoolLifeService.owns(code)) return list(id).stream().filter(e -> e.code().equals(code)).findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.WRONG_STEP));
+        return view(p, event(p, code));
+    }
     private EventView view(Player p, EventDef e) {
         boolean current = available(p, e);
         return new EventView(e.getId().eventCode(), e.getTitle(), e.getSituation(), e.isRequired(),
-                choices.findByEventCodes(p.getRulesVersion(), List.of(e.getId().eventCode())).stream().map(c -> {
+                choices.findByEventCodes(p.getRulesVersion(), List.of(e.getId().eventCode())).stream()
+                .filter(c -> !(p.getYear() >= 3 && e.getId().eventCode().startsWith("VACATION_") && c.getId().choiceCode().equals("CAMP"))).map(c -> {
                     boolean enabled = current && p.getAp() >= c.getApCost();
                     return new EventView.Choice(c.getId().choiceCode(), c.getLabel(), c.getApCost(), enabled,
                             enabled ? null : "이미 선택했거나 시기·AP·필수 선택 조건을 만족하지 않습니다.");
                 }).toList());
     }
-    @Override public void requireNoPendingEvent(Player p) {
-        List<String> pending = events.findEvents(p.getRulesVersion(), Phase.SCHOOL, p.getYear()).stream()
+    @Override public List<String> pendingRequiredEvents(Player p) {
+        var fixed = events.findEvents(p.getRulesVersion(), Phase.SCHOOL, p.getYear()).stream()
                 .filter(EventDef::isRequired).filter(e -> available(p, e)).map(e -> e.getId().eventCode()).toList();
+        if (!fixed.isEmpty()) return fixed;
+        return schoolLife.current(p).filter(EventView::required).map(e -> List.of(e.code())).orElse(List.of());
+    }
+    @Override public void requireNoPendingEvent(Player p) {
+        List<String> pending = pendingRequiredEvents(p);
         if (!pending.isEmpty()) throw new BusinessException(ErrorCode.CHOICE_REQUIRED, Map.of("events", pending));
+        schoolLife.current(p).filter(EventView::required).ifPresent(e -> {
+            throw new BusinessException(ErrorCode.CHOICE_REQUIRED, Map.of("events", List.of(e.code()), "blocksAuto", true));
+        });
     }
     @Override @Transactional
     public MutationResult choose(UUID id, String code, long version, String key, ChooseEventRequest request) {
@@ -76,9 +96,24 @@ public class EventServiceImpl implements EventService {
         var details = new LinkedHashMap<String, Object>();
         int[] cost = {0};
         MutationResult response = commands.execute(id, version, key,
-                new CommandSpec<>("EVENT_CHOICE", code, request, MutationResult.class), p -> {
+                new CommandSpec<>(SchoolLifeService.owns(code) ? "EVENT" : "EVENT_CHOICE", code, request, MutationResult.class), p -> {
                     rules.requireSchool(p); rules.requireNoPendingChoice(p);
+                    if (SchoolLifeService.owns(code)) {
+                        boolean fixedRequired = events.findEvents(p.getRulesVersion(), Phase.SCHOOL, p.getYear()).stream()
+                                .anyMatch(e -> e.isRequired() && available(p, e));
+                        if (fixedRequired) throw new BusinessException(ErrorCode.CHOICE_REQUIRED);
+                        var before = p.getStats().values();
+                        String result = schoolLife.choose(p, code, request.choiceCode(), details);
+                        p.getStats().values().forEach((stat, value) -> {
+                            if (!value.equals(before.get(stat))) delta.put(stat, value - before.get(stat));
+                        });
+                        details.put("choiceCode", request.choiceCode()); details.put("statDelta", delta);
+                        details.put("resultCode", result);
+                        return;
+                    }
                     EventDef e = event(p, code);
+                    if (!e.isRequired() && schoolLife.current(p).filter(EventView::required).isPresent())
+                        throw new BusinessException(ErrorCode.CHOICE_REQUIRED);
                     if (!available(p, e)) throw new BusinessException(ErrorCode.WRONG_STEP);
                     EventChoice c = choices.findById(new EventChoice.Id(p.getRulesVersion(), code, request.choiceCode()))
                             .orElseThrow(() -> new BusinessException(ErrorCode.VALIDATION_ERROR));
@@ -87,7 +122,7 @@ public class EventServiceImpl implements EventService {
                     Map<String, Integer> before = p.getStats().values();
                     Map<String, Integer> growth = new LinkedHashMap<>();
                     effect.path("stats").properties().forEach(entry -> growth.put(entry.getKey(), entry.getValue().asInt()));
-                    p.getStats().apply(growth); p.spendAp(c.getApCost()); cost[0] = c.getApCost();
+                    StatGrowth.apply(p, growth, code); p.spendAp(c.getApCost()); cost[0] = c.getApCost();
                     p.getStats().values().forEach((stat, value) -> {
                         if (value.intValue() != before.get(stat)) delta.put(stat, value - before.get(stat));
                     });

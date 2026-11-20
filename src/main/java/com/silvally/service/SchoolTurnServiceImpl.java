@@ -4,13 +4,16 @@ import com.silvally.common.exception.BusinessException;
 import com.silvally.common.exception.ErrorCode;
 import com.silvally.dto.request.YearTransitionRequest;
 import com.silvally.dto.response.MutationResult;
+import com.silvally.dto.response.TurnReadinessView;
 import com.silvally.dto.response.YearTransitionView;
 import com.silvally.entity.CatalogKind;
+import com.silvally.entity.Phase;
 import com.silvally.entity.Player;
 import com.silvally.repository.PlayerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,13 +30,18 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private final CommandExecutor commandExecutor;
     private final EventService schoolEvents;
     private final SchoolRules rules;
+    private final SchoolLifeService schoolLife;
+    private final com.silvally.repository.CommandLogRepository commandLogs;
     private final CertificateService certificateService;
     private final ProjectService projectService;
     private final CareerService careerService;
+    private final ExamService exams;
 
     public SchoolTurnServiceImpl(PlayerRepository playerRepository, CommandExecutor commandExecutor,
                                  SchoolRules rules, CertificateService certificateService, EventService schoolEvents, SchoolCalendar calendar, FieldLearningService fieldLearning, tools.jackson.databind.ObjectMapper json,
-                                 ProjectService projectService, CareerService careerService) {
+                                 ProjectService projectService, CareerService careerService, ExamService exams,
+                                 SchoolLifeService schoolLife, com.silvally.repository.CommandLogRepository commandLogs) {
+        this.exams = exams; this.schoolLife = schoolLife; this.commandLogs = commandLogs;
         this.json = json;
         this.fieldLearning = fieldLearning;
         this.calendar = calendar;
@@ -50,11 +58,34 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     @Transactional
     public MutationResult advanceTurn(UUID playerId, long expectedVersion, String idempotencyKey) {
         TurnOutcome outcome = new TurnOutcome();
-        return commandExecutor.execute(playerId, expectedVersion, idempotencyKey,
+        var response = commandExecutor.execute(playerId, expectedVersion, idempotencyKey,
                 new CommandSpec<>("TURN", "TURN_END", Map.of(), MutationResult.class),
                 player -> advance(player, outcome),
                 player -> new MutationResult(player.view(), "TURN_END", 0,
                         outcome.statDelta, outcome.resultCode, outcome.details(player)));
+        commandLogs.findByPlayerIdAndCommandId(playerId, CommandExecutor.parseIdempotencyKey(idempotencyKey))
+                .orElseThrow().recordActivity("TURN_END", json.writeValueAsString(response.details()));
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public TurnReadinessView getTurnReadiness(UUID playerId) {
+        Player player = playerRepository.findByIdForUpdate(playerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "회차를 찾을 수 없습니다."));
+        List<TurnReadinessView.Blocker> blockers = new ArrayList<>();
+        if (player.getPhase() != Phase.SCHOOL) {
+            blockers.add(new TurnReadinessView.Blocker("PHASE", player.getPhase().name(), List.of()));
+        } else if (player.getPendingChoice() != null) {
+            YearTransitionView transition = rules.transitionView(player);
+            blockers.add(new TurnReadinessView.Blocker("YEAR_CHOICE", transition.pendingChoice(),
+                    transition.options().stream().map(YearTransitionView.Option::code).toList()));
+        } else {
+            schoolEvents.pendingRequiredEvents(player)
+                    .forEach(code -> blockers.add(new TurnReadinessView.Blocker("REQUIRED_EVENT", code, List.of())));
+        }
+        return new TurnReadinessView(player.getVersion(), player.getPhase().name(), player.getYear(), player.getTurn(),
+                blockers.isEmpty(), blockers);
     }
 
     @Override
@@ -95,19 +126,27 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
         schoolEvents.requireNoPendingEvent(player);
         var before = player.getStats().values();
         if (player.getPracticeRemaining() > 0) {
-            player.getStats().apply(Map.of("P", 2, "C", 1));
+            outcome.statChanges.addAll(StatGrowth.apply(player, Map.of("P", 2, "C", 1), "CAMP_PRACTICE"));
             player.finishPracticeTurn();
             outcome.resultCode = player.getPracticeRemaining() == 0
                     ? calendar.resumeAfterVacation(player, outcome.extraDetails) : "PRACTICE_ADVANCED";
         } else {
-            player.getStats().apply(rules.turnGrowth(player));
-            player.getStats().apply(calendar.focusGrowth(player));
+            // One owner for passive pressure, including exam-day pressure. Use pre-rest health.
+            var stressLoad = schoolLife.applyTurnPressure(player);
+            outcome.extraDetails.put("stressLoad", stressLoad);
+            outcome.statChanges.addAll(StatGrowth.apply(player, rules.turnGrowth(player), "TURN_GROWTH"));
+            outcome.statChanges.addAll(StatGrowth.apply(player, calendar.focusGrowth(player), "SEMESTER_FOCUS"));
+            outcome.statChanges.addAll(StatGrowth.conditionDecline(player));
+            exams.onTurnEnd(player, outcome.statChanges)
+                    .ifPresent(exam -> outcome.extraDetails.put("exam", json.convertValue(exam, Map.class)));
+            schoolLife.recordTurnScene(player, stressLoad);
             // 방학 대기·캠프 실습 턴은 누적 턴이 그대로이므로 일반 턴 종료에서만 만료를 검사한다.
             int nextTurn = rules.absoluteTurn(player) + 1;
             outcome.expiredProjects = projectService.expireOverdue(player, nextTurn);
             outcome.expiredApplications = careerService.expireOverdue(player, nextTurn);
             fieldLearning.onTurnEnd(player).ifPresent(result -> outcome.extraDetails.put("fieldLearning", json.convertValue(result, Map.class)));
             if (calendar.endsSemester(player)) {
+                outcome.statChanges.addAll(StatGrowth.neglectDecline(player));
                 player.awaitVacation(); outcome.resultCode = "VACATION_REQUIRED";
             } else { player.nextTurn(SchoolRules.AP_PER_TURN); outcome.resultCode = "TURN_ADVANCED"; }
         }
@@ -124,6 +163,7 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
     private static final class TurnOutcome {
         private Map<String, Integer> statDelta = Map.of();
         private Map<String, Object> extraDetails = new LinkedHashMap<>();
+        private final List<StatChange> statChanges = new ArrayList<>();
         private String resultCode;
         private List<String> expiredCourses = List.of();
         private List<String> expiredProjects = List.of();
@@ -135,6 +175,9 @@ public class SchoolTurnServiceImpl implements SchoolTurnService {
             details.put("practiceRemaining", player.getPracticeRemaining());
             details.put("year", player.getYear());
             details.put("turn", player.getTurn());
+            if (!statChanges.isEmpty()) {
+                details.put("statChanges", statChanges.stream().map(StatChange::toMap).toList());
+            }
             if (!expiredCourses.isEmpty()) {
                 details.put("expiredCourses", expiredCourses);
             }

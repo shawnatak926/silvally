@@ -104,10 +104,11 @@ public class NarrativeServiceImpl implements NarrativeService {
                 .findById(new EventChoice.Id(rulesVersion, narrative.getSceneId(), narrative.getChoiceCode()))
                 .map(EventChoice::getLabel)
                 .orElse(narrative.getChoiceCode());
+        var evidence = sceneLog.getEvidenceJson() == null ? json.createObjectNode() : json.readTree(sceneLog.getEvidenceJson());
         return new NarrativeScene(narrative.getSceneId(),
-                def.map(EventDef::getTitle).orElse(narrative.getSceneId()),
-                def.map(EventDef::getSituation).orElse(null),
-                narrative.getChoiceCode(), choiceLabel, sceneLog.getResultCode(), sceneLog.getEvidenceJson(),
+                def.map(EventDef::getTitle).orElse(evidence.path("title").asString(narrative.getSceneId())),
+                def.map(EventDef::getSituation).orElse(evidence.path("situation").asString(null)),
+                narrative.getChoiceCode(), evidence.path("choiceLabel").asString(choiceLabel), sceneLog.getResultCode(), sceneLog.getEvidenceJson(),
                 sceneLog.getYear(), sceneLog.getTurn(), sceneLog.getBeforeSchoolDay(),
                 context(narrative), previousNarratives(narrative));
     }

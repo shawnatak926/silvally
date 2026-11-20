@@ -9,6 +9,7 @@ import com.silvally.dto.response.HistoryPage;
 import com.silvally.dto.response.MutationResult;
 import com.silvally.dto.response.PlayerView;
 import com.silvally.dto.response.ProgressView;
+import com.silvally.dto.response.TurnReadinessView;
 import com.silvally.entity.Player;
 import com.silvally.repository.ActivityRecordRepository;
 import com.silvally.repository.CommandLogRepository;
@@ -38,6 +39,8 @@ public class PlayerServiceImpl implements PlayerService {
     static final Set<String> PROFILES = Set.of("OPEN", "MAKER", "REGION", "ACCESS");
 
     private final com.silvally.repository.FieldLearningRepository fieldLearning;
+    private final com.silvally.repository.SchoolEventDrawRepository schoolDraws;
+    private final com.silvally.repository.ExamResultRepository examResults;
     private final com.silvally.repository.InterviewQuestionRepository interviewQuestions;
     private final PlayerRepository playerRepository;
     private final CommandLogRepository commandLogRepository;
@@ -52,6 +55,7 @@ public class PlayerServiceImpl implements PlayerService {
     private final HistoryService historyService;
     private final ObjectMapper objectMapper;
     private final TransactionTemplate transactionTemplate;
+    private final ProgressAssembler progressAssembler;
 
     public PlayerServiceImpl(PlayerRepository playerRepository,
                              CommandLogRepository commandLogRepository,
@@ -67,7 +71,13 @@ public class PlayerServiceImpl implements PlayerService {
                              ObjectMapper objectMapper,
                              PlatformTransactionManager transactionManager,
                              com.silvally.repository.InterviewQuestionRepository interviewQuestions,
-                             com.silvally.repository.FieldLearningRepository fieldLearning) {
+                             com.silvally.repository.FieldLearningRepository fieldLearning,
+                             com.silvally.repository.SchoolEventDrawRepository schoolDraws,
+                             com.silvally.repository.ExamResultRepository examResults,
+                             ProgressAssembler progressAssembler) {
+        this.schoolDraws = schoolDraws;
+        this.progressAssembler = progressAssembler;
+        this.examResults = examResults;
         this.fieldLearning = fieldLearning;
         this.interviewQuestions = interviewQuestions;
         this.playerRepository = playerRepository;
@@ -94,15 +104,20 @@ public class PlayerServiceImpl implements PlayerService {
     public PlayerView create(String idempotencyKey, CreatePlayerRequest request) {
         String createKey = CommandExecutor.parseIdempotencyKey(idempotencyKey).toString();
         String profile = normalizeProfile(request.applicationProfile());
+        String edition = request.edition() == null ? "SPICY" : request.edition();
+        if (!Set.of("MILD", "SPICY").contains(edition)) throw new BusinessException(ErrorCode.VALIDATION_ERROR, "올바른 게임 버전을 선택해 주세요.");
+        var payload = new java.util.LinkedHashMap<String, Object>();
+        payload.put("name", request.name()); payload.put("applicationProfile", profile);
+        if (edition.equals("MILD")) payload.put("edition", edition);
         String requestHash = commandExecutor.hash(new CommandSpec<>("CREATE_PLAYER", "PLAYER",
-                new CreatePlayerRequest(request.name(), profile), PlayerView.class));
+                payload, PlayerView.class));
 
         Optional<PlayerView> replay = transactionTemplate.execute(status -> replayCreate(createKey, requestHash));
         if (replay.isPresent()) {
             return replay.get();
         }
         try {
-            return transactionTemplate.execute(status -> insert(request.name(), profile, createKey, requestHash));
+            return transactionTemplate.execute(status -> insert(request.name(), profile, createKey, requestHash, edition));
         } catch (DataIntegrityViolationException e) {
             return transactionTemplate.execute(status -> replayCreate(createKey, requestHash))
                     .orElseThrow(() -> new BusinessException(ErrorCode.IDEMPOTENCY_CONFLICT));
@@ -131,6 +146,8 @@ public class PlayerServiceImpl implements PlayerService {
         CommandExecutor.verifyVersion(player, expectedVersion);
 
         fieldLearning.deleteById(playerId);
+        schoolDraws.deleteByPlayerId(playerId);
+        examResults.deleteByPlayerId(playerId);
         interviewQuestions.deleteByPlayerId(playerId);
         lifeNarrativeRepository.deleteByPlayerId(playerId);
         commandLogRepository.deleteByPlayerId(playerId);
@@ -145,7 +162,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public ProgressView getProgress(UUID playerId) {
-        throw new UnsupportedOperationException("TODO: 진행 현황 조회");
+        return progressAssembler.assemble(findPlayer(playerId));
     }
 
     @Override
@@ -159,6 +176,12 @@ public class PlayerServiceImpl implements PlayerService {
         return schoolTurnService.advanceTurn(playerId, expectedVersion, idempotencyKey);
     }
 
+    @Override
+    @Transactional
+    public TurnReadinessView getTurnReadiness(UUID playerId) {
+        return schoolTurnService.getTurnReadiness(playerId);
+    }
+
     private Optional<PlayerView> replayCreate(String createKey, String requestHash) {
         return playerRepository.findByCreateKey(createKey).map(player -> {
             if (!requestHash.equals(player.getCreateRequestHash())) {
@@ -168,9 +191,10 @@ public class PlayerServiceImpl implements PlayerService {
         });
     }
 
-    private PlayerView insert(String name, String profile, String createKey, String requestHash) {
-        Player player = playerRepository.saveAndFlush(
-                Player.create(name, profile, createKey, requestHash));
+    private PlayerView insert(String name, String profile, String createKey, String requestHash, String edition) {
+        Player created = Player.create(name, profile, createKey, requestHash);
+        created.configureEdition(edition);
+        Player player = playerRepository.saveAndFlush(created);
         PlayerView view = player.view();
         playerRepository.saveCreateResponse(player.getId(), objectMapper.writeValueAsString(view));
         return view;

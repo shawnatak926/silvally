@@ -60,9 +60,11 @@ class FieldLearningServiceTest {
         assertThat(learning.get(id).preparedTurn()).isEqualTo(3);
         assertThat(learning.get(id).completed()).isFalse();
         String key = UUID.randomUUID().toString(); long version = fixture.version(id);
+        int p = fixture.milli(id, "P");
         var completed = players.advanceTurn(id, version, key);
         assertThat(completed.player().version()).isEqualTo(version + 1);
-        assertThat(completed.statDelta()).containsEntry("P", 3).containsEntry("C", 4);
+        assertThat(completed.statDelta()).containsEntry("C", 4);
+        assertThat(fixture.milli(id, "P") - p).isEqualTo(750);
         assertThat(learning.get(id).status()).isEqualTo("COMPLETED");
         assertThat(learning.get(id).completedTurn()).isEqualTo(4);
         assertThat(learning.get(id).prepared()).isTrue();
@@ -71,7 +73,7 @@ class FieldLearningServiceTest {
         fixture.advance(id);
         var milestones = records.findByPlayerIdAndEventCodeOrderByIdAsc(id, "J01_COMPLETE");
         assertThat(milestones).hasSize(1);
-        assertThat(milestones.getFirst().getEvidenceJson()).contains("\"P\":2", "\"C\":3");
+        assertThat(milestones.getFirst().getEvidenceJson()).contains("\"C\":3");
         assertThat(history.findByPlayerIdAndSubjectCodeOrderByIdAsc(id, "J01_COMPLETE")).hasSize(1);
         assertThat(history.findByPlayerIdAndSubjectCodeOrderByIdAsc(id, "J01_PREPARE").getFirst().getResultCode()).isEqualTo("PREPARING");
         assertThat(players.getHistory(id, 0, 50).items()).filteredOn(item -> item.subjectCode().startsWith("J01"))
@@ -91,10 +93,10 @@ class FieldLearningServiceTest {
         for (int n = 0; n < 3; n++) {
             assertThat(learning.get(id)).isEqualTo(saved);
             var result = fixture.advance(id);
-            assertThat(result.statDelta()).containsEntry("EN", 2).containsEntry("C", 1);
+            assertThat(result.statDelta()).containsEntry("C", 1);
             assertThat(learning.get(id)).isEqualTo(saved);
         }
-        assertThat(fixture.load(id).getStats().getEn()).isEqualTo(55);
+        assertThat(fixture.load(id).getStats().getEn()).isEqualTo(50);
         assertThat(saved.selected()).isFalse(); assertThat(saved.prepared()).isFalse(); assertThat(saved.completed()).isFalse();
         assertThat(records.findByPlayerIdAndEventCodeOrderByIdAsc(id, "J01_PREPARE")).isEmpty();
         assertThat(records.findByPlayerIdAndEventCodeOrderByIdAsc(id, "J01_COMPLETE")).isEmpty();
@@ -108,12 +110,12 @@ class FieldLearningServiceTest {
         assertThat(learning.get(id).failureReason()).isNull();
         fixture.advance(id);
         var result = fixture.advance(id);
-        assertThat(result.statDelta()).containsEntry("EN", 6).containsEntry("C", 4).containsEntry("P", 1);
-        assertThat(fixture.load(id).getStats().getEn()).isEqualTo(58);
+        assertThat(result.statDelta()).containsEntry("EN", 1).containsEntry("C", 4).doesNotContainKey("P");
+        assertThat(fixture.load(id).getStats().getEn()).isEqualTo(51);
         assertThat(learning.get(id).englishAtApplication()).isEqualTo(50);
         assertThat(learning.get(id).completed()).isTrue();
         assertThat(records.findByPlayerIdAndEventCodeOrderByIdAsc(id, "J01_COMPLETE").getFirst().getEvidenceJson())
-                .contains("\"EN\":4", "\"C\":3").doesNotContain("\"P\":2");
+                .contains("\"EN\":1", "\"C\":3").doesNotContain("\"P\":");
     }
     @Test void retryReturnsSavedSelectionAndNewKeysCannotChangePath() {
         UUID id = thirdYearThirdTurn(49);
@@ -158,9 +160,9 @@ class FieldLearningServiceTest {
         assertThat(records.findByPlayerIdOrderByIdAsc(id)).isEmpty();
         assertThatThrownBy(() -> learning.get(id)).isInstanceOf(BusinessException.class);
     }
-    @Test void englishStartsAt22AndGrowthAndRewardsStayWithinBounds() {
+    @Test void englishStartsInDrawnRangeAndGrowthAndRewardsStayWithinBounds() {
         UUID id = fixture.enrolledStudent();
-        assertThat(fixture.load(id).view().stats()).containsEntry("EN", 22);
+        assertThat(fixture.load(id).view().stats().get("EN")).isBetween(18, 26);
         fixture.modify(id, p -> p.getStats().apply(Map.of("EN", 1000)));
         fixture.advance(id);
         assertThat(fixture.load(id).getStats().getEn()).isEqualTo(100);

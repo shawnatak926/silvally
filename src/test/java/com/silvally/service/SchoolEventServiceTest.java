@@ -22,11 +22,13 @@ class SchoolEventServiceTest {
         assertThat(events.getEvents(id)).extracting(e -> e.code()).contains("S01");
         long version = fixture.version(id);
         String key = UUID.randomUUID().toString();
+        int p = fixture.milli(id, "P");
         var result = events.chooseEvent(id, "S01", version, key, new ChooseEventRequest("COOPERATE"));
         assertThat(result.spentAp()).isEqualTo(1);
         assertThat(result.player().remainingAp()).isEqualTo(2);
         assertThat(result.player().version()).isEqualTo(version + 1);
-        assertThat(result.statDelta()).containsEntry("P", 2).containsEntry("C", 3);
+        assertThat(result.statDelta()).containsEntry("C", 3).doesNotContainKey("P");
+        assertThat(fixture.milli(id, "P") - p).isEqualTo(500);
         assertThat(result.details()).containsKeys("scene", "tags");
         assertThat(records.findByPlayerIdAndEventCodeOrderByIdAsc(id, "S01")).hasSize(1);
         var logs = history.findByPlayerIdAndSubjectCodeOrderByIdAsc(id, "S01");

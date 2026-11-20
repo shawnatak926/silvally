@@ -61,7 +61,7 @@ public class FieldLearningServiceImpl implements FieldLearningService {
             reward = f.getPath() == FieldLearning.Path.DOMESTIC ? Map.of("P", 2, "C", 3) : Map.of("EN", 4, "C", 3);
         } else return Optional.empty();
         var before = p.getStats().values();
-        p.getStats().apply(reward);
+        StatGrowth.apply(p, reward, event);
         var actual = new LinkedHashMap<String, Integer>();
         p.getStats().values().forEach((stat, value) -> {
             if (value.intValue() != before.get(stat)) actual.put(stat, value - before.get(stat));

@@ -4,6 +4,7 @@ import com.silvally.dto.request.ChooseEventRequest;
 import com.silvally.entity.Player;
 import com.silvally.repository.PlayerRepository;
 import com.silvally.support.AdmissionAnswers;
+import com.silvally.support.TestStats;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +41,7 @@ class SchoolInterviewResultTest {
     Player prepared(String track, int preparation) {
         Player p = Player.admission("점수 비교", "OPEN");
         org.springframework.test.util.ReflectionTestUtils.setField(p, "seed", "admission-test");
+        TestStats.pin(p);
         p.selectAdmissionTrack(track); p.passDocuments(); p.prepare("AD03", preparation); p.prepare("AD04", preparation);
         return players.saveAndFlush(p);
     }

@@ -18,7 +18,8 @@ public record HistoryPage(
             String narrativeStatus,
             String narrative,
             String narrativeSource,
-            String narrativeModel
+            String narrativeModel,
+            String evidenceJson
     ) {
     }
 }
