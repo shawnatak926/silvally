@@ -56,6 +56,7 @@ public class PlayerServiceImpl implements PlayerService {
     private final ObjectMapper objectMapper;
     private final TransactionTemplate transactionTemplate;
     private final ProgressAssembler progressAssembler;
+    private final com.silvally.repository.NarshaProjectRepository narshaProjectRepository;
 
     public PlayerServiceImpl(PlayerRepository playerRepository,
                              CommandLogRepository commandLogRepository,
@@ -74,7 +75,9 @@ public class PlayerServiceImpl implements PlayerService {
                              com.silvally.repository.FieldLearningRepository fieldLearning,
                              com.silvally.repository.SchoolEventDrawRepository schoolDraws,
                              com.silvally.repository.ExamResultRepository examResults,
-                             ProgressAssembler progressAssembler) {
+                             ProgressAssembler progressAssembler,
+                             com.silvally.repository.NarshaProjectRepository narshaProjectRepository) {
+        this.narshaProjectRepository = narshaProjectRepository;
         this.schoolDraws = schoolDraws;
         this.progressAssembler = progressAssembler;
         this.examResults = examResults;
@@ -154,6 +157,7 @@ public class PlayerServiceImpl implements PlayerService {
         courseEnrollmentRepository.deleteByPlayerId(playerId);
         jobApplicationRepository.deleteByPlayerId(playerId);
         playerProjectRepository.deleteByPlayerId(playerId);
+        narshaProjectRepository.deleteByPlayerId(playerId);
         activityRecordRepository.deleteByPlayerId(playerId);
         eventCommandRepository.deleteByPlayerId(playerId);
         playerRepository.delete(player);

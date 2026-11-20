@@ -31,6 +31,10 @@ class SchoolCalendarServiceTest {
         assertThat(fixture.milli(id, "P") - p).isEqualTo(500);
         assertThat(events.getEvent(id, "FOCUS_Y1_S1").choices()).allMatch(c -> !c.enabled());
     }
+    com.silvally.dto.response.MutationResult chooseWithTopic(UUID id, String event, String choice, String topic) {
+        return events.chooseEvent(id, event, fixture.version(id), UUID.randomUUID().toString(),
+                ChooseEventRequest.withNarsha(choice, new NarshaInput("CUSTOM", topic, null)));
+    }
     com.silvally.dto.response.MutationResult choose(UUID id, String event, String choice) {
         return events.chooseEvent(id, event, fixture.version(id), UUID.randomUUID().toString(), new ChooseEventRequest(choice));
     }
@@ -65,11 +69,11 @@ class SchoolCalendarServiceTest {
         UUID id = fixture.enrolledStudent();
         setPeriod(id, 1, 8);
         assertThat(events.getEvents(id)).extracting(e -> e.code()).contains("NARSHA_START");
-        choose(id, "NARSHA_START", "JOIN");
+        chooseWithTopic(id, "NARSHA_START", "JOIN", "1학년 팀 프로젝트");
         setPeriod(id, 1, 22);
         assertThat(events.getEvents(id)).extracting(e -> e.code()).doesNotContain("NARSHA_WRAP");
         setPeriod(id, 1, 23); choose(id, "NARSHA_WRAP", "SUBMIT");
-        setPeriod(id, 2, 2); choose(id, "NARSHA_RESUME", "RESUME");
+        setPeriod(id, 2, 2); chooseWithTopic(id, "NARSHA_RESUME", "RESUME", "2학년 팀 프로젝트");
         fixture.addStats(id, Map.of("P", 100, "B", 100, "C", 100));
         setPeriod(id, 2, 22);
         var result = choose(id, "NARSHA_RANK", "CHECK");

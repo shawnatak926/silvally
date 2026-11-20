@@ -211,7 +211,8 @@ class SchoolLifeServiceTest {
                     new YearTransitionRequest(p.getYear() == 2 ? "SOFTWARE" : "WEB"));
             fixture.completeCalendarChoices(id);
             p = fixture.load(id); if (p.getPhase() != Phase.SCHOOL) break;
-            if (p.getYear() == 1 && p.getTurn() == 8) choose(id, "NARSHA_START", "JOIN");
+            if (p.getYear() == 1 && p.getTurn() == 8) events.chooseEvent(id, "NARSHA_START", fixture.version(id), UUID.randomUUID().toString(),
+                    com.silvally.dto.request.ChooseEventRequest.withNarsha("JOIN", new com.silvally.dto.request.NarshaInput("CUSTOM", "테스트 프로젝트", null)));
             fixture.advance(id); regular++;
             fixture.completeCalendarChoices(id);
         }

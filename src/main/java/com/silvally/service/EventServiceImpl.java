@@ -17,6 +17,7 @@ public class EventServiceImpl implements EventService {
     private final SchoolLifeService schoolLife;
     private final FieldLearningService fieldLearning;
     private final SchoolCalendar calendar;
+    private final NarshaService narsha;
     private final PlayerRepository players;
     private final EventDefRepository events;
     private final EventChoiceRepository choices;
@@ -27,8 +28,10 @@ public class EventServiceImpl implements EventService {
     private final ObjectMapper json;
     public EventServiceImpl(PlayerRepository players, EventDefRepository events, EventChoiceRepository choices,
             ActivityRecordRepository activities, CommandLogRepository history, CommandExecutor commands,
-            SchoolRules rules, ObjectMapper json, SchoolCalendar calendar, FieldLearningService fieldLearning, NarrativeService narratives, SchoolLifeService schoolLife) {
+            SchoolRules rules, ObjectMapper json, SchoolCalendar calendar, FieldLearningService fieldLearning, NarrativeService narratives, SchoolLifeService schoolLife,
+            NarshaService narsha) {
         this.schoolLife = schoolLife;
+        this.narsha = narsha;
         this.narratives = narratives;
         this.fieldLearning = fieldLearning;
         this.calendar = calendar;
@@ -92,6 +95,8 @@ public class EventServiceImpl implements EventService {
     public MutationResult choose(UUID id, String code, long version, String key, ChooseEventRequest request) {
         if (request == null || !request.isSelectionValid() || request.choiceCodes() != null)
             throw new BusinessException(ErrorCode.VALIDATION_ERROR);
+        if (request.narsha() != null && !code.equals("NARSHA_START") && !code.equals("NARSHA_RESUME"))
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "나르샤 주제는 프로젝트를 시작하는 선택에만 보낼 수 있습니다.");
         var delta = new LinkedHashMap<String, Integer>();
         var details = new LinkedHashMap<String, Object>();
         int[] cost = {0};
@@ -104,6 +109,7 @@ public class EventServiceImpl implements EventService {
                         if (fixedRequired) throw new BusinessException(ErrorCode.CHOICE_REQUIRED);
                         var before = p.getStats().values();
                         String result = schoolLife.choose(p, code, request.choiceCode(), details);
+                        narsha.recordSchoolChoice(p, request.choiceCode());
                         p.getStats().values().forEach((stat, value) -> {
                             if (!value.equals(before.get(stat))) delta.put(stat, value - before.get(stat));
                         });
@@ -129,7 +135,7 @@ public class EventServiceImpl implements EventService {
                     details.put("choiceCode", c.getId().choiceCode()); details.put("statDelta", delta);
                     details.put("sceneSource", "MOCK"); details.put("sceneStatus", "READY");
                     details.put("tags", effect.path("tags")); details.put("scene", effect.path("scene").asString(c.getLabel()));
-                    String result = calendar.apply(p, code, c.getId().choiceCode(), details);
+                    String result = calendar.apply(p, code, c.getId().choiceCode(), request.narsha(), details);
                     if (code.equals("J01")) {
                         var selection = fieldLearning.select(p, c.getId().choiceCode());
                         result = selection.status();

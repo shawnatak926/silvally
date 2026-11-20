@@ -6,7 +6,7 @@
 - `EventService.requireNoPendingEvent(Player)`: 김우주 담당 턴 진행기가 필수 사건을 먼저 확인합니다. 오류 상세의 `events`에 대기 중인 사건 코드가 들어갑니다.
 - `SchoolRules.TURNS_PER_YEAR=24`. 1~12턴/13~24턴은 각 학기입니다. `FOCUS_Y{year}_S{semester}` 선택은 AP0/즉시 성장0, 선택한 P/A/C +1을 정규 턴에 반영합니다.
 - `VACATION_Y{year}_SUMMER/WINTER`: 12/24턴 성장 후 같은 정규 턴에서 선택 대기. REST는 다음 학기/학년으로 전이, CAMP는 별도 실습 2턴을 `/turns/advance`로 수행한 뒤 전이합니다. 실습은 P+2/C+1의 가상 게임 보상이며 정규 턴 성장과 집중 목표를 중복 적용하지 않습니다.
-- 나르샤: `NARSHA_START`(1-8), `NARSHA_WRAP`(1-23), `NARSHA_RESUME`(2-2), `NARSHA_RANK`(2-22). 참가 이력이 있는 다음 단계만 열리며 순위는 한 번 저장합니다. 2-23의 `SOFTWAREWAVE`는 저장된 1~3위만 선택 가능합니다.
+- 나르샤: `NARSHA_START`(1-8), `NARSHA_WRAP`(1-23), `NARSHA_RESUME`(2-2), `NARSHA_RANK`(2-22). 1학년 마무리·2학년 순위는 해당 학년 프로젝트를 시작한 경우에만 열리고 순위는 한 번 저장합니다. 2학년 시작은 1학년 참가·완료와 무관하게 열립니다(#24, 학년별 기록·주제 입력은 `NarshaService`). 2-23의 `SOFTWAREWAVE`는 저장된 1~3위만 선택 가능합니다.
 - 순위는 실제 학교의 선발 기준이 아닌 가상 게임 규칙입니다. 팀 역량(P/B/C 평균)에서 산출하며 `rankSource=GAME_RULE`로 표시합니다. 이전 코드에는 원본 팀 순위 데이터가 없습니다.
 - 선택 결과의 `MutationResult.details`와 `ActivityRecord.evidenceJson`에 `scene`, `sceneSource=MOCK`, `sceneStatus=READY`, `tags`, 실제 `statDelta`를 전달합니다. 응답/명령 로그의 `sceneId`는 활동 이력 ID입니다. 공통 명령 로그에 선택/장면을 함께 붙이므로 일반 학교 사건은 이중 저장하지 않습니다.
 

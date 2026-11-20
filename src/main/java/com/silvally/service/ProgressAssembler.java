@@ -24,9 +24,11 @@ public class ProgressAssembler {
     private final PlayerProjectRepository projects;
     private final ProjectRules projectRules;
     private final ExamService exams;
+    private final NarshaService narsha;
 
     public ProgressAssembler(CourseEnrollmentRepository enrollments, PlayerProjectRepository projects,
-                             ProjectRules projectRules, ExamService exams) {
+                             ProjectRules projectRules, ExamService exams, NarshaService narsha) {
+        this.narsha = narsha;
         this.enrollments = enrollments;
         this.projects = projects;
         this.projectRules = projectRules;
@@ -46,7 +48,8 @@ public class ProgressAssembler {
                 works.stream().map(ProgressAssembler::project).toList(),
                 courses.stream().filter(c -> c.getStatus() == CourseStatus.PASSED).map(ProgressAssembler::qualification).toList(),
                 yearSummaries(player, examResults),
-                snapshots(works));
+                snapshots(works),
+                narsha.projects(player.getId()));
     }
 
     private static Map<String, Object> enrollment(CourseEnrollment course) {

@@ -159,7 +159,11 @@ class FullPlaythroughHttpTest {
             } else {
                 choice = enabledChoices(id, code).getFirst();
             }
-            player = mutate("POST", "/players/" + id + "/events/" + code + "/choices", Map.of("choiceCode", choice), player)
+            // 2학년 나르샤 시작은 주제 후보와 역할을 함께 보낸다.
+            Map<String, Object> body = choice.equals("RESUME")
+                    ? Map.of("choiceCode", choice, "narsha", Map.of("topicCode", "INTERVIEW_PLATFORM", "role", "BACKEND"))
+                    : Map.of("choiceCode", choice);
+            player = mutate("POST", "/players/" + id + "/events/" + code + "/choices", body, player)
                     .path("player");
             if (choice.equals("CAMP")) assertThat(player.path("school").path("practiceRemaining").asInt()).isEqualTo(2);
         }

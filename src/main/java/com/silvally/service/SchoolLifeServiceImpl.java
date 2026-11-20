@@ -170,15 +170,9 @@ public class SchoolLifeServiceImpl implements SchoolLifeService {
         for (int i = options.size() - 1; i > 0; i--) Collections.swap(options, i, rng.nextInt(i + 1));
         return new Event(selected.code(), selected.title(), selected.situation(), false, List.copyOf(options), selected.source());
     }
-    private static boolean developing(Player p) {
-        return p.getYear() == 1 && "STARTED".equals(p.getNarshaStage())
-                || p.getYear() == 2 && "RESUMED".equals(p.getNarshaStage());
-    }
-    private static boolean deadline(Player p) {
-        return developing(p) && p.getTurn() >= (p.getYear() == 1 ? 20 : 19)
-                || p.getYear() == 1 && p.getTurn() == 23 && "WRAPPED".equals(p.getNarshaStage())
-                || p.getYear() == 2 && p.getTurn() == 22 && "RANKED".equals(p.getNarshaStage());
-    }
+    /** 현재 학년 나르샤 프로젝트의 진행·마감 상태는 NarshaRules가 스트레스 계산에 제공한다. */
+    private static boolean developing(Player p) { return NarshaRules.developing(p); }
+    private static boolean deadline(Player p) { return NarshaRules.deadline(p); }
     @Override public Map<String, Object> applyTurnPressure(Player p) {
         int before = p.getStats().getS();
         var sources = new ArrayList<Map<String, Object>>();
