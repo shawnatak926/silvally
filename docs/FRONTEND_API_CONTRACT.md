@@ -92,7 +92,8 @@
 | 수강 목록 `enrollments` | `ProgressView.enrollments` (이전 `enrolments`는 응답된 적 없는 미구현 필드였음) | 서버 수정 |
 | 학년 표현 | `phase`(ADMISSION_1·2, BEFORE_SCHOOL, CAREER_PICK, SCHOOL, GRAD_READY, ENDED) + `year`·`turn` | 어댑터 정규화 |
 | 비포스쿨 일차·복수 선택 | `beforeSchoolDay`; 1~2일차는 `choiceCodes` 2개, 3~5일차는 `choiceCode` 1개 | 어댑터 정규화 |
-| 직무 코드 | `initialCareerCode`·`currentCareerCode`, 추천은 `career-preference.recommendations` | 기존 |
+| 직무 코드 | `initialCareerCode`·`currentCareerCode`, 추천은 `career-preference.recommendations`(항목마다 `label`·`summary`). 직무는 11종이며 `AI`는 "인공지능 개발자", 새 코드 `AI_NATIVE`는 "AI 네이티브 개발자"입니다. 프론트 표시 코드 매핑에 `AI_NATIVE`를 추가해야 합니다 | 기존 + 서버 추가 |
+| 학과·집중 수업 | `GET /year-transition`의 `options[]`(학과: `SOFTWARE` 소프트웨어개발과·`AI` 인공지능소프트웨어과, 3학년 집중 수업 5종)와 `notice`. `EMBEDDED`·`SECURITY`는 이전 저장 회차용이라 새로 고를 수 없습니다. 학과·집중 수업은 희망 직무를 정하거나 제한하지 않습니다 | 서버 추가 |
 | 인생 기록 story | `HistoryPage.items[]`(`logId`, `narrativeStatus` PENDING·SAVED·FAILED, `narrative`) + `nextAfterId` | 어댑터 정규화 |
 | AI 생성 상태 | 항목별 `narrativeStatus`; 재시도는 `POST /narratives/retry` 후 history 재조회 | 기존 |
 | 턴 진행 가능 여부 | `GET /turns/readiness` | 서버 추가 |

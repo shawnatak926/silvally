@@ -102,11 +102,11 @@ class SchoolTurnServiceTest {
                 .isInstanceOfSatisfying(BusinessException.class, e -> {
                     assertThat(e.getErrorCode()).isEqualTo(ErrorCode.CHOICE_REQUIRED);
                     assertThat(e.getDetails()).containsEntry("pendingChoice", "MAJOR");
-                    assertThat(e.getDetails().get("options")).asInstanceOf(InstanceOfAssertFactories.LIST).contains("SOFTWARE", "SECURITY");
+                    assertThat(e.getDetails().get("options")).asInstanceOf(InstanceOfAssertFactories.LIST).containsExactlyInAnyOrder("SOFTWARE", "AI");
                 });
         assertError(() -> certificateService.enroll(id, "INFO_CRAFTSMAN", fixture.version(id),
                 UUID.randomUUID().toString()), ErrorCode.CHOICE_REQUIRED);
-        assertThat(schoolTurnService.getYearTransition(id).options()).hasSize(3);
+        assertThat(schoolTurnService.getYearTransition(id).options()).hasSize(2);
     }
 
     @Test
