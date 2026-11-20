@@ -45,7 +45,7 @@ public class CareerRecommender {
         for (int i = 0; i < Math.min(RECOMMEND_LIMIT, ranked.size()); i++) {
             Scored scored = ranked.get(i);
             result.add(new Recommendation(i + 1, scored.role().code(), scored.role().label(), scored.score(),
-                    scored.statReasons(), scored.activityReasons()));
+                    scored.statReasons(), scored.activityReasons(), scored.role().summary()));
         }
         return result;
     }
