@@ -18,12 +18,14 @@ public class NarrativeContextCollector {
     private final CommandLogRepository commandLogs;
     private final PlayerProjectRepository projects;
     private final CourseEnrollmentRepository enrollments;
+    private final SchoolEvidenceSelector schoolEvidence;
 
     public NarrativeContextCollector(CommandLogRepository commandLogs, PlayerProjectRepository projects,
-                                     CourseEnrollmentRepository enrollments) {
+                                     CourseEnrollmentRepository enrollments, SchoolEvidenceSelector schoolEvidence) {
         this.commandLogs = commandLogs;
         this.projects = projects;
         this.enrollments = enrollments;
+        this.schoolEvidence = schoolEvidence;
     }
 
     public NarrativeContext collect(Player player, CommandLog sceneLog) {
@@ -47,6 +49,7 @@ public class NarrativeContextCollector {
         return new NarrativeContext(player.getName(), player.getPhase().name(), player.getYear(), player.getTurn(),
                 player.getBeforeSchoolDay(), player.getStats().values(), player.getAdmissionTrack(),
                 player.getMajor(), player.getTrack(), player.getCurrentCareerCode(), playerProjects,
-                certificates, recentChoices);
+                certificates, recentChoices,
+                schoolEvidence.select(sceneLog.getSubjectCode(), sceneLog.getChoiceCode(), sceneLog.getEvidenceJson()));
     }
 }
