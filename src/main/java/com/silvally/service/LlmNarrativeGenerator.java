@@ -89,7 +89,7 @@ public class LlmNarrativeGenerator implements NarrativeGenerator {
         data.put("gameRules", GAME_RULES);
         data.put("previousNarratives", scene.previousNarratives());
         return "아래 game_data로 이번 장면의 서사를 써라.\n<game_data>\n"
-                + json.writeValueAsString(data) + "\n</game_data>";
+                + escapeTags(json.writeValueAsString(data)) + "\n</game_data>";
     }
 
     private Map<String, Object> state(NarrativeContext context) {
@@ -113,6 +113,11 @@ public class LlmNarrativeGenerator implements NarrativeGenerator {
         } catch (RuntimeException ignored) {
         }
         return evidenceJson;
+    }
+
+    /** JSON 문자열 값 안의 꺾쇠를 유니코드 이스케이프로 바꿔 game_data 경계를 닫지 못하게 한다. */
+    private static String escapeTags(String payload) {
+        return payload.replace("<", "\\u003c").replace(">", "\\u003e");
     }
 
     private static String validate(ChatResponse response) {
