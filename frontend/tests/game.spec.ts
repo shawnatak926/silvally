@@ -43,7 +43,7 @@ async function enterSchool(page: Page) {
     await select(page, label)
   }
   await expect(choiceHeading(page, '희망 직무 선택')).toBeVisible()
-  await expect(page.getByRole('radio')).toHaveCount(3)
+  await expect(page.getByRole('radio')).toHaveCount(11)
   await page.getByRole('radio', { name: /웹 개발자/ }).check()
   await page.getByRole('button', { name: '이 직무로 시작' }).click()
   await expect(page.getByText('1학년 · 1턴', { exact: true })).toBeVisible()

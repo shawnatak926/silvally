@@ -15,8 +15,8 @@ class CareerRecommenderTest {
     private final CareerRecommender recommender = new CareerRecommender();
 
     @Test
-    @DisplayName("능력치 가중 평균과 활동 태그 일치 수로 점수를 매겨 상위 3개만 추천한다")
-    void recommend_scoresAndLimitsToTopThree() {
+    @DisplayName("능력치 가중 평균과 활동 태그 일치 수로 점수를 매겨 전체 직무를 적합도순으로 나열한다")
+    void recommend_scoresAndRanksAllRoles() {
         List<CareerRole> roles = List.of(
                 role("A", 1, Map.of("P", 3, "B", 1), "tagA"),
                 role("B", 2, Map.of("P", 1), "tagB"),
@@ -28,8 +28,8 @@ class CareerRecommenderTest {
 
         List<Recommendation> result = recommender.recommend(roles, stats, activities);
 
-        assertThat(result).extracting(Recommendation::roleCode).containsExactly("B", "A", "C");
-        assertThat(result).extracting(Recommendation::rank).containsExactly(1, 2, 3);
+        assertThat(result).extracting(Recommendation::roleCode).containsExactly("B", "A", "C", "D");
+        assertThat(result).extracting(Recommendation::rank).containsExactly(1, 2, 3, 4);
         Recommendation first = result.get(0);
         // B: 능력치 P 40 + 활동 태그 1개 4점
         assertThat(first.score()).isEqualByComparingTo("44.00");

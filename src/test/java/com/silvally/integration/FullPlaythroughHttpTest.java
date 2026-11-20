@@ -55,7 +55,7 @@ class FullPlaythroughHttpTest {
         assertThat(player.path("phase").asString()).isEqualTo("CAREER_PICK");
 
         JsonNode preference = ok(call("GET", "/players/" + id + "/career-preference", null, null), 200);
-        assertThat(preference.path("recommendations")).hasSize(3);
+        assertThat(preference.path("recommendations")).hasSize(11);
         String role = preference.path("recommendations").get(0).path("roleCode").asString();
         player = mutate("PUT", "/players/" + id + "/career-preference", Map.of("roleCode", role), player).path("player");
         assertThat(player.path("phase").asString()).isEqualTo("SCHOOL");

@@ -1,7 +1,7 @@
 # 프론트 연동 API 계약 (#26)
 
 기존 대소고나 프론트가 별도 로컬 서버 대신 silvally Spring 서버에 연결될 때 지켜야 할 공통 계약입니다.
-기준은 `feature/frontend-api-contract` 브랜치이며, 프론트 소스는 이 저장소에 없으므로 프론트 쪽 변경은 프론트 저장소에서 따로 추적합니다.
+프론트 소스는 이 저장소의 `frontend/`에 있습니다. 아래 서버 계약과 프론트의 어댑터 연결·실제 전체 진행 검증은 구분하며, API 주소만 바꾸면 모든 기능이 호환된다고 가정하지 않습니다.
 
 ## 1. 실행 환경
 
@@ -63,7 +63,7 @@
 | GET | `/players/{id}/events`, `/events/{code}` | 현재 가능한 사건 목록·상세 |
 | POST ✎ | `/players/{id}/events/{code}/choices` | 입학(AD01~AD05)·비포스쿨(BS01~BS05)·재학 사건 선택 |
 | GET | `/players/{id}/events/AD05/interview`, `/events/{code}/result` | 학교 면접 질문, 저장된 전형 결과 |
-| GET / PUT ✎ | `/players/{id}/career-preference` | 상위 3개 직무 추천 / 확정·변경 |
+| GET / PUT ✎ | `/players/{id}/career-preference` | 전체 11개 직무 적합도순 조회 / 자유 확정·기존 조건에 따른 변경 |
 | GET | `/players/{id}/turns/readiness` | 턴 진행 가능 여부와 차단 사유 |
 | POST ✎ | `/players/{id}/turns/advance` | 턴 종료 |
 | GET / POST ✎ | `/players/{id}/year-transition` | 학년 전환 필수 선택(MAJOR·TRACK) |
@@ -125,5 +125,5 @@ loop:
 ## 7. 검증
 
 - 서버: `./gradlew build`
-- `FullPlaythroughHttpTest`는 임의 포트의 실제 서버에서 위 자동 진행 순서대로 회차 생성 → 입학 판정·학교 면접 → 비포스쿨 5일 → 상위 3개 직무 선택 → 1~3학년 → 졸업·엔딩까지 진행합니다. 정규 72턴, 캠프 2추가턴, MAJOR·TRACK 선택, 학년별 시험 6회, 재조회 일치, 이력 ID 안정성을 국내 현장실습·실리콘밸리 경로 각각에서 확인합니다. 키 없는 템플릿 서사 기준입니다.
-- 프론트 빌드, PC·모바일 화면 확인, 취업 엔딩·자퇴 경로, 학교 근거 카탈로그(#23·#28)는 이 문서의 범위 밖이며 해당 이슈·프론트 저장소에서 검증합니다.
+- `FullPlaythroughHttpTest`는 임의 포트의 실제 서버에서 위 자동 진행 순서대로 회차 생성 → 입학 판정·학교 면접 → 비포스쿨 5일 → 전체 11개 직무 중 희망 직무 선택 → 1~3학년 → 졸업·엔딩까지 진행합니다. 정규 72턴, 캠프 2추가턴, MAJOR·TRACK 선택, 학년별 시험 6회, 재조회 일치, 이력 ID 안정성을 국내 현장실습·실리콘밸리 경로 각각에서 확인합니다. 키 없는 템플릿 서사 기준입니다.
+- 프론트 빌드, PC·모바일 화면 확인, 취업 엔딩·자퇴 경로, 학교 근거 카탈로그(#23·#28)의 검증 환경은 `frontend/README.md`와 관련 이슈에 별도로 기록합니다. 데모·별도 로컬 Spring 테스트를 팀 서버 연결 완료로 간주하지 않습니다.

@@ -27,7 +27,6 @@ import java.util.TreeSet;
 @Component
 public class CareerRecommender {
     public static final int ACTIVITY_POINT = 4;
-    public static final int RECOMMEND_LIMIT = 3;
 
     /** 비포스쿨에서 한 활동의 근거. */
     public record Activity(int day, String eventCode, String choiceCode, String label, Set<String> tags) {
@@ -42,7 +41,7 @@ public class CareerRecommender {
                                           List<Activity> activities) {
         List<Scored> ranked = scoreAll(roles, stats, activities);
         List<Recommendation> result = new ArrayList<>();
-        for (int i = 0; i < Math.min(RECOMMEND_LIMIT, ranked.size()); i++) {
+        for (int i = 0; i < ranked.size(); i++) {
             Scored scored = ranked.get(i);
             result.add(new Recommendation(i + 1, scored.role().code(), scored.role().label(), scored.score(),
                     scored.statReasons(), scored.activityReasons()));

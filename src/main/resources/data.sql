@@ -179,3 +179,4 @@ INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','SECURITY','보안','{"order": 8, "stats": {"B": 2, "A": 2}, "tags": ["security", "debugging"]}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','AI','AI 개발','{"order": 9, "stats": {"I": 3, "A": 1}, "tags": ["ai", "study"]}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','DESIGN','UI/UX 디자인','{"order": 10, "stats": {"F": 2, "C": 2}, "tags": ["design", "communication"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','AI_NATIVE','AI 네이티브 개발자','{"order": 11, "stats": {"I": 2, "P": 1, "A": 1}, "tags": ["ai", "automation", "service"]}');

@@ -389,10 +389,10 @@ function CareerPicker({ player, busy, run }: { player: PlayerView; busy: boolean
   if (career.error) return <Problem error={career.error} retry={() => { void career.refetch() }} />
   return (
     <>
-      <Heading eyebrow="진로 추천" title="희망 직무 선택" level={2}>{player.edition === 'MILD' ? '1학년 1학기, 현재 기초 역량을 바탕으로 추천한 세 가지 직무입니다.' : '비포스쿨에서 쌓은 경험을 바탕으로 고른 세 가지 직무입니다.'}</Heading>
+      <Heading eyebrow="나의 진로" title="희망 직무 선택" level={2}>{player.edition === 'MILD' ? '현재 기초 역량을 바탕으로 11개 직무를 적합도순으로 정리했습니다.' : '비포스쿨 경험과 능력치를 바탕으로 11개 직무를 적합도순으로 정리했습니다.'} 순위는 참고하고, 하고 싶은 직무를 자유롭게 골라 주세요.</Heading>
       <ChoiceForm busy={busy} submit="이 직무로 시작" onSubmit={(roleCode) => run('PUT', '/career-preference', { roleCode })}
-        options={career.data.recommendations.map((entry) => ({
-          value: entry.roleCode, label: entry.label, tag: `${entry.rank}위 · ${entry.score.toFixed(2)}`,
+        options={[...career.data.recommendations].sort((a, b) => a.rank - b.rank).map((entry) => ({
+          value: entry.roleCode, label: entry.label, tag: `적합도 ${entry.rank}위 · ${entry.score.toFixed(2)}점`,
           detail: [...entry.activityReasons.map((item) => item.eventCode === 'BS01' && item.choiceCode === 'STUDIO'
             ? label('STUDIO') : item.activityLabel), ...entry.statReasons.map((item) => `${stats[item.statCode]} +${item.contribution}`)].join(' · '),
         }))} />
