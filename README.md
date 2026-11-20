@@ -1,5 +1,17 @@
 # silvally
 
+## 웹 게임 실행
+
+React·TypeScript 기반 웹은 [`frontend/`](frontend/README.md)에 있습니다.
+
+```sh
+cd frontend
+npm ci
+npm run demo
+```
+
+Node.js 22.12 이상이 필요합니다. 데모는 서버 없이 플레이할 수 있으며, 현재 Java 서버와의 API 통합 상태·실행 설정·테스트 방법은 프론트엔드 안내를 확인합니다.
+
 ## 인생 기록 AI 서사 설정
 
 서사 생성은 서버 환경변수로만 설정합니다. API 키가 없으면 고정 문장 템플릿(mock) 모드로 실행됩니다.

@@ -1,0 +1,42 @@
+[
+  {
+    "code": "school-guide",
+    "name": "(대구소프트웨어마이스터고) 2027 신입생 홍보 자료 학교안내.pdf",
+    "pages": 2,
+    "textChars": 2482,
+    "asset": "/school-sources/school-guide-2027.pdf",
+    "sha256": "ff246829b49633c5f82f85db49e44962211c2bb72b544570756de9a1793a66e9"
+  },
+  {
+    "code": "career-guide",
+    "name": "(붙임 1) 2027학년도 진로진학 안내서 제작 자료 요청(대구소마고).pdf",
+    "pages": 5,
+    "textChars": 3778,
+    "asset": "/school-sources/career-guide-2027.pdf",
+    "sha256": "f7fc0e0e03374e11276d03c5040905e1c4c3876d6f4bdce54369ec446f87f4ef"
+  },
+  {
+    "code": "growth-path",
+    "name": "(붙임 2) 계열별 성장경로(소프트웨어).pdf",
+    "pages": 1,
+    "textChars": 221,
+    "asset": "/school-sources/growth-path-2027.pdf",
+    "sha256": "c8d1f51f7861b2498a144ef0b414ea3720bdd871c88c64644de92f12720accf3"
+  },
+  {
+    "code": "admissions",
+    "name": "2027학년도 신입생 입학설명회(0919)_최종.pdf",
+    "pages": 82,
+    "textChars": 11407,
+    "asset": "/school-sources/admissions-2027.pdf",
+    "sha256": "3b624ce27bd67723ce1298e6cc3c592deef048a64ccbca20dfed89ad4e05c4e7"
+  },
+  {
+    "code": "school-web",
+    "name": "2027학년도 진학 안내 홈페이지 탑재 자료(대구소마고).pdf",
+    "pages": 7,
+    "textChars": 3502,
+    "asset": "/school-sources/school-web-2027.pdf",
+    "sha256": "e9aed75c839022b01c1f730adc113893387219795c1b6917ae52ea55252c928f"
+  }
+]
