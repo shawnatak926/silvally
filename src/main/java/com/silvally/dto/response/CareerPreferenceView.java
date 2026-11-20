@@ -17,8 +17,14 @@ public record CareerPreferenceView(
             String label,
             BigDecimal score,
             List<StatReason> statReasons,
-            List<ActivityReason> activityReasons
+            List<ActivityReason> activityReasons,
+            String summary
     ) {
+        public Recommendation(int rank, String roleCode, String label, BigDecimal score,
+                              List<StatReason> statReasons, List<ActivityReason> activityReasons) {
+            this(rank, roleCode, label, score, statReasons, activityReasons, null);
+        }
+
     }
 
     public record StatReason(String statCode, int value, BigDecimal contribution) {

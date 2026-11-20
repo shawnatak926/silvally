@@ -153,7 +153,22 @@ public class CareerPreferenceServiceImpl implements CareerPreferenceService {
     private CareerPreferenceView view(Player player, CareerPreferenceRecord record) {
         List<String> eligible = player.getPhase() == Phase.SCHOOL ? eligibleChangeRoles(player, record) : List.of();
         return new CareerPreferenceView(player.getInitialCareerCode(), player.getCurrentCareerCode(),
-                record.recommendations(), !eligible.isEmpty(), eligible);
+                current(player, record.recommendations()), !eligible.isEmpty(), eligible);
+    }
+
+    /**
+     * 저장된 추천의 직무 이름·설명을 현재 카탈로그 기준으로 맞춘다. 순위·점수·이유는 최초 추천 그대로 두므로
+     * 직무 이름이 바뀌기 전에 저장된 회차(예: AI 코드)도 같은 코드로 새 이름을 보여 준다.
+     */
+    private List<CareerPreferenceView.Recommendation> current(Player player,
+                                                              List<CareerPreferenceView.Recommendation> stored) {
+        Map<String, CareerRole> roles = new java.util.HashMap<>();
+        roleCatalog.all(player).forEach(role -> roles.put(role.code(), role));
+        return stored.stream().map(r -> {
+            CareerRole role = roles.get(r.roleCode());
+            return role == null ? r : new CareerPreferenceView.Recommendation(r.rank(), r.roleCode(), role.label(),
+                    r.score(), r.statReasons(), r.activityReasons(), role.summary());
+        }).toList();
     }
 
     private List<CareerRecommender.Activity> activities(Player player) {

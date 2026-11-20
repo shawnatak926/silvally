@@ -51,6 +51,7 @@ public class CareerRoleCatalog {
         config.path("stats").properties().forEach(e -> stats.put(e.getKey(), e.getValue().asInt()));
         Set<String> tags = new LinkedHashSet<>();
         config.path("tags").forEach(node -> tags.add(node.asString()));
-        return new CareerRole(def.getId().code(), def.getTitle(), config.path("order").asInt(), stats, tags);
+        String summary = config.path("summary").asString(null);
+        return new CareerRole(def.getId().code(), def.getTitle(), config.path("order").asInt(), stats, tags, summary);
     }
 }

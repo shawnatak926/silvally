@@ -160,6 +160,7 @@ INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','PROJECT','ANDROID_NOTE_APP','안드로이드 메모 앱','{"role": "ANDROID", "minYear": 2, "durationTurns": 12, "workRequired": 3, "focus": ["P", "F"], "passQuality": 50}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','PROJECT','MINI_GAME','미니 게임','{"role": "GAME", "minYear": 2, "durationTurns": 12, "workRequired": 3, "focus": ["P", "I"], "passQuality": 50}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','PROJECT','CHATBOT','AI 챗봇','{"role": "AI", "minYear": 3, "durationTurns": 12, "workRequired": 3, "focus": ["I", "A"], "passQuality": 55}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','PROJECT','AI_TOOL_SERVICE','AI 도구 활용 서비스','{"role": "AI_NATIVE", "minYear": 2, "durationTurns": 12, "workRequired": 3, "focus": ["P", "I"], "passQuality": 50}');
 
 -- 기업: deadlineTurn은 1학년 1턴을 1로 센 누적 턴이며 1학년 24턴 기준입니다. (2학년 1턴 = 25, 3학년 1턴 = 49, 3학년 24턴 = 72)
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COMPANY','BYTE_WORKS','바이트웍스','{"role": "BACKEND", "minYear": 2, "deadlineTurn": 58, "docPass": 30, "codingPass": 50, "interviewPass": 50, "offerPass": 55, "codingStats": ["P", "B"], "interviewStats": ["C", "A"]}');
@@ -167,6 +168,7 @@ INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COMPANY','DROID_FACTORY','드로이드팩토리','{"role": "ANDROID", "minYear": 3, "deadlineTurn": 66, "docPass": 35, "codingPass": 55, "interviewPass": 50, "offerPass": 60, "codingStats": ["P", "F"], "interviewStats": ["C", "A"]}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COMPANY','DUNGEON_GAMES','던전게임즈','{"role": "GAME", "minYear": 3, "deadlineTurn": 66, "docPass": 35, "codingPass": 55, "interviewPass": 50, "offerPass": 60, "codingStats": ["P", "I"], "interviewStats": ["C", "I"]}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COMPANY','DEEP_MIND_KR','딥마인드코리아','{"role": "AI", "minYear": 3, "deadlineTurn": 70, "docPass": 40, "codingPass": 60, "interviewPass": 55, "offerPass": 65, "codingStats": ["I", "A"], "interviewStats": ["A", "C"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','COMPANY','AI_WORKS','에이아이웍스','{"role": "AI_NATIVE", "minYear": 3, "deadlineTurn": 70, "docPass": 30, "codingPass": 55, "interviewPass": 50, "offerPass": 60, "codingStats": ["P", "I"], "interviewStats": ["C", "A"]}');
 
 -- 직무: order는 추천 동점 처리에 쓰는 고정 순번, stats는 직무 적합 능력치 가중치, tags는 비포스쿨 활동 태그와 맞춰 보는 값입니다.
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','WEB','웹 프론트엔드','{"order": 1, "stats": {"F": 3, "P": 1}, "tags": ["web", "design"]}');
@@ -177,5 +179,6 @@ INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','GAME','게임 개발','{"order": 6, "stats": {"P": 2, "I": 2}, "tags": ["game", "maker"]}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','NETWORK','네트워크','{"order": 7, "stats": {"B": 3, "A": 1}, "tags": ["network"]}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','SECURITY','보안','{"order": 8, "stats": {"B": 2, "A": 2}, "tags": ["security", "debugging"]}');
-INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','AI','AI 개발','{"order": 9, "stats": {"I": 3, "A": 1}, "tags": ["ai", "study"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','AI','인공지능 개발자','{"order": 9, "stats": {"I": 3, "A": 1}, "tags": ["ai", "study"], "summary": "인공지능 모델과 데이터 중심으로 학습·분석·개선하는 직무"}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','DESIGN','UI/UX 디자인','{"order": 10, "stats": {"F": 2, "C": 2}, "tags": ["design", "communication"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','CAREER_ROLE','AI_NATIVE','AI 네이티브 개발자','{"order": 11, "stats": {"P": 2, "I": 1, "C": 1}, "tags": ["ai", "project"], "summary": "AI 도구와 모델을 활용해 서비스를 빠르게 구현·검증하는 직무"}');
