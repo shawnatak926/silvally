@@ -186,7 +186,7 @@ test('집중 목표를 유지하며 진행하고 캠프는 방학 안에서만 �
   await expect(page.getByText('1학기 · 1/12턴')).toBeVisible()
   await page.getByRole('button', { name: '자동 진행', exact: true }).click()
   await page.getByRole('button', { name: '룸메이트와 생활 규칙 정하기 · 1 AP', exact: true }).click()
-  await expect(page.locator('.clock-label')).toHaveText('시간이 흐르는 중')
+  await expect(page.getByRole('button', { name: '일시 정지', exact: true })).toBeEnabled()
   await page.getByRole('button', { name: '다음 결정까지' }).click()
   const dialog = page.getByRole('region', { name: '중대 결정' })
   await expect(dialog.getByRole('heading', { name: '1학년 나르샤 · 주제 선택' })).toBeVisible({ timeout: 15_000 })

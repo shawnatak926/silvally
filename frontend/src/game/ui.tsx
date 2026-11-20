@@ -5,6 +5,7 @@ import photo from '../assets/campus-photo.png'
 import { ApiError } from '../api/client'
 import { isSchool, type AdmissionProtection, type CalendarPeriod, type InterviewEvaluation, type MutationResult, type PlayerView, type Stat, type Stats } from '../api/contracts'
 import { usePlayerData } from '../api/hooks'
+import { ChoiceCountdown, randomChoice, useChoiceTimer } from './choice-timer'
 import { actionLabel, admissionComponents, admissionProtection, label, phaseLabel, schoolPeriod, stats } from './labels'
 import { fieldLearningDetail, fieldLearningRoutes, fieldLearningStatusLabel, isFieldLearningExperience, isFieldLearningRoute } from './field-learning'
 
@@ -82,17 +83,22 @@ export function Journey({ player }: { player: PlayerView }) {
   )
 }
 
-interface Option { value: string; label: string; detail?: ReactNode; disabled?: boolean; hint?: string | null; tag?: string }
+interface Option { value: string; label: string; detail?: ReactNode; disabled?: boolean; hint?: string | null; tag?: string; autoPick?: boolean }
 
 export function ChoiceForm({
-  options, onSubmit, submit = '선택 확정', busy, onSelectionChange, children, canSubmit = true,
+  options, onSubmit, submit = '선택 확정', busy, onSelectionChange, children, canSubmit = true, automatic = false,
 }: { options: Option[]; onSubmit: (value: string) => void; submit?: string; busy: boolean;
-  onSelectionChange?: (value: string) => void; children?: ReactNode; canSubmit?: boolean }) {
+  onSelectionChange?: (value: string) => void; children?: ReactNode; canSubmit?: boolean; automatic?: boolean }) {
   const id = useId()
   const [selection, setSelection] = useState('')
   const selected = options.find((item) => item.value === selection && !item.disabled)
+  const allowed = options.filter(item => !item.disabled && item.autoPick !== false && !item.value.includes('WITHDRAWAL'))
+  const timer = useChoiceTimer({ enabled: automatic && canSubmit && (Boolean(selected) || allowed.length > 0), busy,
+    choiceKey: options.map(item => `${item.value}:${item.disabled}`).join('|'),
+    onExpire: () => { const choice = selected ?? randomChoice(allowed); if (choice) onSubmit(choice.value) } })
   return (
-    <form onSubmit={(event) => { event.preventDefault(); if (selected && !busy && canSubmit) onSubmit(selected.value) }}>
+    <form onSubmit={(event) => { event.preventDefault(); if (selected && !busy && canSubmit) timer.confirm(() => onSubmit(selected.value)) }}>
+      {automatic && <ChoiceCountdown timer={timer} description={!canSubmit ? '필요한 입력을 마치면 자동 선택을 시작합니다.' : selected ? '선택해 둔 항목을 자동으로 확정합니다.' : undefined} />}
       <fieldset className="options" aria-label="선택지" disabled={busy}>
         {options.map((option) => (
           <label className={`option${selected?.value === option.value ? ' selected' : ''}${option.disabled ? ' locked' : ''}`} key={option.value}>

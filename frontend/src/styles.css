@@ -15,6 +15,15 @@
   font: 15px/1.55 "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
 }
+.choice-countdown { margin-block: 14px; padding-block: 12px; border-block: 1px solid var(--divider); }
+.choice-countdown-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+.choice-countdown-toggle { min-height: 44px; padding: 4px 8px; border: 0; background: transparent; text-decoration: underline; text-underline-offset: 3px; color: var(--accent); }
+.choice-countdown progress { display: block; width: 100%; height: 6px; margin-block: 8px; appearance: none; border: 0; background: var(--divider); color: var(--accent); accent-color: var(--accent); }
+.choice-countdown progress::-webkit-progress-bar { background: var(--divider); }
+.choice-countdown progress::-webkit-progress-value { background: var(--accent); transition: width .1s linear; }
+.choice-countdown progress::-moz-progress-bar { background: var(--accent); }
+.choice-countdown small { display: block; color: var(--muted); font-size: 12px; }
+@media (prefers-reduced-motion: reduce) { .choice-countdown progress::-webkit-progress-value { transition: none; } }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 0; }
 h1, h2, h3, p { margin: 0; }
