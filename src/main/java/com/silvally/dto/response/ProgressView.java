@@ -9,6 +9,7 @@ public record ProgressView(
         List<Map<String, Object>> projects,
         List<Map<String, Object>> qualifications,
         List<Map<String, Object>> yearSummaries,
-        List<Map<String, Object>> snapshots
+        List<Map<String, Object>> snapshots,
+        List<Map<String, Object>> narshaProjects
 ) {
 }

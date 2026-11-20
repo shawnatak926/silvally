@@ -1,6 +1,7 @@
 package com.silvally.service;
 
 import com.silvally.common.exception.*;
+import com.silvally.dto.request.NarshaInput;
 import com.silvally.entity.*;
 import org.springframework.stereotype.Component;
 import java.util.*;
@@ -9,7 +10,10 @@ import java.util.*;
 @Component
 public class SchoolCalendar {
     private final CertificateService certificates;
-    public SchoolCalendar(CertificateService certificates) { this.certificates = certificates; }
+    private final NarshaService narsha;
+    public SchoolCalendar(CertificateService certificates, NarshaService narsha) {
+        this.certificates = certificates; this.narsha = narsha;
+    }
     public String focusCode(Player p) { return "FOCUS_Y" + p.getYear() + "_S" + (p.getTurn() <= 12 ? 1 : 2); }
     public String vacationCode(Player p) { return "VACATION_Y" + p.getYear() + (p.getTurn() == 12 ? "_SUMMER" : "_WINTER"); }
     public boolean available(Player p, String code) {
@@ -19,7 +23,8 @@ public class SchoolCalendar {
         if (code.startsWith("FOCUS_") || code.startsWith("VACATION_")) return false;
         return switch (code) {
             case "NARSHA_WRAP" -> "STARTED".equals(p.getNarshaStage());
-            case "NARSHA_RESUME" -> "WRAPPED".equals(p.getNarshaStage());
+            // 2학년 시작은 1학년 참가·완료 여부와 무관하게 열린다.
+            case "NARSHA_RESUME" -> true;
             case "NARSHA_RANK" -> "RESUMED".equals(p.getNarshaStage());
             case "SOFTWAREWAVE" -> "RANKED".equals(p.getNarshaStage()) && p.getNarshaRank() <= 3;
             default -> true;
@@ -29,6 +34,12 @@ public class SchoolCalendar {
         return p.hasSemesterFocus() ? Map.of(p.getSemesterFocus(), 1) : Map.of();
     }
     public String apply(Player p, String event, String choice, Map<String, Object> details) {
+        return apply(p, event, choice, null, details);
+    }
+    public String apply(Player p, String event, String choice, NarshaInput narshaInput, Map<String, Object> details) {
+        if (narshaInput != null && !(event.equals("NARSHA_START") && choice.equals("JOIN")
+                || event.equals("NARSHA_RESUME") && choice.equals("RESUME")))
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "나르샤 주제는 프로젝트를 시작하는 선택에만 보낼 수 있습니다.");
         if (event.startsWith("FOCUS_")) {
             String stat = switch (choice) { case "PROGRAMMING" -> "P"; case "COMMUNICATION" -> "C"; case "ACADEMIC" -> "A";
                 default -> throw new BusinessException(ErrorCode.VALIDATION_ERROR); };
@@ -41,16 +52,12 @@ public class SchoolCalendar {
             details.put("practiceRemaining", 2);
             return "CAMP_READY";
         } else switch (event) {
-            case "NARSHA_START" -> { if (choice.equals("JOIN")) p.setNarshaStage("STARTED"); }
-            case "NARSHA_WRAP" -> p.setNarshaStage("WRAPPED");
-            case "NARSHA_RESUME" -> p.setNarshaStage("RESUMED");
-            case "NARSHA_RANK" -> {
-                // 공식 학교 순위가 아닌 서버의 가상 게임 규칙. 평균 기술·협업 점수로 고정 순위를 산출합니다.
-                int mean = (p.getStats().getP() + p.getStats().getB() + p.getStats().getC()) / 3;
-                p.rankNarsha(1 + (100 - mean) / 10);
-                details.put("rank", p.getNarshaRank()); details.put("rankSource", "GAME_RULE");
-            }
-            case "SOFTWAREWAVE" -> { if (choice.equals("ATTEND")) p.attendSoftwarewave(); }
+            case "NARSHA_START" -> { if (choice.equals("JOIN")) narsha.start(p, narshaInput, details); }
+            case "NARSHA_WRAP" -> narsha.wrap(p, details);
+            case "NARSHA_RESUME" -> { if (choice.equals("RESUME")) narsha.start(p, narshaInput, details); }
+            // 공식 학교 순위가 아닌 서버의 가상 게임 규칙. 기록된 작업·멘토링과 팀 능력으로 완성도를 내 순위를 정합니다.
+            case "NARSHA_RANK" -> narsha.rank(p, details);
+            case "SOFTWAREWAVE" -> { if (choice.equals("ATTEND")) narsha.exhibit(p, details); }
             default -> { }
         }
         return "COMPLETED";

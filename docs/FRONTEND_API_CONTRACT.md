@@ -70,6 +70,7 @@
 | GET / POST ✎ | `/players/{id}/actions` | 행동 목록 / 실행 |
 | GET / POST ✎ | `/players/{id}/courses`, `/courses/{code}/enroll·attend·exam` | 방과후 과정·자격증 |
 | GET / POST ✎ | `/players/{id}/projects`, `/projects/{code}/start·work·portfolio` | 프로젝트 |
+| GET / POST ✎ | `/players/{id}/narsha`, `/narsha/actions` | 나르샤 주제 후보·학년별 기록 조회, 작업·멘토링(AP 1) |
 | GET | `/players/{id}/field-learning`, `/field-learning/summary` | 현장실습·실리콘밸리 상태 |
 | GET / POST ✎ | `/players/{id}/applications`, `/applications/{appId}/steps`, `/applications/{appId}/interview` | 채용 |
 | GET / POST ✎ | `/players/{id}/inventory`, `/inventory/{item}/use` | 인벤토리 |
@@ -84,7 +85,8 @@
 | 학기 집중 `semesterFocus` | `PlayerView.school.semesterFocus` (현재 학기 선택 능력치 P·C·A, 미선택 시 null) | 서버 추가 |
 | 방학·캠프 `vacation` | `school.vacationPending`, `school.practiceRemaining` (캠프 실습 잔여 턴) | 서버 추가 |
 | 학년 선택 대기 | `school.pendingChoice` (MAJOR·TRACK) + `GET /year-transition` 선택지 | 서버 추가 |
-| 나르샤 | `school.narshaStage`·`narshaRank`·`softwarewaveAttended`. 학년별 두 기록 분리는 #24 | 서버 추가 (부분) |
+| 나르샤 | `school.narshaStage`·`narshaRank`·`softwarewaveAttended`는 가장 최근 프로젝트의 요약 값입니다. 학년별 주제·역할·작업/멘토링·완성도·등위·전시 여부는 `GET /narsha`의 `projects[]`(`progress.narshaProjects`, 졸업 요약 `narshaProjects`도 같은 값) | 서버 추가 |
+| 나르샤 시작 입력 | `NARSHA_START`(JOIN)·`NARSHA_RESUME`(RESUME) 선택 본문에 `narsha: {topicCode, customTopic?, role?}`가 필요합니다. `topicCode`는 `GET /narsha`의 `topics[].code` 또는 `CUSTOM`(직접 입력, 공백 정리 후 2~80자). 시작이 아닌 선택에 보내면 `VALIDATION_ERROR` | 서버 추가 |
 | 시험 준비도 | `school.examPreparation` | 서버 추가 |
 | 성적 G | `stats.G`, 시험 결과는 턴 응답 `details.exam`과 `progress.yearSummaries[].exams` | 기존 + 서버 추가 |
 | 수강 목록 `enrollments` | `ProgressView.enrollments` (이전 `enrolments`는 응답된 적 없는 미구현 필드였음) | 서버 수정 |

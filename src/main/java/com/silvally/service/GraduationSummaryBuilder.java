@@ -38,12 +38,14 @@ public class GraduationSummaryBuilder {
     private final CatalogDefRepository catalog;
     private final ObjectMapper objectMapper;
     private final ExamService exams;
+    private final NarshaService narsha;
 
     public GraduationSummaryBuilder(ExamService exams, CourseEnrollmentRepository courseEnrollmentRepository,
                                     PlayerProjectRepository playerProjectRepository,
                                     ActivityRecordRepository activityRecordRepository,
                                     CatalogDefRepository catalog,
-                                    ObjectMapper objectMapper) {
+                                    ObjectMapper objectMapper, NarshaService narsha) {
+        this.narsha = narsha;
         this.courseEnrollmentRepository = courseEnrollmentRepository;
         this.playerProjectRepository = playerProjectRepository;
         this.activityRecordRepository = activityRecordRepository;
@@ -78,6 +80,8 @@ public class GraduationSummaryBuilder {
         summary.put("certificates", certificates(player));
         summary.put("projects", projects(player.getId()));
         summary.put("portfolioCount", portfolioCount(player.getId()));
+        // 1·2학년 나르샤는 별도 기록으로 졸업 당시 주제·완성도·등위·전시 여부를 그대로 남긴다.
+        summary.put("narshaProjects", narsha.projects(player.getId()));
         summary.put("fieldTrips", fieldTrips(player.getId()));
         JobApplication accepted = decision.accepted();
         if (accepted != null) {

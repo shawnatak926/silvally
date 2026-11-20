@@ -77,8 +77,11 @@ class SchoolFixture {
             String choice = event.code().startsWith("FOCUS_") ? "COMMUNICATION"
                 : event.code().startsWith("VACATION_") ? "REST" : event.code().equals("J01") ? "DOMESTIC"
                 : event.choices().getFirst().code();
-            last = events.chooseEvent(playerId, event.code(), version(playerId), UUID.randomUUID().toString(),
-                    new com.silvally.dto.request.ChooseEventRequest(choice));
+            var request = choice.equals("RESUME")
+                    ? com.silvally.dto.request.ChooseEventRequest.withNarsha(choice,
+                            new com.silvally.dto.request.NarshaInput("CUSTOM", "테스트 프로젝트", null))
+                    : new com.silvally.dto.request.ChooseEventRequest(choice);
+            last = events.chooseEvent(playerId, event.code(), version(playerId), UUID.randomUUID().toString(), request);
         }
         return last;
     }
