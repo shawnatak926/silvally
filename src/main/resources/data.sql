@@ -59,8 +59,9 @@ INSERT INTO event_choice (rules_version,event_code,choice_code,label,ap_cost,hea
 
 -- 학년 전환 필수 선택: 2학년 진급 시 전공, 3학년 진급 시 트랙. focus는 턴 종료 시 +1 성장하는 능력치.
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','MAJOR','SOFTWARE','소프트웨어개발과','{"focus": ["P", "B"]}');
-INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','MAJOR','EMBEDDED','임베디드소프트웨어과','{"focus": ["P", "I"]}');
-INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','MAJOR','SECURITY','정보보안과','{"focus": ["B", "A"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','MAJOR','AI','인공지능소프트웨어과','{"focus": ["I", "A"]}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','MAJOR','EMBEDDED','임베디드소프트웨어과','{"focus": ["P", "I"], "legacy": true}');
+INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','MAJOR','SECURITY','정보보안과','{"focus": ["B", "A"], "legacy": true}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','TRACK','WEB','웹 서비스 트랙','{"focus": ["F", "B"]}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','TRACK','MOBILE','모바일 앱 트랙','{"focus": ["P", "F"]}');
 INSERT INTO catalog_def (rules_version,kind,code,title,config_json) VALUES ('v1.2','TRACK','AI','AI 트랙','{"focus": ["I", "A"]}');

@@ -94,13 +94,29 @@ public class SchoolRules {
         String pending = player.getPendingChoice();
         List<YearTransitionView.Option> options = pending == null ? List.of()
                 : catalog.findByKind(player.getRulesVersion(), pending).stream()
+                .filter(def -> !legacy(def))
                 .map(def -> new YearTransitionView.Option(def.getId().code(), def.getTitle(), focus(def)))
                 .toList();
-        return new YearTransitionView(player.getYear(), pending, options);
+        return new YearTransitionView(player.getYear(), pending, options, noticeFor(pending));
+    }
+
+    static final String MAJOR_NOTICE = "학과는 능력치 성장 방향만 정하며 희망 직무를 정하거나 제한하지 않습니다. "
+            + "다른 직무도 개인 프로젝트와 방과후 활동으로 키울 수 있습니다.";
+    static final String TRACK_NOTICE = "3학년 집중 수업은 게임에서 나눈 구분이며 실제 3학년 교육과정 전체가 아닙니다. "
+            + "어느 희망 직무도 이 선택으로 배제되지 않습니다.";
+
+    private static String noticeFor(String pending) {
+        return "MAJOR".equals(pending) ? MAJOR_NOTICE : "TRACK".equals(pending) ? TRACK_NOTICE : null;
+    }
+
+    /** 이전 표시를 쓰던 학과·트랙. 저장된 회차의 성장에는 쓰이지만 새로 고를 수는 없다. */
+    private boolean legacy(CatalogDef def) {
+        return objectMapper.readTree(def.getConfigJson()).path("legacy").asBoolean(false);
     }
 
     public CatalogDef findChoice(Player player, CatalogKind kind, String code) {
         return catalog.findById(new CatalogDef.Id(player.getRulesVersion(), kind.name(), code))
+                .filter(def -> !legacy(def))
                 .orElseThrow(() -> new BusinessException(ErrorCode.VALIDATION_ERROR,
                         "선택할 수 없는 " + kind.getPath() + " 코드입니다: " + code));
     }
