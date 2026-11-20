@@ -22,7 +22,7 @@ function goals(player: PlayerView) {
     case 'ADMISSION_1': return ['지원 전형과 서류 준비']
     case 'ADMISSION_2': return ['코딩·기초능력 전형과 학교 면접']
     case 'BEFORE_SCHOOL': return ['5일 동안 학교와 전공 체험']
-    case 'CAREER_PICK': return ['추천 직무 중 첫 희망 직무 선택']
+    case 'CAREER_PICK': return ['11개 직무 중 첫 희망 직무 선택']
     case 'GRAD_READY': return ['졸업 후 진로 결정']
     case 'ENDED': return []
   }

@@ -16,6 +16,7 @@ import { FieldLearningRecord, History, Notebook, qualificationName } from './gam
 import { CurrentStory, DashboardLinks, SchoolRail, StoryJournal, StudentRail } from './game/story'
 import { InterviewForm } from './game/interview'
 import { EventSource, NarshaRecord } from './game/school-life'
+import { ChoiceCountdown, ChoiceTimerScope, randomChoice, TimedChoices, useChoiceTimer } from './game/choice-timer'
 import { CampusPhoto, ChoiceForm, Dialog, Frame, Heading, Journey, Loading, PhotoScene, Problem, Receipt, StatList } from './game/ui'
 
 type Run = (method: 'POST' | 'PUT', path: string, body?: Record<string, unknown>, version?: number) => void
@@ -138,8 +139,9 @@ function Game({ player, busy, receipt, feedback, commandFailed, run }: {
   const hasRequired = requiredEvents.length > 0 || (school && ((player.year === 2 && !player.major) || (player.year === 3 && !player.track)))
   const canAct = school && Boolean(events.data) && !events.error && !hasRequired
   const choiceOpen = visible.some((event) => event.choices.some((choice) => choice.enabled)) || recruitment.hasAction
-  const blocksAuto = visible.some((event) => (event.blocksAuto ?? (event.required || event.code === 'J01'))
+  const importantChoice = visible.some((event) => (event.blocksAuto ?? (event.required || event.code === 'J01'))
     && event.choices.some((choice) => choice.enabled)) || recruitment.hasAction
+  const blocksAuto = importantChoice || (playback !== 'next' && visible.some((event) => event.choices.some((choice) => choice.enabled)))
   const checking = events.isFetching || recruitment.pending || recruitment.fetching
   const canAuto = canAct && !blocksAuto && !recruitment.error && !checking
   const awaitingChoice = hasRequired || blocksAuto
@@ -190,14 +192,15 @@ function Game({ player, busy, receipt, feedback, commandFailed, run }: {
           <Heading eyebrow="중대 결정" title={decision.title} level={2}>{decision.situation}</Heading>
           <EventSource source={decision.source} />
           {isNarshaTopic(decision.code) ? <NarshaTopicPicker key={decision.code} event={decision} busy={busy} run={run} /> :
+            <TimedChoices choices={decision.choices} busy={busy} onChoose={(choiceCode) => run('POST', `/events/${decision.code}/choices`, { choiceCode })}>{choose =>
             <ol className="decision-options" data-event-code={decision.code}>{decision.choices.map((choice, index) => <li key={choice.code}>
               <button className="btn wide decision-option" type="button" disabled={busy || !choice.enabled}
                 aria-label={choice.label} aria-describedby={choice.description ? `decision-${choice.code}` : undefined}
-                onClick={() => run('POST', `/events/${decision.code}/choices`, { choiceCode: choice.code })}>
+                onClick={() => choose(choice.code)}>
                 <span aria-hidden="true">{index + 1}</span><span className="decision-copy"><strong>{choice.label}</strong>
                 {choice.description && <small id={`decision-${choice.code}`}>{choice.description}</small>}</span>
               </button>
-            </li>)}</ol>}
+            </li>)}</ol>}</TimedChoices>}
         </section>
       ) : <EventPanel key={current.code} event={current} player={player} busy={busy} run={run} />}
     </>
@@ -209,18 +212,19 @@ function Game({ player, busy, receipt, feedback, commandFailed, run }: {
         {running ? '시간이 흐르는 중' : '일시 정지 상태'}
         {awaitingChoice && <small> · 선택 대기</small>}
       </span>
-      <button className="btn primary" type="button" disabled={!running && (!canAuto || busy || commandFailed)}
-        onClick={() => { if (!running) showStory(); setPlayback(running ? null : 'auto') }}>{running ? '일시 정지' : '자동 진행'}</button>
+      <button className="btn primary" type="button" disabled={!playback && ((!canAuto && !awaitingChoice) || busy || commandFailed)}
+        onClick={() => { if (!playback) showStory(); setPlayback(playback ? null : 'auto') }}>{playback ? '일시 정지' : '자동 진행'}</button>
       <select className="clock-speed" aria-label="진행 속도" value={speed} onChange={(event) => setSpeed(Number(event.target.value))}>
         {[1, 2, 4, 8, 16].map((rate) => <option key={rate} value={rate}>{rate}×</option>)}
       </select>
-      <button className="btn" type="button" disabled={playback === 'next' || !canAuto || busy || commandFailed}
+      <button className="btn" type="button" disabled={playback === 'next' || !canAct || importantChoice || checking || busy || commandFailed || Boolean(recruitment.error)}
         onClick={() => { showStory(); setPlayback('next') }}>다음 결정까지</button>
       <button className="btn end-turn" type="button" disabled={!canAct || busy} onClick={advance}>턴 종료</button>
     </div>
   )
 
   return (
+    <ChoiceTimerScope paused={busy || commandFailed || Boolean(dialog)} resetKey={`${player.id}:${player.version}:${player.phase}`}>
     <Frame player={player} timeControls={timeControls} footer={<Journey player={player} />}
       saveStatus={busy ? '저장 중' : commandFailed ? '저장 상태 확인' : '저장됨'}>
       <div className="story-layout">
@@ -243,7 +247,7 @@ function Game({ player, busy, receipt, feedback, commandFailed, run }: {
                 시간을 진행하면 이번 실습을 마칩니다.
               </Heading>
             </section>}
-            {school && <p className="clock-hint">중대 결정과 채용 일정에서는 시간을 멈춥니다.</p>}
+            {school && <p className="clock-hint">선택 중에는 시간을 멈추고, 입력이 없으면 10초 후 자동으로 선택합니다.</p>}
             {!panel && !hiring && !school && <p className="story-note">현재 열린 선택지가 없습니다.</p>}
           </section>
           <StoryJournal entries={entries.slice(0, -1)} />
@@ -259,7 +263,7 @@ function Game({ player, busy, receipt, feedback, commandFailed, run }: {
         {choiceOpen && <p>현재 열린 선택이나 채용 일정은 이번 턴과 함께 지나갑니다.</p>}
         <button type="button" className="btn primary wide" disabled={busy || !canAct} onClick={nextTurn}>다음 턴으로</button>
       </Dialog>}
-    </Frame>
+    </Frame></ChoiceTimerScope>
   )
 }
 
@@ -275,7 +279,7 @@ function SemesterFocus({ player, busy, run, event }: {
     <section className="story-card choice-card" aria-label="이번 학기에 집중할 것">
       <Heading eyebrow={`${semester}학기 · ${turnInSemester}/${semesterTurns}턴`} title="이번 학기에 집중할 것" level={2} />
       {focus ? <p><strong>{focus.label}</strong><br /><small>이 학기가 끝날 때까지 매 턴 적용됩니다.</small></p> :
-        choices.length ? <ChoiceForm busy={busy} submit="이번 학기 집중 정하기"
+        choices.length ? <ChoiceForm automatic busy={busy} submit="이번 학기 집중 정하기"
           options={choices.map((choice) => ({ value: choice.code, label: choice.label, detail: choice.description, disabled: !choice.enabled }))}
           onSubmit={(choiceCode) => run('POST', '/events/TERM_FOCUS/choices', { choiceCode })} /> :
           query.isError ? <Problem error={query.error} retry={() => { void query.refetch() }} /> : <Loading />}
@@ -288,9 +292,9 @@ function NarshaTopicPicker({ event, busy, run }: { event: EventView; busy: boole
   const [topic, setTopic] = useState('')
   const custom = choiceCode === 'NARSHA_CUSTOM'
   const valid = !custom || (topic.trim().length >= 2 && topic.trim().length <= 80 && !/[\x00-\x1f\x7f]/.test(topic.trim()))
-  return <ChoiceForm busy={busy} submit="이 주제로 시작" canSubmit={valid} onSelectionChange={setChoiceCode}
+  return <ChoiceForm automatic busy={busy} submit="이 주제로 시작" canSubmit={valid} onSelectionChange={setChoiceCode}
     options={event.choices.map((choice) => ({
-      value: choice.code, label: choice.label, detail: choice.description, disabled: !choice.enabled,
+      value: choice.code, label: choice.label, detail: choice.description, disabled: !choice.enabled, autoPick: choice.code !== 'NARSHA_CUSTOM',
     }))} onSubmit={(code) => run('POST', `/events/${event.code}/choices`, {
       choiceCode: code, ...(code === 'NARSHA_CUSTOM' ? { customTopic: topic.trim() } : {}),
     })}>
@@ -315,8 +319,17 @@ function BeforeSchoolPicker({ event, busy, onSubmit }: {
   const visited = choices.filter((choice) => choice.visited).length
   const remaining = Math.max(0, limit - visited)
   const submitLabel = event.code === 'BS01' ? '탐색 마치기' : '체험 마치기'
+  const available = choices.filter(choice => choice.enabled && !choice.visited).map(choice => choice.code)
+  const timer = useChoiceTimer({ enabled: remaining > 0 && available.length >= remaining, busy, choiceKey: event.code,
+    onExpire: () => {
+      const picked = selected.filter(code => available.includes(code)).slice(0, remaining)
+      const pool = available.filter(code => !picked.includes(code))
+      while (picked.length < remaining) { const code = randomChoice(pool)!; picked.push(code); pool.splice(pool.indexOf(code), 1) }
+      onSubmit(picked)
+    } })
 
   return <>
+    <ChoiceCountdown timer={timer} description="고른 장소·체험은 유지하고, 남은 개수만 자동으로 채워 확정합니다." />
     <p className="field-note" role="status">선택 {Math.min(visited + selected.length, limit)} / {limit}</p>
     <fieldset className="options before-school-options" aria-label={event.title}>
       {choices.map((choice) => {
@@ -336,7 +349,7 @@ function BeforeSchoolPicker({ event, busy, onSubmit }: {
       })}
     </fieldset>
     <button className="btn primary wide" type="button" disabled={busy || selected.length !== remaining}
-      onClick={() => onSubmit(selected)}>{submitLabel}</button>
+      onClick={() => timer.confirm(() => onSubmit(selected))}>{submitLabel}</button>
   </>
 }
 
@@ -362,21 +375,21 @@ function EventPanel({ event, player, busy, run }: { event: EventView; player: Pl
         <BeforeSchoolPicker key={event.code} event={event} busy={busy}
           onSubmit={(choiceCodes) => run('POST', path, { choiceCodes })} />
       ) : event.required ? (
-        <ChoiceForm busy={busy} onSubmit={commit} options={event.choices.map((choice) => ({
+        <ChoiceForm automatic busy={busy} onSubmit={commit} options={event.choices.map((choice) => ({
           value: choice.code, label: choice.label, detail: choice.description, disabled: !choice.enabled,
           hint: choice.visited ? undefined : choice.reason, tag: choice.visited ? '방문 완료' : choice.apCost > 0 ? `${choice.apCost} AP` : undefined,
         }))} />
       ) : (
         <>
-          <div className="event-buttons">
+          <TimedChoices choices={event.choices} busy={busy} onChoose={commit}>{choose => <div className="event-buttons">
             {event.choices.map((choice, index) => <div key={choice.code}>
               <button type="button" className={`btn wide${index === 0 ? ' primary' : ''}`} disabled={busy || !choice.enabled}
-                onClick={() => commit(choice.code)}>{choice.label}{choice.apCost > 0 ? ` · ${choice.apCost} AP` : ''}</button>
+                onClick={() => choose(choice.code)}>{choice.label}{choice.apCost > 0 ? ` · ${choice.apCost} AP` : ''}</button>
               {fieldLearning && isFieldLearningRoute(choice.code) && <small className="field-option">{fieldLearningRoutes[choice.code].preview}</small>}
               {choice.description && !fieldLearning && <small className="field-option">{choice.description}</small>}
               {choice.reason && <small className="lock-note">{choice.reason}</small>}
             </div>)}
-          </div>
+          </div>}</TimedChoices>
         </>
       )}
     </>
@@ -389,10 +402,10 @@ function CareerPicker({ player, busy, run }: { player: PlayerView; busy: boolean
   if (career.error) return <Problem error={career.error} retry={() => { void career.refetch() }} />
   return (
     <>
-      <Heading eyebrow="진로 추천" title="희망 직무 선택" level={2}>{player.edition === 'MILD' ? '1학년 1학기, 현재 기초 역량을 바탕으로 추천한 세 가지 직무입니다.' : '비포스쿨에서 쌓은 경험을 바탕으로 고른 세 가지 직무입니다.'}</Heading>
-      <ChoiceForm busy={busy} submit="이 직무로 시작" onSubmit={(roleCode) => run('PUT', '/career-preference', { roleCode })}
-        options={career.data.recommendations.map((entry) => ({
-          value: entry.roleCode, label: entry.label, tag: `${entry.rank}위 · ${entry.score.toFixed(2)}`,
+      <Heading eyebrow="나의 진로" title="희망 직무 선택" level={2}>{player.edition === 'MILD' ? '현재 기초 역량을 바탕으로 11개 직무를 적합도순으로 정리했습니다.' : '비포스쿨 경험과 능력치를 바탕으로 11개 직무를 적합도순으로 정리했습니다.'} 순위는 참고하고, 하고 싶은 직무를 자유롭게 골라 주세요.</Heading>
+      <ChoiceForm automatic busy={busy} submit="이 직무로 시작" onSubmit={(roleCode) => run('PUT', '/career-preference', { roleCode })}
+        options={[...career.data.recommendations].sort((a, b) => a.rank - b.rank).map((entry) => ({
+          value: entry.roleCode, label: entry.label, tag: `적합도 ${entry.rank}위 · ${entry.score.toFixed(2)}점`,
           detail: [...entry.activityReasons.map((item) => item.eventCode === 'BS01' && item.choiceCode === 'STUDIO'
             ? label('STUDIO') : item.activityLabel), ...entry.statReasons.map((item) => `${stats[item.statCode]} +${item.contribution}`)].join(' · '),
         }))} />

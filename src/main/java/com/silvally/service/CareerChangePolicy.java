@@ -10,7 +10,7 @@ import java.util.Set;
  * 희망 직무 확정·변경 규칙. 상태를 바꾸지 않는다.
  *
  * <ul>
- *     <li>처음 확정은 최초 추천 상위 {@value CareerRecommender#RECOMMEND_LIMIT}개 중에서만 고른다.</li>
+ *     <li>처음 확정은 적합도순으로 나열한 전체 직무 중에서 자유롭게 고른다.</li>
  *     <li>변경은 재학 중 최대 {@value #MAX_CHANGES}번까지 할 수 있다.</li>
  *     <li>변경 대상은 현재 직무가 아니면서, 최초 추천 상위 직무이거나 현재 능력치 점수가
  *     {@value #CHANGE_MIN_STAT_SCORE} 이상인 직무로 제한한다.</li>

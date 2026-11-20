@@ -72,8 +72,8 @@ class AiNativeCareerTest {
     }
 
     @Test
-    @DisplayName("추천은 정확히 3개이고 같은 입력이면 순서가 바뀌지 않으며 점수가 모두 같으면 고정 순번을 따른다")
-    void recommend_exactlyThreeAndStable() {
+    @DisplayName("전체 직무는 정확히 11개이고 같은 입력이면 순서가 바뀌지 않으며 점수가 모두 같으면 고정 순번을 따른다")
+    void recommend_allElevenAndStable() {
         Player player = fixture.load(fixture.enrolledStudent());
         List<CareerRole> roles = roleCatalog.all(player);
         Map<String, Integer> stats = Map.of("P", 0, "F", 0, "B", 0, "I", 0, "A", 0, "C", 0);
@@ -81,8 +81,8 @@ class AiNativeCareerTest {
         List<Recommendation> first = recommender.recommend(roles, stats, List.of());
         List<Recommendation> second = recommender.recommend(new ArrayList<>(roles.reversed()), stats, List.of());
 
-        assertThat(first).hasSize(3).isEqualTo(second);
-        assertThat(first).extracting(Recommendation::roleCode).containsExactly("WEB", "BACKEND", "CROSS_PLATFORM");
+        assertThat(first).hasSize(11).isEqualTo(second);
+        assertThat(first).extracting(Recommendation::roleCode).containsExactly("WEB", "BACKEND", "CROSS_PLATFORM", "ANDROID", "IOS", "GAME", "NETWORK", "SECURITY", "AI", "DESIGN", "AI_NATIVE");
         assertThat(recommender.scoreAll(roles, stats, List.of())).hasSize(11)
                 .last().satisfies(scored -> assertThat(scored.role().code()).isEqualTo("AI_NATIVE"));
     }
@@ -98,7 +98,7 @@ class AiNativeCareerTest {
 
         List<Recommendation> result = recommender.recommend(roleCatalog.all(player), stats, activities);
 
-        assertThat(result).hasSize(3);
+        assertThat(result).hasSize(11);
         Recommendation top = result.getFirst();
         assertThat(top.roleCode()).isEqualTo("AI");
         assertThat(top.label()).isEqualTo("인공지능 개발자");
@@ -122,7 +122,7 @@ class AiNativeCareerTest {
 
         List<Recommendation> result = recommender.recommend(roleCatalog.all(player), stats, activities);
 
-        assertThat(result).hasSize(3);
+        assertThat(result).hasSize(11);
         Recommendation top = result.getFirst();
         assertThat(top.roleCode()).isEqualTo("AI_NATIVE");
         assertThat(top.label()).isEqualTo("AI 네이티브 개발자");
@@ -157,7 +157,7 @@ class AiNativeCareerTest {
     }
 
     @Test
-    @DisplayName("AI 네이티브 개발자를 추천 중에서 처음 확정하고, 추천 밖이면 확정할 수 없다")
+    @DisplayName("AI 네이티브 개발자는 적합도 순위가 낮아도 처음 확정할 수 있다")
     void select_aiNativeFromRecommendation() {
         UUID id = careerPickerWith(Map.of("P", 70, "C", 60), "project");
         CareerPreferenceView view = preferenceService.getPreference(id);
@@ -171,12 +171,13 @@ class AiNativeCareerTest {
         assertThat(selected.player().currentCareerCode()).isEqualTo("AI_NATIVE");
 
         UUID other = careerPickerWith(Map.of("B", 70), "backend");
-        assertThat(preferenceService.getPreference(other).recommendations())
-                .extracting(Recommendation::roleCode).doesNotContain("AI_NATIVE");
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> preferenceService.select(other,
-                        fixture.version(other), UUID.randomUUID().toString(), new SelectCareerPreferenceRequest("AI_NATIVE")))
-                .isInstanceOfSatisfying(com.silvally.common.exception.BusinessException.class,
-                        e -> assertThat(e.getErrorCode()).isEqualTo(com.silvally.common.exception.ErrorCode.LOCKED));
+        CareerPreferenceView lowerRanked = preferenceService.getPreference(other);
+        assertThat(lowerRanked.recommendations()).filteredOn(r -> r.roleCode().equals("AI_NATIVE"))
+                .singleElement().satisfies(r -> assertThat(r.rank()).isGreaterThan(3));
+        var lowerSelected = preferenceService.select(other, fixture.version(other), UUID.randomUUID().toString(),
+                new SelectCareerPreferenceRequest("AI_NATIVE"));
+        assertThat(lowerSelected.player().initialCareerCode()).isEqualTo("AI_NATIVE");
+
     }
 
     @Test

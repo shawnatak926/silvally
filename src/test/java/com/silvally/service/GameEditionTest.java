@@ -26,7 +26,7 @@ class GameEditionTest {
         assertThat(created.year()).isEqualTo(1); assertThat(created.turn()).isEqualTo(1);
         assertThat(players.getHistory(created.id(), 0, 50).items()).isEmpty();
         var recommendations = careers.getPreference(created.id());
-        assertThat(recommendations.recommendations()).hasSize(3);
+        assertThat(recommendations.recommendations()).hasSize(11);
         careers.select(created.id(), fixture.version(created.id()), UUID.randomUUID().toString(), new SelectCareerPreferenceRequest(recommendations.recommendations().getFirst().roleCode()));
         assertThat(fixture.load(created.id()).getPhase()).isEqualTo(Phase.SCHOOL);
         assertThatThrownBy(() -> players.create(key, new CreatePlayerRequest("순한맛", null, "SPICY"))).isInstanceOf(BusinessException.class);

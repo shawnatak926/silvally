@@ -48,14 +48,17 @@ class CareerPreferenceServiceTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("비포스쿨 활동과 능력치로 상위 3개 직무를 추천 이유와 함께 돌려준다")
-    void getPreference_topThreeWithReasons() {
+    @DisplayName("비포스쿨 활동과 능력치로 전체 11개 직무를 적합도와 이유 순으로 돌려준다")
+    void getPreference_allElevenWithReasons() {
         UUID id = careerPicker();
 
         CareerPreferenceView view = careerPreferenceService.getPreference(id);
 
         assertThat(view.recommendations()).extracting(CareerPreferenceView.Recommendation::roleCode)
-                .containsExactly("WEB", "CROSS_PLATFORM", "DESIGN");
+                .startsWith("WEB", "CROSS_PLATFORM", "DESIGN");
+        assertThat(view.recommendations()).hasSize(11);
+        assertThat(view.recommendations()).extracting(CareerPreferenceView.Recommendation::roleCode).doesNotHaveDuplicates();
+        assertThat(view.recommendations()).extracting(CareerPreferenceView.Recommendation::score).isSortedAccordingTo(java.util.Comparator.reverseOrder());
         CareerPreferenceView.Recommendation web = view.recommendations().get(0);
         // F 38, P 20 → (3×38 + 1×20) ÷ 4 = 33.5, 웹 태그 활동 2건 × 4점
         assertThat(web.score()).isEqualByComparingTo("41.50");
@@ -93,7 +96,7 @@ class CareerPreferenceServiceTest {
     }
 
     @Test
-    @DisplayName("추천 상위 3개 중에서 희망 직무를 확정하면 재학이 시작되고 최초 직무가 남는다")
+    @DisplayName("목록의 희망 직무를 확정하면 재학이 시작되고 최초 직무가 남는다")
     void select_recommendedRole_startsSchool() {
         UUID id = careerPicker();
 
@@ -111,17 +114,34 @@ class CareerPreferenceServiceTest {
     }
 
     @Test
-    @DisplayName("추천 밖 직무나 알 수 없는 직무는 처음 확정할 수 없다")
-    void select_notRecommended_rejected() {
+    @DisplayName("상위 3개 밖 최하위 직무도 선택할 수 있고 알 수 없는 직무는 거절한다")
+    void select_lowestRankedRole_allowedAndUnknownRejected() {
         UUID id = careerPicker();
-
-        assertThatThrownBy(() -> select(id, "AI"))
-                .isInstanceOfSatisfying(BusinessException.class, e -> {
-                    assertThat(e.getErrorCode()).isEqualTo(ErrorCode.LOCKED);
-                    assertThat(e.getDetails().get("allowed").toString()).contains("WEB", "CROSS_PLATFORM", "DESIGN");
-                });
+        CareerPreferenceView view = careerPreferenceService.getPreference(id);
+        String lowest = view.recommendations().getLast().roleCode();
         assertError(() -> select(id, "ASTRONAUT"), ErrorCode.VALIDATION_ERROR);
-        assertThat(fixture.load(id).getPhase()).isEqualTo(Phase.CAREER_PICK);
+        CareerPreferenceMutation result = select(id, lowest);
+        assertThat(result.player().initialCareerCode()).isEqualTo(lowest);
+        assertThat(result.player().currentCareerCode()).isEqualTo(lowest);
+        assertThat(result.player().phase()).isEqualTo(Phase.SCHOOL.name());
+    }
+
+    @Test
+    @DisplayName("상위 3개만 저장된 회차는 원래 능력치와 이력을 보존하며 전체 직무를 보여준다")
+    void legacyRecommendations_expandWithoutChangingVersionOrInitialStats() {
+        UUID id = careerPicker();
+        CareerPreferenceView first = careerPreferenceService.getPreference(id);
+        fixture.modify(id, p -> {
+            CareerPreferenceRecord saved = objectMapper.readValue(p.getRecommendationJson(), CareerPreferenceRecord.class);
+            p.storeRecommendation(objectMapper.writeValueAsString(new CareerPreferenceRecord(saved.stats(), saved.recommendations().subList(0, 3), saved.history())));
+            p.getStats().apply(Map.of("I", 60));
+        });
+        long version = fixture.version(id);
+        CareerPreferenceView expanded = careerPreferenceService.getPreference(id);
+        assertThat(expanded.recommendations()).isEqualTo(first.recommendations());
+        assertThat(fixture.version(id)).isEqualTo(version);
+        select(id, expanded.recommendations().getLast().roleCode());
+        assertThat(history(id)).hasSize(1);
     }
 
     @Test

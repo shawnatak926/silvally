@@ -82,10 +82,7 @@ public class CareerPreferenceServiceImpl implements CareerPreferenceService {
         String from = player.getCurrentCareerCode();
         String type;
         if (player.getPhase() == Phase.CAREER_PICK) {
-            if (record.recommendations().stream().noneMatch(r -> r.roleCode().equals(role.code()))) {
-                throw new BusinessException(ErrorCode.LOCKED, "추천된 직무 중에서만 처음 확정할 수 있습니다.",
-                        Map.of("allowed", record.recommendations().stream().map(r -> r.roleCode()).toList()));
-            }
+            // 직무 존재 여부는 roleCatalog.find에서 검증한다. 적합도 순위로 선택을 제한하지 않는다.
             type = "SELECT";
             player.confirmCareer(role.code(), SchoolRules.AP_PER_TURN);
         } else if (player.getPhase() == Phase.SCHOOL) {
@@ -118,7 +115,7 @@ public class CareerPreferenceServiceImpl implements CareerPreferenceService {
 
     private List<String> eligibleChangeRoles(Player player, CareerPreferenceRecord record) {
         Set<String> initialTop = new LinkedHashSet<>();
-        record.recommendations().forEach(r -> initialTop.add(r.roleCode()));
+        record.recommendations().stream().limit(3).forEach(r -> initialTop.add(r.roleCode()));
         return changePolicy.eligibleRoles(player.getCurrentCareerCode(), initialTop,
                 recommender.scoreAll(roleCatalog.all(player), player.getStats().toMap(), activities(player)),
                 changesUsed(record));
@@ -137,7 +134,14 @@ public class CareerPreferenceServiceImpl implements CareerPreferenceService {
      */
     private CareerPreferenceRecord loadRecord(Player player, boolean persistWithoutVersionBump) {
         if (player.getRecommendationJson() != null) {
-            return objectMapper.readValue(player.getRecommendationJson(), CareerPreferenceRecord.class);
+            CareerPreferenceRecord saved = objectMapper.readValue(player.getRecommendationJson(), CareerPreferenceRecord.class);
+            // 선택 대기 회차만 보강한다. 이미 확정한 회차의 점수·변경 조건은 보존한다.
+            if (player.getPhase() == Phase.CAREER_PICK
+                    && saved.recommendations().size() != roleCatalog.all(player).size()) {
+                return new CareerPreferenceRecord(saved.stats(),
+                        recommender.recommend(roleCatalog.all(player), saved.stats(), activities(player)), saved.history());
+            }
+            return saved;
         }
         CareerPreferenceRecord record = new CareerPreferenceRecord(player.getStats().toMap(),
                 recommender.recommend(roleCatalog.all(player), player.getStats().toMap(), activities(player)),

@@ -596,14 +596,15 @@ function recommend(g: DemoGame) {
         return { index, rank: 0, roleCode, label, score: Number((reasons.reduce((sum, item) => sum + item.contribution, 0) + 3 * activityReasons.length).toFixed(2)),
           statReasons: reasons.sort((a, b) => b.contribution - a.contribution).slice(0, 2), activityReasons }
       }).sort((a, b) => b.score - a.score || b.activityReasons.length - a.activityReasons.length || a.index - b.index)
-        .slice(0, 3).map(({ index: _index, ...item }, i) => ({ ...item, rank: i + 1 }))
+        .map(({ index: _index, ...item }, i) => ({ ...item, rank: i + 1 }))
 }
 
 export function preferences(g: DemoGame): CareerPreferenceView {
   if (!g.recommendations.length) return block('비포스쿨을 완료하면 추천을 볼 수 있습니다.', 'RECOMMENDATION_NOT_READY')
+  if (g.view.phase === 'CAREER_PICK' && g.recommendations.length !== roles.length) recommend(g)
   const { year, turn, initialCareerCode, currentCareerCode } = g.view
   const windowOpen = isSchool(g.view) && !requiredSchoolEvent(g) && (year === 2 || (year === 3 && turn < applicationTurn))
-  const eligible = [...new Set([...g.recommendations.map((item) => item.roleCode), ...g.practiced,
+  const eligible = [...new Set([...g.recommendations.slice(0, 3).map((item) => item.roleCode), ...g.practiced,
     ...g.projects.filter((project) => project.status === 'COMPLETE').flatMap((project) => projects[project.projectCode].careers)])]
     .filter((role) => role !== currentCareerCode)
   const canChange = Boolean(initialCareerCode && windowOpen && !g.careerChanged && eligible.length)
@@ -614,7 +615,7 @@ function pickCareer(g: DemoGame, role: string) {
   const before = structuredClone(g.view)
   const choices = preferences(g)
   if (g.view.phase === 'CAREER_PICK') {
-    if (!choices.recommendations.some((item) => item.roleCode === role)) return block('추천 직무 세 가지에서 골라 주세요.', 'CAREER_NOT_RECOMMENDED')
+    if (!choices.recommendations.some((item) => item.roleCode === role)) return block('목록에 있는 직무를 골라 주세요.', 'CAREER_NOT_RECOMMENDED')
     Object.assign(g.view, { initialCareerCode: role, currentCareerCode: role, phase: 'Y1', year: 1, turn: 1, remainingAp: 4, beforeSchoolDay: null })
   } else {
     if (!choices.eligibleChangeRoleCodes.includes(role)) return block('지금 변경할 수 없는 희망 직무입니다.', 'CAREER_CHANGE_LOCKED')
