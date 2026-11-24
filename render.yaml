@@ -16,3 +16,7 @@ services:
         sync: false
       - key: NARRATIVE_LLM_MODEL
         value: k-exaone_v2.5
+      - key: NARRATIVE_LLM_TIMEOUT
+        value: 20s
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
